@@ -1,0 +1,67 @@
+{
+  "name": "volleygoals-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.13.0",
+    "@emotion/styled": "^11.13.0",
+    "@hookform/resolvers": "^3.9.1",
+    "@mui/icons-material": "^7.0.2",
+    "@mui/lab": "^7.0.0-beta.11",
+    "@mui/material": "^7.0.2",
+    "@mui/x-data-grid": "^7.22.1",
+    "@sentry/esbuild-plugin": "^2.22.2",
+    "@sentry/react": "^8.26.0",
+    "@types/node": "^22.7.4",
+    "axios": "^1.8.2",
+    "cron-validate": "^1.5.2",
+    "esbuild": "^0.23.1",
+    "esbuild-plugin-copy": "^2.1.1",
+    "esbuild-plugin-yaml": "^0.0.1",
+    "esbuild-sass-plugin": "^3.3.1",
+    "esbuild-yaml": "^1.2.0",
+    "https-browserify": "^1.0.0",
+    "js-cookie": "^3.0.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.53.1",
+    "react-router-dom": "^6.4.4",
+    "sync-fetch": "^0.6.0-2",
+    "uuid": "^10.0.0",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5",
+    "zustymiddlewarets": "^1.4.2"
+  },
+  "devDependencies": {
+    "@types/js-cookie": "^3.0.6",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.9",
+    "@types/sync-fetch": "^0.4.3",
+    "autoprefixer": "^10.4.20",
+    "node-stdlib-browser": "^1.2.1",
+    "postcss": "^8.4.47"
+  },
+  "scripts": {
+    "build": "node prod-esbuild.mjs",
+    "dev": "node esbuild.mjs",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
