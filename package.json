@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@aws-amplify/ui-vue": "^4.3.5",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@hookform/resolvers": "^3.9.1",
