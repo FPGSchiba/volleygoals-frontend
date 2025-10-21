@@ -1,0 +1,30 @@
+name: Test
+on: pull_request_target
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    permissions:
+      id-token: write
+      contents: read
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Test
+        uses: ArtiomTr/jest-coverage-report-action@v2
+        with:
+          output: comment, report-markdown
