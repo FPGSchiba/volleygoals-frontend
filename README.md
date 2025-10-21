@@ -23,3 +23,9 @@ See the section about [running tests](https://facebook.github.io/create-react-ap
 Builds the app for production to the `public/assets` folder.
 
 It correctly bundles React in production mode and optimizes the build for the best performance.
+
+## Deployment
+
+The production build is served at: [https://volleygoals.schiba-apps.net](volleygoals.schiba-apps.net)
+
+The development build is served at: [https://volleygoals-test.schiba-apps.net](volleygoals-test.schiba-apps.net)
