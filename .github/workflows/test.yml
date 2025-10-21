@@ -2,14 +2,16 @@ name: Test
 on: pull_request_target
 
 permissions:
-  id-token: write
-  contents: read
+  checks: write
+  pull-requests: write
+  contents: write
 
 jobs:
   test:
     permissions:
-      id-token: write
-      contents: read
+      checks: write
+      pull-requests: write
+      contents: write
     name: Test
     runs-on: ubuntu-latest
     steps:
