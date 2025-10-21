@@ -42,7 +42,7 @@ esbuild
                 servedir: "public/assets",
                 port: 3000,
             }).then((server) => {
-                console.log(`Server started on http://${server.host}:${server.port}`);
+                console.log(`Server started on http://localhost:${server.port}`);
             });
             r.watch().then(r => console.log('watching...'));
     })
