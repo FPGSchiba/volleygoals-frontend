@@ -1,14 +1,16 @@
 @use "sass:meta";
 html {
-
+  height: 100%;
 }
 
 body {
+  height: 100%;
+  background-color: var(--palette-background-default);
+
   // Components
   @include meta.load-css("components/header");
   @include meta.load-css("components/notification");
 
   // Pages
-  @include meta.load-css("pages/home");
   @include meta.load-css("pages/login");
 }

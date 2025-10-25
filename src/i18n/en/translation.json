@@ -1,0 +1,12 @@
+{
+  "login.heading": "Sign In",
+  "login.subheading": "Welcome to Volley Goals!",
+  "login.input.email.label": "Email",
+  "login.input.email.required": "Email is required",
+  "login.input.email.invalid": "Please enter a valid email address",
+  "login.input.password.label": "Password",
+  "login.input.password.required": "Password is required",
+  "login.input.password.minLength": "Password must be at least 8 characters",
+  "login.button.submit": "Sign In",
+  "login.forgotPassword": "Forgot your password?"
+}

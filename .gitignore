@@ -23,9 +23,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated files
-public/assets
-!public/assets/favicon.ico
-!public/assets/index.html
+public/assets/index.js
+public/assets/index.js.map
+public/assets/resources
 
 # IDE
 .vscode/

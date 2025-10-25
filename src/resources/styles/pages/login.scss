@@ -1,63 +1,64 @@
 .login {
   &.login-paper {
     display: flex;
-    width: 30rem;
-    padding: 2rem;
-    margin: 0 auto;
+    width: min(65%, 25rem);
     justify-content: flex-start;
-    margin-top: 8rem;
+    margin: 8rem auto 0;
     flex-direction: column;
     align-items: center;
-    padding-bottom: 4rem;
+    padding: 2rem 2rem 4rem;
   }
 
   &.login-header {
-    display: flex;
-    margin-bottom: 2rem;
-  }
-
-  &.login-logo {
-    &.login-logo-wrapper {
-      display: inline-block;
-      width: 15rem;
-      height: 4.5rem;
-      margin-right: 1rem;
-      padding: 1rem;
-      margin-top: -5rem;
-      margin-bottom: 1rem;
-      background-color: #222;
-      border-radius: 25px;
-    }
-
-    &.login-logo-img {
-      width: 100%;
-      height: 100%;
-    }
-  }
-
-  &.login-form {
-    &.login-form-wrapper {
+    &.login-header-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      margin-bottom: 2rem;
+    }
+
+    &.login-header-heading {
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    &.login-header-subheading {
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+  }
+
+  &.login-input {
+    &.login-input-email {
       width: 100%;
+      margin-bottom: 1.5rem;
     }
-
-    &.login-form-input {
-      margin-bottom: 1rem;
-      width: 25rem;
+    &.login-input-password {
+      width: 100%;
+      margin-bottom: 1.5rem;
     }
+  }
 
-    &.login-form-button {
-      width: 25rem;
+  &.login-button {
+    &.login-button-submit {
+      height: 3rem;
+    }
+  }
+
+  &.login-link {
+    &.login-link-reset-password {
+      width: 100%;
       margin-top: 1rem;
+      font-size: 0.875rem;
+      text-align: center;
     }
+  }
 
-    &.login-form-reset {
-      margin-top: 1rem;
-      color: #1a73e8;
-      cursor: pointer;
-    }
+  &.login-divider {
+    width: 100%;
+    text-align: center;
+    margin: 1.5rem 0;
   }
 }
