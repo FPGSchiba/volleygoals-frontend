@@ -1,54 +1,81 @@
-import { Box, Paper, Typography, TextField, Button, Link } from "@mui/material";
+import { Box, Paper, Typography, Link } from "@mui/material";
 import * as React from 'react';
 import i18next from "i18next";
 import {LoginEmailPassword} from "./LoginEmailPassword";
 import {LoginTOTP} from "./LoginTOTP";
-import {SignInOutput} from "aws-amplify/auth";
+import {ConfirmSignInOutput, SignInOutput} from "aws-amplify/auth";
+import {SetupTOTP} from "./SetupTOTP";
+import {useNotificationStore} from "../../store/notification";
+import {SetupNewPassword} from "./SetupNewPassword";
+import {useUserStore} from "../../store/user";
+import {useNavigate} from "react-router-dom";
+import {SetupInitialPassword} from "./SetupInitialPassword";
 
 enum LoginSteps {
   EmailPassword,
+  InitialPasswordSetup,
+  PasswordSetup,
   TwoFactorAuth,
+  TwoFactorSetup,
   Success,
 }
 
 function Login() {
   const [currentStep, setCurrentStep] = React.useState<LoginSteps>(LoginSteps.EmailPassword);
+  const [totpSetupUrl, setTotpSetupUrl] = React.useState<URL | null>(null);
+  const [username, setUsername] = React.useState<string>("craftzockerlp@gmail.com");
 
-  const handleEmailPasswordFinished = (output: SignInOutput) => {
-    console.log(output);
+  const setUser = useUserStore(state => state.setUser);
+  const navigate = useNavigate();
+
+  const handleStepChange = (output: ConfirmSignInOutput | SignInOutput) => {
+    if (output.isSignedIn) {
+      setUser().then(() => {
+        navigate("/");
+        setCurrentStep(LoginSteps.Success);
+      })
+    } else {
+      switch (output.nextStep.signInStep) {
+        case "CONFIRM_SIGN_IN_WITH_TOTP_CODE":
+          setCurrentStep(LoginSteps.TwoFactorAuth);
+          break;
+        case "CONTINUE_SIGN_IN_WITH_TOTP_SETUP":
+          setTotpSetupUrl(output.nextStep.totpSetupDetails.getSetupUri("Volley Goals"));
+          setCurrentStep(LoginSteps.TwoFactorSetup);
+          break;
+        case "RESET_PASSWORD":
+          setUsername(username);
+          setCurrentStep(LoginSteps.PasswordSetup);
+          break;
+        case "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED":
+          setCurrentStep(LoginSteps.InitialPasswordSetup);
+          break;
+        default:
+          console.log(output.nextStep.signInStep);
+          setCurrentStep(LoginSteps.EmailPassword);
+          break;
+      }
+    }
   }
 
-  const handleTOTPFinished = (output: SignInOutput) => {
-    console.log(output);
+  const handleResetPasswordFinished = () => {
+    setCurrentStep(LoginSteps.EmailPassword);
   }
-
-  // Translations
-  const headingT = i18next.t("login.heading", "Sign in");
-  const subheadingT = i18next.t("login.subheading", "Welcome to Volley Goals");
 
   return (
     <Paper className={"login login-paper"}>
-      <Box className={"login login-header login-header-wrapper"}>
-        <Typography className={"login login-header login-header-heading"} variant={"h2"}>
-          {headingT}
-        </Typography>
-        <Typography className={"login login-header login-header-subheading"} variant={"h4"}>
-          {subheadingT}
-        </Typography>
-      </Box>
-
       {(() => {
         switch (currentStep) {
           case LoginSteps.EmailPassword:
             return (
               <LoginEmailPassword
-                onSignInFinished={handleEmailPasswordFinished}
+                onSignInFinished={handleStepChange}
               />
             );
           case LoginSteps.TwoFactorAuth:
             return (
               <LoginTOTP
-                onSignInFinished={handleEmailPasswordFinished}
+                onSignInFinished={handleStepChange}
               />
             );
           case LoginSteps.Success:
@@ -60,6 +87,18 @@ function Login() {
                 <Link href="/">{i18next.t("login.goHome", "Go to dashboard")}</Link>
               </Box>
             );
+            case LoginSteps.TwoFactorSetup:
+              return (
+                <SetupTOTP onSetupFinished={handleStepChange} setupURL={totpSetupUrl} />
+              )
+          case LoginSteps.PasswordSetup:
+            return (
+              <SetupNewPassword username={username} onSuccess={handleResetPasswordFinished} />
+            )
+          case LoginSteps.InitialPasswordSetup:
+            return (
+              <SetupInitialPassword onSetupFinished={handleStepChange} />
+            )
           default:
             return null;
         }

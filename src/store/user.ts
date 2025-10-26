@@ -7,16 +7,20 @@ type UserState = {
 }
 
 type UserActions = {
-  setUser: (user: AuthUser, session: AuthSession) => void
+  setUser: () => Promise<void>
   logout: () => void
   hasRole: (role: string) => Promise<boolean>
 }
 
 const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: AuthSession | undefined}> => {
-  const session = await fetchAuthSession();
-  const user = await getCurrentUser();
+  try {
+    const session = await fetchAuthSession();
+    const user = await getCurrentUser();
 
-  return {user, session};
+    return {user, session};
+  } catch (error) {
+    return {user: undefined, session: undefined};
+  }
 }
 
 const defaultValues = { user: undefined as AuthUser | undefined, session: undefined as AuthSession | undefined };
@@ -27,7 +31,11 @@ const useUserStore = create<UserState & UserActions>((set, get) => {
   return {
     user: defaultValues.user,
     session: defaultValues.session,
-    setUser: (user, session) => set({ user, session }),
+    setUser: async () => {
+      const user = await getCurrentUser();
+      const session = await fetchAuthSession();
+      set({ user, session });
+    },
     logout: () => {
       set({ user: undefined, session: undefined});
       signOut();

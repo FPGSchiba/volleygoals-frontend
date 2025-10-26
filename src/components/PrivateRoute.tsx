@@ -24,6 +24,8 @@ export function PrivateRoute({ allowedRoles = [] }: PrivateRouteProps) {
         const groups = payload?.['cognito:groups'] ?? [];
         const userRoles: string[] = Array.isArray(groups) ? groups : [groups].filter(Boolean);
 
+        console.log(userRoles);
+
         const allowed = allowedRoles.length === 0 || allowedRoles.some(role => userRoles.includes(role));
         if (mounted) {
           setIsAuthenticated(true);

@@ -1,12 +1,206 @@
 {
-  "login.heading": "Sign In",
-  "login.subheading": "Welcome to Volley Goals!",
-  "login.input.email.label": "Email",
-  "login.input.email.required": "Email is required",
-  "login.input.email.invalid": "Please enter a valid email address",
-  "login.input.password.label": "Password",
-  "login.input.password.required": "Password is required",
-  "login.input.password.minLength": "Password must be at least 8 characters",
-  "login.button.submit": "Sign In",
-  "login.forgotPassword": "Forgot your password?"
+  "login": {
+    "emailPassword": {
+      "heading": "Sign In",
+      "subheading": "Welcome to Volley Goals!",
+      "email": {
+        "label": "Email",
+        "required": "Email is required",
+        "invalid": "Please enter a valid email address"
+      },
+      "password": {
+        "label": "Password",
+        "required": "Password is required",
+        "minLength": "Password must be at least 8 characters"
+      },
+      "submit": "Sign In",
+      "forgotPassword": "Forgot your password?"
+    },
+    "setupTOTP": {
+      "heading": "Set up TFA with TOTP",
+      "subheading": "Timed One-Time Password (TOTP) is mandatory here!",
+      "showQRInstructions": "To show the QR Code please click this area and scan it with an Authenticator App.",
+      "code": {
+        "label": "TOTP Code",
+        "required": "Enter the 6-digit code",
+        "validation": "Please enter a 6-digit code",
+        "placeholder": "123456",
+        "helperText": "Enter the 6-digit code from your authenticator app"
+      },
+      "submit": "Verify"
+    },
+    "setupInitialPassword": {
+      "heading": "Set your password",
+      "subheading": "Choose a secure password for your account.",
+      "newPassword": {
+        "label": "New Password",
+        "required": "New password is required",
+        "minLength": "Password must be at least 8 characters"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "required": "Please confirm your password",
+        "match": "Passwords must match"
+      },
+      "submit": "Set Password"
+    },
+    "setupPassword": {
+      "heading": "Set a new Password",
+      "subheading": "Please use your email to update your Password.",
+      "password": {
+        "label": "Password",
+        "required": "Password is required",
+        "minLength": "Password must be at least 8 characters"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "required": "Please confirm your password",
+        "match": "Passwords must match"
+      },
+      "codeHelperText": "Code sent to: {{email}}",
+      "code": {
+        "label": "Verification Code",
+        "required": "Verification code is required",
+        "validation": "Please enter a 6 Digit code",
+        "placeholder": "123456"
+      },
+      "resend": {
+        "stateWaiting": "Resend ({{countdown}} s)",
+        "stateActive": "Resend Code"
+      },
+      "submit": {
+        "stateActive": "Set new Password",
+        "stateLoading": "Setting Password..."
+      },
+      "success": {
+        "title": "Password Updated",
+        "message": "Your password has been successfully updated. You can now sign in with your new password."
+      }
+    },
+    "totp": {
+      "heading": "Two-Factor Authentication",
+      "subheading": "Please enter the code from your authenticator app.",
+      "code": {
+        "label": "TOTP Code",
+        "required": "Enter the 6-digit code",
+        "validation": "Please enter a 6-digit code",
+        "placeholder": "123456",
+        "helperText": "Enter the 6-digit code from your authenticator app"
+      },
+      "submit": "Verify"
+    }
+  },
+  "error": {
+    "login": {
+      "emailPassword": {
+        "failed": {
+          "title": "Sign in failed"
+        },
+        "invalidCredentials": {
+          "title": "Invalid credentials",
+          "message": "Incorrect email or password."
+        },
+        "userNotConfirmed": {
+          "title": "Account not confirmed",
+          "message": "Your account is not confirmed. Check your email for a confirmation link."
+        },
+        "userNotFound": {
+          "title": "Account not found",
+          "message": "No account found for that email."
+        },
+        "passwordResetRequired": {
+          "title": "Password reset required",
+          "message": "A password reset is required. Please reset your password."
+        },
+        "tooManyRequests": {
+          "title": "Too many attempts",
+          "message": "Too many attempts. Try again later."
+        }
+      },
+      "setupTOTP": {
+        "verificationFailed": {
+          "title": "Verification failed",
+          "message": "TOTP verification failed, this means the code you entered is incorrect. Please try again."
+        },
+        "codeMismatch": {
+          "title": "Invalid code.",
+          "message": "The code you entered is incorrect. Please try again."
+        },
+        "expired": {
+          "title": "Code expired.",
+          "message": "The code has expired. Request a new code and try again."
+        },
+        "notAuthorized": {
+          "title": "Not authorized.",
+          "message": "You are not authorized to perform this action."
+        },
+        "limitExceeded": {
+          "title": "Too many attempts.",
+          "message": "Too many attempts. Please wait and try again later."
+        }
+      },
+      "setupPassword": {
+        "confirmForgotPassword": {
+          "title": "Invalid code or password",
+          "message": "The confirmation code or new password is invalid. Please check and try again."
+        },
+        "validation": {
+          "title": "Validation error",
+          "message": "Confirmation code, password, or username is empty or invalid."
+        },
+        "limitExceeded": {
+          "title": "Too many attempts",
+          "message": "Too many attempts. Please wait before trying again."
+        },
+        "codeMismatch": {
+          "title": "Invalid code",
+          "message": "The code you entered is invalid. Please check and try again."
+        },
+        "expiredCode": {
+          "title": "Code expired",
+          "message": "The code has expired. Request a new code to continue."
+        }
+      },
+      "totp": {
+        "verificationFailed": {
+          "title": "Verification failed",
+          "message": "The code you entered is incorrect. Please try again."
+        },
+        "codeMismatch": {
+          "title": "Invalid code",
+          "message": "The code you entered is incorrect. Please check it and try again."
+        },
+        "expired": {
+          "title": "Code expired",
+          "message": "The code has expired. Request a new code to continue."
+        },
+        "limitExceeded": {
+          "title": "Too many attempts",
+          "message": "Too many attempts. Please wait before trying again."
+        }
+      },
+      "setupInitialPassword": {
+        "notAuthorized": {
+          "title": "Password Setup Failed",
+          "message": "There was an error setting your password. Please try again."
+        },
+        "invalidPassword": {
+          "title": "Invalid password",
+          "message": "Password does not meet the required complexity."
+        },
+        "codeMismatch": {
+          "title": "Invalid code",
+          "message": "The confirmation code is incorrect. Please check and try again."
+        },
+        "expiredCode": {
+          "title": "Code expired",
+          "message": "The confirmation code has expired. Request a new code to continue."
+        },
+        "userNotFound": {
+          "title": "User not found",
+          "message": "No account found for that email."
+        }
+      }
+    }
+  }
 }

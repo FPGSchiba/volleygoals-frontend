@@ -61,4 +61,153 @@
     text-align: center;
     margin: 1.5rem 0;
   }
+
+  &.login-setup {
+    &.login-setup-totp {
+      &.form {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      &.qrcode-wrap {
+        height: 250px;
+        width: 250px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 0.5rem;
+        margin-bottom: 20px;
+        background-color: var(--pallete-background-default);
+      }
+
+      &.qrcode-instructions {
+        text-align: center;
+      }
+
+      &.input-group {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &.verify-btn {
+        height: 3rem;
+        width: 40%;
+        margin-left: 1rem;
+        margin-top: 5px;
+        align-self: flex-start;
+      }
+    }
+  }
+
+  &.login-totp {
+    &.login-totp-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &.login-totp-submit {
+      height: 3rem;
+      width: 40%;
+      margin-left: 1rem;
+      margin-top: 5px;
+      align-self: flex-start;
+    }
+  }
+
+  &.login-spassword {
+    &.login-spassword-destination-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      margin-bottom: 1rem;
+    }
+
+    &.login-spassword-resend-wrapper{
+      display: flex;
+      flex-direction: row;
+      margin-left: auto;
+    }
+
+    &.login-spassword-loading {
+      margin-right: 10px;
+      display: block;
+      width: 40px;
+      height: 40px;
+      align-self: center;
+      margin-bottom: auto;
+      margin-top: 10px;
+    }
+
+    &.login-spassword-destination {
+      align-self: center;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 3px;
+    }
+
+    &.login-spassword-row {
+      width: 100%;
+      margin-top: 1rem;
+    }
+
+    &.login-spassword-code-field {
+      width: 40%;
+    }
+
+    &.login-spassword-code-row {
+      width: 100%;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: row;
+    }
+
+    &.login-spassword-submit {
+      height: 3.5rem;
+      width: 35%;
+      align-self: flex-end;
+      margin-top: 1rem;
+    }
+
+    &.login-spassword-resend {
+      height: 3.5rem;
+      width: 70%;
+      margin-left: 1rem;
+      align-self: flex-end;
+      margin-bottom: auto;
+    }
+  }
+
+  &.login-ipassword {
+    &.login-ipassword-form-wrapper {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    &.login-ipassword-input-new-password {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    &.login-ipassword-input-confirm-password {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+
+    &.login-ipassword-button-submit {
+      height: 3rem;
+      width: 60%;
+      align-self: flex-end;
+      margin-top: 1rem;
+    }
+  }
 }

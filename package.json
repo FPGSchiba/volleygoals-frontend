@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@aws-amplify/auth": "^6.16.0",
     "@aws-amplify/ui-vue": "^4.3.5",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
@@ -27,6 +28,7 @@
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.65.0",
     "react-i18next": "^16.2.0",
+    "react-qr-code": "^2.0.18",
     "react-router-dom": "^7.9.4",
     "sync-fetch": "^0.6.0-2",
     "uuid": "^13.0.0",

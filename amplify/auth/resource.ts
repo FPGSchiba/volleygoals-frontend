@@ -24,7 +24,8 @@ export const auth = defineAuth({
   },
   groups: ["ADMINS", "TRAINERS", "MEMBERS"],
   multifactor: {
-    mode: 'OPTIONAL',
+    mode: 'REQUIRED',
     totp: true,
   },
+  accountRecovery: 'EMAIL_ONLY'
 });
