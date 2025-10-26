@@ -35,7 +35,6 @@ export function SetupInitialPassword({ onSetupFinished }: SetupInitialPasswordPr
       });
       onSetupFinished(output);
     } catch (error) {
-      console.error(error);
       const err = error as any;
       const name = err?.name || err?.code || 'Default';
 

@@ -5,7 +5,6 @@ import {LoginEmailPassword} from "./LoginEmailPassword";
 import {LoginTOTP} from "./LoginTOTP";
 import {ConfirmSignInOutput, SignInOutput} from "aws-amplify/auth";
 import {SetupTOTP} from "./SetupTOTP";
-import {useNotificationStore} from "../../store/notification";
 import {SetupNewPassword} from "./SetupNewPassword";
 import {useUserStore} from "../../store/user";
 import {useNavigate} from "react-router-dom";
@@ -23,7 +22,7 @@ enum LoginSteps {
 function Login() {
   const [currentStep, setCurrentStep] = React.useState<LoginSteps>(LoginSteps.EmailPassword);
   const [totpSetupUrl, setTotpSetupUrl] = React.useState<URL | null>(null);
-  const [username, setUsername] = React.useState<string>("craftzockerlp@gmail.com");
+  const [username, setUsername] = React.useState<string>("");
 
   const setUser = useUserStore(state => state.setUser);
   const navigate = useNavigate();
@@ -44,7 +43,6 @@ function Login() {
           setCurrentStep(LoginSteps.TwoFactorSetup);
           break;
         case "RESET_PASSWORD":
-          setUsername(username);
           setCurrentStep(LoginSteps.PasswordSetup);
           break;
         case "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED":
@@ -58,6 +56,11 @@ function Login() {
     }
   }
 
+  const handleEmailPasswordFinished = (output: SignInOutput, username: string) => {
+    setUsername(username);
+    handleStepChange(output);
+  }
+
   const handleResetPasswordFinished = () => {
     setCurrentStep(LoginSteps.EmailPassword);
   }
@@ -69,7 +72,7 @@ function Login() {
           case LoginSteps.EmailPassword:
             return (
               <LoginEmailPassword
-                onSignInFinished={handleStepChange}
+                onSignInFinished={handleEmailPasswordFinished}
               />
             );
           case LoginSteps.TwoFactorAuth:

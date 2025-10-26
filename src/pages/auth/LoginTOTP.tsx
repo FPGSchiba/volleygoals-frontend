@@ -25,8 +25,6 @@ export function LoginTOTP(props: LoginTOTPProps) {
       });
       onSignInFinished(output);
     } catch (error: any) {
-      console.error("TOTP verification failed:", error);
-
       const code = error?.code ?? error?.name;
       let messageKey = "error.login.totp.verificationFailed.message";
       let messageDefault = "TOTP verification failed, this means the code you entered is incorrect. Please try again.";

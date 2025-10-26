@@ -22,8 +22,7 @@ import * as React from 'react';
 
     const notify = useNotificationStore(state => state.notify);
 
-    const [destinationMail, setDestinationMail] = React.useState<string>("");
-
+    const [destination, setDestination] = React.useState<string | null>(null);
     const [isResetting, setIsResetting] = React.useState(false);
     const [resendDisabledUntil, setResendDisabledUntil] = React.useState<number | null>(null);
     const [resendCountdown, setResendCountdown] = React.useState(0);
@@ -49,11 +48,9 @@ import * as React from 'react';
 
       try {
         const res = await resetPassword({ username });
-        setDestinationMail((res as any)?.nextStep?.codeDeliveryDetails?.destination ?? "");
+        setDestination(res.nextStep.codeDeliveryDetails?.destination || null);
         getSentSet().add(username);
-        console.log("Password reset result:", res);
       } catch (err) {
-        console.error("Password reset error:", err);
         const errName = (err as any)?.name || (err as any)?.code || "";
         let errMsg = (err && ((err as any).message || String(err))) || i18next.t("error.unknown", "An unknown error occurred.");
         let title = i18next.t("login.setupNewPassword.error.defaultTitle", "Password reset failed");
@@ -84,7 +81,7 @@ import * as React from 'react';
         setResendDisabledUntil(null);
         setResendCountdown(0);
       } finally {
-        // setIsResetting(false);
+        setIsResetting(false);
       }
     };
 
@@ -125,54 +122,48 @@ import * as React from 'react';
     });
 
     const onSubmit = async (values: FormValues) => {
-      try {
-        const code = values.code.replace(/\D/g, "").slice(0, 6);
-        console.log("Submitting new password", { username, code, password: values.password });
-        confirmResetPassword({
-          username: username,
-          confirmationCode: code,
-          newPassword: values.password,
-        }).catch((err) => {
-          console.error("Confirm reset password error:", err);
-          const errName = (err as any)?.name || (err as any)?.code || "";
-          let errMsg = (err && ((err as any).message || String(err))) || i18next.t("error.unknown", "An unknown error occurred.");
-          let title = i18next.t("login.setupNewPassword.error.defaultTitle", "Set password failed");
-          let level: "error" | "warning" | "info" = "error";
+      const code = values.code.replace(/\D/g, "").slice(0, 6);
+      confirmResetPassword({
+        username: username,
+        confirmationCode: code,
+        newPassword: values.password,
+      }).catch((err) => {
+        const errName = (err as any)?.name || (err as any)?.code || "";
+        let errMsg = (err && ((err as any).message || String(err))) || i18next.t("error.unknown", "An unknown error occurred.");
+        let title = i18next.t("login.setupNewPassword.error.defaultTitle", "Set password failed");
+        let level: "error" | "warning" | "info" = "error";
 
-          switch (errName) {
-            case "ConfirmForgotPasswordException":
-              title = i18next.t("error.login.setupNewPassword.confirmForgotPassword.title", "Invalid code or password");
-              errMsg = i18next.t(
-                "error.login.setupNewPassword.confirmForgotPassword.message",
-                "The confirmation code or new password is invalid. Please check and try again."
-              );
-              level = "error";
-              break;
-            case "AuthValidationErrorCode":
-              title = i18next.t("error.login.setupNewPassword.validation.title", "Validation error");
-              errMsg = i18next.t(
-                "error.login.setupNewPassword.validation.message",
-                "Confirmation code, password, or username is empty or invalid."
-              );
-              level = "warning";
-              break;
-            default:
-              break;
-          }
+        switch (errName) {
+          case "ConfirmForgotPasswordException":
+            title = i18next.t("error.login.setupNewPassword.confirmForgotPassword.title", "Invalid code or password");
+            errMsg = i18next.t(
+              "error.login.setupNewPassword.confirmForgotPassword.message",
+              "The confirmation code or new password is invalid. Please check and try again."
+            );
+            level = "error";
+            break;
+          case "AuthValidationErrorCode":
+            title = i18next.t("error.login.setupNewPassword.validation.title", "Validation error");
+            errMsg = i18next.t(
+              "error.login.setupNewPassword.validation.message",
+              "Confirmation code, password, or username is empty or invalid."
+            );
+            level = "warning";
+            break;
+          default:
+            break;
+        }
 
-          notify({ title, message: errMsg, level });
-          throw err;
-        }).then(() => {
-          notify({
-            level: 'info',
-            message: i18next.t("login.setupNewPassword.success.message", "Your password has been reset successfully. You can now log in with your new password."),
-            title: i18next.t("login.setupNewPassword.success.title", "Password reset successful."),
-          });
+        notify({ title, message: errMsg, level });
+        throw err;
+      }).then(() => {
+        notify({
+          level: 'info',
+          message: i18next.t("login.setupNewPassword.success.message", "Your password has been reset successfully. You can now log in with your new password."),
+          title: i18next.t("login.setupNewPassword.success.title", "Password reset successful."),
         });
-        onSuccess();
-      } catch (err) {
-        console.error(err);
-      }
+      });
+      onSuccess();
     };
 
     const passwordValue = watch("password");
@@ -186,7 +177,7 @@ import * as React from 'react';
     const confirmPasswordLabelT = i18next.t("login.setupPassword.confirmPassword.label", "Confirm Password");
     const confirmPasswordRequiredT = i18next.t("login.setupPassword.confirmPassword.required", "Please confirm your password");
     const confirmPasswordMatchT = i18next.t("login.setupPassword.confirmPassword.match", "Passwords must match");
-    const codeHelperTextT = i18next.t("login.setupPassword.codeHelperText", { email: destinationMail, defaultValue: "Code sent to: {{email}}" });
+    const codeHelperTextT = i18next.t("login.setupPassword.codeHelperText", { email: destination, defaultValue: "Code sent to: {{email}}" });
     const codeLabelT = i18next.t("login.setupPassword.code.label", "Verification Code");
     const codePlaceholderT = i18next.t("login.setupPassword.code.placeholder", "123456");
     const codeRequiredT = i18next.t("login.setupPassword.code.required", "Verification code is required");

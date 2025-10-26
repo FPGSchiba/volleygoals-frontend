@@ -27,7 +27,6 @@ export function SetupTOTP({ setupURL, onSetupFinished }: SetupTOTPProps) {
       });
       onSetupFinished(output);
     } catch (error) {
-      console.error(error);
       const err = error as any;
       const code = err?.code || err?.name || "";
 

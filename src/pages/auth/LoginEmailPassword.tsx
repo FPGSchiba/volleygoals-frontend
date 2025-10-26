@@ -33,8 +33,6 @@ export function LoginEmailPassword(props: LoginEmailPasswordProps) {
       });
       onSignInFinished(output, data.email);
     } catch (error: any) {
-      console.error(error);
-
       const code = error?.name || error?.code || '';
       let message = error?.message ?? String(error);
       let title = i18next.t("error.login.emailPassword.failed.title", "Sign in failed.");
