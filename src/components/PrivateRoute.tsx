@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { Navigate, Outlet } from 'react-router-dom';
+import {UserRole} from "../store/types";
 
 type PrivateRouteProps = {
-  allowedRoles?: string[];
+  allowedRoles?: UserRole[];
 };
 
 export function PrivateRoute({ allowedRoles = [] }: PrivateRouteProps) {
@@ -24,9 +25,7 @@ export function PrivateRoute({ allowedRoles = [] }: PrivateRouteProps) {
         const groups = payload?.['cognito:groups'] ?? [];
         const userRoles: string[] = Array.isArray(groups) ? groups : [groups].filter(Boolean);
 
-        console.log(userRoles);
-
-        const allowed = allowedRoles.length === 0 || allowedRoles.some(role => userRoles.includes(role));
+        const allowed = allowedRoles.length === 0 || allowedRoles.some(role => userRoles.includes(role.toString()));
         if (mounted) {
           setIsAuthenticated(true);
           setIsAllowed(allowed);

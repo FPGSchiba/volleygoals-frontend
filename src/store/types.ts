@@ -13,3 +13,9 @@ export interface NotifyEvent {
   level: OverridableStringUnion<AlertColor, AlertPropsColorOverrides>
   title: string
 }
+
+export enum UserRole {
+  Admin = "ADMINS",
+  Member = "MEMBERS",
+  Trainer = "TRAINERS",
+}

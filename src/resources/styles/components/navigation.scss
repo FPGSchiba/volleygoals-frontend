@@ -1,0 +1,37 @@
+.nav {
+  &.nav-sidebar {
+    &.nav-sidebar-root {
+      transition: width 200ms;
+      overflow: hidden;
+      margin-top: 20px;
+      margin-left: 20px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      max-height: 50rem;
+      background-color: var(--palette-background-paper);
+    }
+
+    &.nav-sidebar-item, &.nav-sidebar-item-active {
+      border-left: 4px solid var(--palette-primary-main);
+      height: 4rem;
+      display: flex;
+      align-items: center;
+    }
+
+    &.nav-sidebar-item-icon {
+      margin-right: 0.5rem;
+    }
+
+    &.nav-sidebar-item-text {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+  }
+
+  &.nav-heading {
+    &.nav-heading-title {
+      margin-left: 10px;
+    }
+  }
+}

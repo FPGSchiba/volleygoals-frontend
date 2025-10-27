@@ -1,4 +1,4 @@
-import { Box, Paper, Typography, Link } from "@mui/material";
+import {Box, Link, Paper, Typography} from "@mui/material";
 import * as React from 'react';
 import i18next from "i18next";
 import {LoginEmailPassword} from "./LoginEmailPassword";
@@ -9,6 +9,8 @@ import {SetupNewPassword} from "./SetupNewPassword";
 import {useUserStore} from "../../store/user";
 import {useNavigate} from "react-router-dom";
 import {SetupInitialPassword} from "./SetupInitialPassword";
+import {UserRole} from "../../store/types";
+import {useEffect} from "react";
 
 enum LoginSteps {
   EmailPassword,
@@ -26,13 +28,21 @@ function Login() {
 
   const setUser = useUserStore(state => state.setUser);
   const navigate = useNavigate();
+  const roles = useUserStore(state => state.roles);
+
+  useEffect(() => { // in order to redirect on login if user is already set and if user gets set by login flow
+    if (roles.length > 0) {
+      if (roles.includes(UserRole.Admin)) {
+        navigate("/teams");
+      } else {
+        navigate("/dashboard");
+      }
+    }
+  }, [roles]);
 
   const handleStepChange = (output: ConfirmSignInOutput | SignInOutput) => {
     if (output.isSignedIn) {
-      setUser().then(() => {
-        navigate("/");
-        setCurrentStep(LoginSteps.Success);
-      })
+      setUser(); // ignore this as we already listen to changes in user store and use useEffect to redirect
     } else {
       switch (output.nextStep.signInStep) {
         case "CONFIRM_SIGN_IN_WITH_TOTP_CODE":
