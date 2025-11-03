@@ -34,7 +34,7 @@
     "zustymiddlewarets": "^1.4.2"
   },
   "devDependencies": {
-    "@aws-amplify/backend": "^1.16.1",
+    "@aws-amplify/backend": "^1.17.0",
     "@aws-amplify/backend-cli": "^1.8.0",
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.27.1",
