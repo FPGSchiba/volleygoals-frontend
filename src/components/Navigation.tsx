@@ -9,7 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import {UserRole} from "../store/types";
+import {UserType} from "../store/types";
 import {useUserStore} from "../store/user";
 import { Box, IconButton, Typography } from "@mui/material";
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
@@ -21,18 +21,18 @@ type NavItem = {
   label: string;
   path: string;
   icon?: React.ReactNode;
-  roles: UserRole[];
+  roles: UserType[];
 };
 
 const NAV_ITEMS: NavItem[] = [
   // Admin View
-  { key: 'teams', label: 'Teams', path: '/teams', icon: <GroupIcon />, roles: [UserRole.Admin] },
+  { key: 'teams', label: 'Teams', path: '/teams', icon: <GroupIcon />, roles: [UserType.Admin] },
   // Trainer Only
-  { key: 'seasons', label: 'Seasons', path: '/seasons', icon: <DateRangeIcon />, roles: [UserRole.Trainer] },
+  { key: 'seasons', label: 'Seasons', path: '/seasons', icon: <DateRangeIcon />, roles: [UserType.User] },
   // Members and Trainers
-  { key: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, roles: [UserRole.Member, UserRole.Trainer] },
+  { key: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, roles: [UserType.User] },
   // All Users
-  { key: 'profile', label: 'Profile', path: '/profile', icon: <PersonIcon />, roles: [UserRole.Member, UserRole.Trainer, UserRole.Admin] },
+  { key: 'profile', label: 'Profile', path: '/profile', icon: <PersonIcon />, roles: [UserType.User, UserType.Admin] },
 ];
 
 type NavigationProps = {
@@ -45,13 +45,13 @@ type NavigationProps = {
 export function Navigation(props: NavigationProps) {
   const { collapsed, setCollapsed, drawerWidth, hidden } = props;
   const navigate = useNavigate();
-  const roles = useUserStore(state => state.roles);
+  const userType = useUserStore(state => state.userType);
   const [visibleItems, setVisibleItems] = React.useState<NavItem[]>([]);
 
   useEffect(() => {
-    const items = NAV_ITEMS.filter(item => (roles ?? []).some(role => item.roles.includes(role)));
+    const items = NAV_ITEMS.filter(item => item.roles.includes(userType!));
     setVisibleItems(items);
-  }, [roles]);
+  }, [userType]);
 
   return (
     <>

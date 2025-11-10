@@ -4,9 +4,25 @@ import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
 import plugin from 'node-stdlib-browser/helpers/esbuild/plugin';
 import stdLibBrowser from 'node-stdlib-browser';
-import { YAMLPlugin } from "esbuild-yaml";
+import { loadEnvFile } from 'node:process';
 import path from 'path';
-import { copy } from 'esbuild-plugin-copy';
+
+loadEnvFile();
+
+const define = {};
+for (const k of Object.keys(process.env)) {
+    const v = process.env[k];
+    if (v === undefined) continue;
+    const value = JSON.stringify(v);
+
+    // use dot-notation when the env key is a valid identifier,
+    // otherwise use bracket-notation with a JSON-escaped string
+    if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(k)) {
+        define[`process.env.${k}`] = value;
+    } else {
+        define[`process.env[${JSON.stringify(k)}]`] = value;
+    }
+}
 
 esbuild
     .context({
@@ -19,6 +35,7 @@ esbuild
         inject: [path.resolve('node_modules/node-stdlib-browser/helpers/esbuild/shim.js')],
         define: {
             https: 'https',
+            ...define,
         },
         plugins: [
             sassPlugin({

@@ -1,5 +1,6 @@
 import {Box, Link, Paper, Typography} from "@mui/material";
 import * as React from 'react';
+import {useEffect} from 'react';
 import i18next from "i18next";
 import {LoginEmailPassword} from "./LoginEmailPassword";
 import {LoginTOTP} from "./LoginTOTP";
@@ -9,8 +10,7 @@ import {SetupNewPassword} from "./SetupNewPassword";
 import {useUserStore} from "../../store/user";
 import {useNavigate} from "react-router-dom";
 import {SetupInitialPassword} from "./SetupInitialPassword";
-import {UserRole} from "../../store/types";
-import {useEffect} from "react";
+import {UserType} from "../../store/types";
 
 enum LoginSteps {
   EmailPassword,
@@ -28,17 +28,17 @@ function Login() {
 
   const setUser = useUserStore(state => state.setUser);
   const navigate = useNavigate();
-  const roles = useUserStore(state => state.roles);
+  const userType = useUserStore(state => state.userType);
 
   useEffect(() => { // in order to redirect on login if user is already set and if user gets set by login flow
-    if (roles.length > 0) {
-      if (roles.includes(UserRole.Admin)) {
+    if (userType) {
+      if (userType === UserType.Admin) {
         navigate("/teams");
       } else {
         navigate("/dashboard");
       }
     }
-  }, [roles]);
+  }, [userType]);
 
   const handleStepChange = (output: ConfirmSignInOutput | SignInOutput) => {
     if (output.isSignedIn) {

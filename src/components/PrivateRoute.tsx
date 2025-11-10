@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { fetchAuthSession } from 'aws-amplify/auth';
 import { Navigate, Outlet } from 'react-router-dom';
-import {UserRole} from "../store/types";
+import {UserType} from "../store/types";
 
 type PrivateRouteProps = {
-  allowedRoles?: UserRole[];
+  allowedRoles?: UserType[];
 };
 
 export function PrivateRoute({ allowedRoles = [] }: PrivateRouteProps) {

@@ -1,12 +1,14 @@
 import {create} from "zustand";
 import { fetchAuthSession, AuthSession, getCurrentUser, AuthUser, signOut } from 'aws-amplify/auth';
-import {UserRole} from "./types";
-import Auth from "aws-amplify/auth";
+import {ITeamAssignment, UserType} from "./types";
+import VolleyGoalsAPI from "../services/backend.api";
 
 type UserState = {
   user: AuthUser | undefined;
   session: AuthSession | undefined;
-  roles: UserRole[];
+  userType: UserType | undefined;
+  availableTeams?: ITeamAssignment[];
+  selectedTeam?: ITeamAssignment;
 }
 
 type UserActions = {
@@ -14,7 +16,7 @@ type UserActions = {
   logout: () => void
 }
 
-const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: AuthSession | undefined, roles: UserRole[]}> => {
+const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: AuthSession | undefined, userType: UserType | undefined}> => {
   try {
     const maxAttempts = 3;
     const isSessionError = (err: any) => {
@@ -27,7 +29,7 @@ const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: Au
       session = await fetchAuthSession();
     } catch (err) {
       if (isSessionError(err)) {
-        return { user: undefined, session: undefined, roles: [] };
+        return { user: undefined, session: undefined, userType: undefined };
       }
       throw err;
     }
@@ -46,7 +48,7 @@ const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: Au
         if (idToken) break;
       } catch (err) {
         if (isSessionError(err)) {
-          return { user: undefined, session: undefined, roles: [] };
+          return { user: undefined, session: undefined, userType: undefined };
         }
         // ignore other errors and continue retrying
       }
@@ -57,20 +59,23 @@ const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: Au
     const payload = idToken?.payload as Record<string, any> | undefined;
     const groups = payload?.['cognito:groups'] ?? [];
     const userRoles: string[] = Array.isArray(groups) ? groups : [groups].filter(Boolean);
+    VolleyGoalsAPI.setToken(idToken);
 
-    return { user, session, roles: userRoles.map((role) => role as UserRole) };
+    return { user, session, userType: userRoles.map((role) => role as UserType)[0] };
   } catch (error) {
-    return {user: undefined, session: undefined, roles: []};
+    return {user: undefined, session: undefined, userType: undefined};
   }
 }
 
 const useUserStore = create<UserState & UserActions>((set, get) => {
-  loadUserStore().then(({ user, session, roles }) => set({ user, session, roles }));
+  loadUserStore().then(({ user, session, userType }) => set({ user, session, userType, availableTeams: [], selectedTeam: undefined }));
 
   return {
     user: undefined,
     session: undefined,
-    roles: [],
+    userType: undefined,
+    availableTeams: [],
+    selectedTeam: undefined,
     setUser: async () => {
       try {
         const user = await getCurrentUser();
@@ -82,13 +87,15 @@ const useUserStore = create<UserState & UserActions>((set, get) => {
         const groups = payload?.['cognito:groups'] ?? [];
         const userRoles: string[] = Array.isArray(groups) ? groups : [groups].filter(Boolean);
 
-        set({ user, session, roles: userRoles.map((role) => role as UserRole) });
+        VolleyGoalsAPI.setToken(idToken);
+
+        set({ user, session, userType: userRoles.map((role) => role as UserType)[0] });
       } catch (error) {
-        set({ user: undefined, session: undefined, roles: [] });
+        set({ user: undefined, session: undefined, userType: undefined });
       }
     },
     logout: () => {
-      set({ user: undefined, session: undefined, roles: [] });
+      set({ user: undefined, session: undefined, userType: undefined });
       signOut();
     }
   };

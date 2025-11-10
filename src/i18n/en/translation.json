@@ -91,6 +91,50 @@
     }
   },
   "error": {
+    "general": {
+      "title": "An error occurred",
+      "message": "Something went wrong. Please try again later."
+    },
+    "internalServerError": {
+      "title": "Internal Server Error",
+      "message": "An unexpected error occurred on the server. Please try again later."
+    },
+    "badRequest": {
+      "title": "Bad Request",
+      "message": "The request was invalid or cannot be served. Please check and try again."
+    },
+    "forbidden": {
+      "title": "Access Denied",
+      "message": "You do not have permission to access this resource."
+    },
+    "notFound": {
+      "title": "Resource Not Found",
+      "message": "The requested resource could not be found."
+    },
+    "notImplemented": {
+      "title": "Not Implemented",
+      "message": "The requested functionality is not implemented."
+    },
+    "unauthorized": {
+      "title": "Unauthorized",
+      "message": "You are not authorized to perform this action."
+    },
+    "team": {
+      "exists": {
+        "title": "Team Already Exists",
+        "message": "A team with this name already exists. Please choose a different name."
+      },
+      "notFound": {
+        "title": "Team Not Found",
+        "message": "The specified team could not be found."
+      }
+    },
+    "teamSettings": {
+      "notFound": {
+        "title": "Team Settings Not Found",
+        "message": "The specified team settings could not be found."
+      }
+    },
     "login": {
       "emailPassword": {
         "failed": {
@@ -200,6 +244,22 @@
           "title": "User not found",
           "message": "No account found for that email."
         }
+      }
+    }
+  },
+  "success": {
+    "ok": {
+      "title": "Success",
+      "message": "The operation was completed successfully."
+    },
+    "team": {
+      "created": {
+        "title": "Team Created",
+        "message": "The team has been created successfully."
+      },
+      "deleted": {
+        "title": "Team Deleted",
+        "message": "The team has been deleted successfully."
       }
     }
   }

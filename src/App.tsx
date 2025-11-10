@@ -11,7 +11,7 @@ import {NotFound} from "./pages/help/NotFound";
 import {Navigation} from "./components/Navigation";
 import {Notification} from "./components/Notification";
 import {ResetPassword} from "./pages/auth/ResetPassword";
-import {UserRole} from "./store/types";
+import {UserType} from "./store/types";
 import { Box } from "@mui/material";
 import {Profile} from "./pages/user/Profile";
 
@@ -75,15 +75,15 @@ function App() {
             <Route path={"/login"} element={<Login />} />
             <Route path={"/accept-invite/:token"} element={<AcceptInvite />} />
             <Route path={"/reset-password"} element={<ResetPassword />} />
-            <Route path={"/"} element={<PrivateRoute allowedRoles={[UserRole.Member, UserRole.Trainer]} />} >
+            <Route path={"/"} element={<PrivateRoute allowedRoles={[UserType.User]} />} >
               <Route path="" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </ Route>
-            <Route path={"/teams"} element={<PrivateRoute allowedRoles={[UserRole.Admin]} />} >
+            <Route path={"/teams"} element={<PrivateRoute allowedRoles={[UserType.Admin]} />} >
               <Route path={""} element={<Teams />} />
               <Route path={":teamId"} element={<TeamSettings />} />
             </Route>
-            <Route path={"/profile"} element={<PrivateRoute allowedRoles={[UserRole.Member, UserRole.Trainer, UserRole.Admin]} />} >
+            <Route path={"/profile"} element={<PrivateRoute allowedRoles={[UserType.User, UserType.Admin]} />} >
               <Route path={""} element={<Profile />} />
             </Route>
             <Route path={"/no-access"} element={<NoAccess />} />

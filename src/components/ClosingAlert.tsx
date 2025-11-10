@@ -22,6 +22,20 @@ export function ClosingAlert(props: Readonly<{ notification: Notification }>) {
       <div className="notification notification-body notification-body-wrapper">
         <Typography className="notification notification-body notification-body-header" variant="h5">{notification.title}</Typography>
         <Typography className="notification notification-body notification-body-message" variant="body1">{notification.message}</Typography>
+        {notification.details && (
+          <details className="notification notification-details" style={{marginTop: 8}}>
+            <summary style={{display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', padding: 0}}>
+              <Typography variant="body2" className="notification notification-details-summary">Details</Typography>
+              <span aria-hidden style={{fontSize: 18, lineHeight: 1}}>▾</span>
+            </summary>
+            <textarea
+              readOnly
+              defaultValue={notification.details}
+              className="notification notification-details-content"
+              style={{whiteSpace: 'pre-wrap', marginTop: 6, width: '100%', minHeight: 96, resize: 'vertical', borderRadius: 4, border: '1px solid rgba(0,0,0,0.12)', padding: 8, fontFamily: 'inherit', fontSize: '0.875rem'}}
+            />
+          </details>
+        )}
       </div>
       <IconButton
         size="small"

@@ -18,6 +18,8 @@
     "@types/node": "^24.9.1",
     "aws-amplify": "^6.15.7",
     "axios": "^1.13.0",
+    "env": "^0.0.2",
+    "esbuild-envfile-plugin": "^1.0.7",
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-yaml": "^0.0.1",
     "esbuild-sass-plugin": "^3.3.1",
