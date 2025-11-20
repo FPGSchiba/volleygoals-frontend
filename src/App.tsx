@@ -5,7 +5,7 @@ import {AcceptInvite} from "./pages/auth/AcceptInvite";
 import {PrivateRoute} from "./components/PrivateRoute";
 import { Dashboard } from "./pages/Dashboard";
 import {Teams} from "./pages/admin/Teams";
-import {TeamSettings} from "./pages/admin/TeamSettings";
+import {TeamDetails} from "./pages/admin/TeamDetails";
 import {NoAccess} from "./pages/help/NoAccess";
 import {NotFound} from "./pages/help/NotFound";
 import {Navigation} from "./components/Navigation";
@@ -81,7 +81,7 @@ function App() {
             </ Route>
             <Route path={"/teams"} element={<PrivateRoute allowedRoles={[UserType.Admin]} />} >
               <Route path={""} element={<Teams />} />
-              <Route path={":teamId"} element={<TeamSettings />} />
+              <Route path={":teamId"} element={<TeamDetails />} />
             </Route>
             <Route path={"/profile"} element={<PrivateRoute allowedRoles={[UserType.User, UserType.Admin]} />} >
               <Route path={""} element={<Profile />} />

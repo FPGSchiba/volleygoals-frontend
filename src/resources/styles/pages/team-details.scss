@@ -1,0 +1,87 @@
+// Floating paper layout for Team Details page
+// Keeps styling minimal and consistent with the app's neutral palette
+
+.team-details-root {
+  .team-details-inner {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    grid-template-rows: auto 1fr;
+    gap: 24px;
+    align-items: start;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  // primary overview paper (form)
+  .team-overview-paper {
+    // subtle rounded card with shadow
+    border-radius: 10px;
+    background: var(--palette-background-paper, #fff);
+    box-shadow: 0 6px 18px rgba(32,33,36,0.08);
+    overflow: visible;
+    color: var(--palette-text-primary, #000);
+
+    .team-settings-card {
+      margin-top: 8px;
+      background: var(--palette-background-default, #fafafa);
+      color: var(--palette-text-secondary, #666);
+    }
+  }
+
+  // side paper for members list
+  .team-members-paper {
+    border-radius: 10px;
+    background: var(--palette-background-paper, #fff);
+    box-shadow: 0 4px 10px rgba(32,33,36,0.06);
+    min-height: 160px;
+  }
+
+  // main combined paper (spans full width)
+  .team-main-paper {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    border-radius: 10px;
+    background: var(--palette-background-paper, #fff);
+    box-shadow: 0 8px 24px rgba(32,33,36,0.06);
+    color: var(--palette-text-primary, #000);
+  }
+
+  // subtle accents and borders
+  .team-overview-paper, .team-members-paper, .team-settings-card, .team-settings-paper {
+    border: 1px solid var(--palette-divider, #e0e0e0);
+  }
+
+  // accent for primary actions
+  .team-overview-paper .MuiButton-containedPrimary {
+    background-color: var(--palette-primary-main, #1976d2);
+  }
+
+  // responsive: stack on small screens
+  @media (max-width: 900px) {
+    .team-details-inner {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto;
+    }
+
+    .team-settings-paper {
+      order: 3;
+    }
+    .team-members-paper {
+      order: 4;
+    }
+  }
+
+  // Layout placements: overview left, settings right, members span full width below
+  .team-overview-paper { grid-column: 1; grid-row: 1; }
+  .team-settings-paper { grid-column: 2; grid-row: 1; }
+  .team-main-paper { grid-column: 1 / -1; grid-row: 1; }
+  .team-members-paper { grid-column: 1 / -1; grid-row: 2; }
+
+  // emphasise the save area inside main paper
+  .team-main-paper .MuiButton-contained {
+    box-shadow: none;
+  }
+  .team-main-paper .MuiTypography-body2 {
+    color: var(--palette-text-secondary, #666);
+  }
+}

@@ -18,6 +18,7 @@ import {
   TextField,
   MenuItem,
 } from '@mui/material';
+import CircularProgress from '@mui/material/CircularProgress';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import AddIcon from '@mui/icons-material/Add';
 import { IFilterOption } from '../services/types';
@@ -63,6 +64,13 @@ export interface GenericListProps<Item, FilterOptions extends IFilterOption> {
   // Example: [{ field: 'name', label: 'Name' }, { field: 'updatedAt', label: 'Updated' }]
   sortableFields?: { field: string; label: string }[];
 
+  // Optional: custom renderer for the actions cell per row. If provided, this
+  // will be used instead of the default Edit/Delete buttons. The renderer
+  // receives the item only — the parent is expected to wire any handlers
+  // (for example calling store functions) from within the renderer. This
+  // simplifies the API and gives the page full control over action behavior.
+  renderActions?: (item: Item) => React.ReactNode;
+
   items: Item[];
   count: number;
 }
@@ -80,6 +88,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   renderRow,
   renderFilterFields,
   sortableFields,
+  renderActions,
   items,
   count
 }: GenericListProps<Item, FilterOptions>) {
@@ -94,15 +103,20 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
 
   const [page, setPage] = useState(1);
   const effectiveRows = rowsPerPage;
+  const [loading, setLoading] = useState<boolean>(false);
 
   const pageCount = Math.max(1, Math.ceil((count || items.length) / effectiveRows));
 
   const load = async (f: FilterOptions) => {
     try {
+      setLoading(true);
       const withLimit = { ...(f as any), limit: f.limit ?? effectiveRows } as FilterOptions;
       const res = await fetch(withLimit);
+      return res;
     } catch (err) {
       console.error('ItemList fetch error', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -148,14 +162,20 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   }, [items, page, effectiveRows]);
 
   return (
-    <Box>
+    <Box className="item-list">
       <Grid container alignItems="center" spacing={2}>
-        <Grid>
-          <Typography variant="h5">{title}</Typography>
+        <Grid className="item-list-header">
+          <Typography variant="h5" className="item-list-title">{title}</Typography>
         </Grid>
         {create && (
           <Grid>
-            <Button startIcon={<AddIcon />} variant="contained" color="primary" onClick={handleCreate}>
+            <Button
+              startIcon={<AddIcon />}
+              variant="contained"
+              color="primary"
+              onClick={handleCreate}
+              className="item-list-create-button"
+            >
               Create
             </Button>
           </Grid>
@@ -163,20 +183,21 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
       </Grid>
 
       <Box mt={2}>
-        <Accordion>
+        <Accordion className="item-list-filter">
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography>Filter</Typography>
           </AccordionSummary>
           <AccordionDetails>
-            <Grid container spacing={2} alignItems="center">
+            <Grid container spacing={2} alignItems="center" className="item-list-filter-grid">
               {/* Default filter controls (always included) */}
-              <Grid>
+              <Grid className="item-list-filter-field">
                 <TextField
                   select
                   fullWidth
                   label="Limit"
                   value={draftFilter.limit ?? rowsPerPage}
                   onChange={(e) => setDraftFilter({ ...(draftFilter as any), limit: Number(e.target.value) } as FilterOptions)}
+                  className="item-list-textfield"
                 >
                   {[5, 10, 20, 50].map((v) => (
                     <MenuItem key={v} value={v}>
@@ -186,7 +207,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                 </TextField>
               </Grid>
 
-              <Grid>
+              <Grid className="item-list-filter-field">
                 {sortableFields && sortableFields.length > 0 ? (
                   <TextField
                     select
@@ -214,7 +235,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                 )}
               </Grid>
 
-              <Grid>
+              <Grid className="item-list-filter-field">
                 <TextField
                   select
                   fullWidth
@@ -223,6 +244,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                   onChange={(e) =>
                     setDraftFilter({ ...(draftFilter as any), sortOrder: (e.target.value as 'asc' | 'desc') } as FilterOptions)
                   }
+                  className="item-list-textfield"
                 >
                   <MenuItem value="asc">Ascending</MenuItem>
                   <MenuItem value="desc">Descending</MenuItem>
@@ -233,7 +255,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
               {renderFilterFields ? renderFilterFields(draftFilter, setDraftFilter) : null}
 
               <Grid>
-                <Button variant="outlined" onClick={handleApplyFilter}>
+                <Button variant="contained" onClick={handleApplyFilter} className="item-list-apply-button">
                   Apply
                 </Button>
               </Grid>
@@ -243,7 +265,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
       </Box>
 
       <Box mt={2}>
-        <TableContainer component={Paper}>
+        <TableContainer component={Paper} className="item-list-table">
           <Table>
             {columns.length > 0 && (
               <TableHead>
@@ -251,7 +273,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                   {columns.map((c, idx) => (
                     <TableCell key={idx}>{c}</TableCell>
                   ))}
-                  {(onEdit || onDelete) && <TableCell align="right">Actions</TableCell>}
+                  {(renderActions || onEdit || onDelete) && <TableCell align="right">Actions</TableCell>}
                 </TableRow>
               </TableHead>
             )}
@@ -259,8 +281,14 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
             <TableBody>
               {displayed.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length + (onEdit || onDelete ? 1 : 0)}>
-                    <Typography>No items found.</Typography>
+                  <TableCell colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="item-list-no-items">
+                    {loading ? (
+                      <Box display="flex" justifyContent="center" py={4}>
+                        <CircularProgress />
+                      </Box>
+                    ) : (
+                      <Typography>No items found.</Typography>
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -272,35 +300,41 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                   });
 
                   if (React.isValidElement(rendered) && (rendered.type === TableRow || (rendered as any).props?.children)) {
-                    return React.cloneElement(rendered as React.ReactElement, { key: id });
+                    return React.cloneElement(rendered as React.ReactElement<any>, { key: id, className: `${(rendered as any).props?.className || ''} item-list-custom-row` } as any);
                   }
 
                   return (
-                    <TableRow key={id}>
+                    <TableRow key={id} className="item-list-row">
                       {Array.isArray(rendered) ? rendered : <TableCell>{rendered}</TableCell>}
-                      {(onEdit || onDelete) && (
+                      {(renderActions || onEdit || onDelete) && (
                         <TableCell align="right">
-                          {onEdit && (
-                            <Button size="small" onClick={() => handleEdit(item)}>
-                              Edit
-                            </Button>
-                          )}
-                          {onDelete && (
-                            <Button size="small" onClick={() => handleDelete(id)}>
-                              Delete
-                            </Button>
+                          {renderActions ? (
+                            renderActions(item)
+                          ) : (
+                            <>
+                              {onEdit && (
+                                <Button style={{ marginRight: '5px' }} variant="contained" size="small" onClick={() => handleEdit(item)} className="item-list-action-button item-list-action-edit">
+                                  Edit
+                                </Button>
+                              )}
+                              {onDelete && (
+                                <Button variant="contained" size="small" onClick={() => handleDelete(id)} className="item-list-action-button item-list-action-delete">
+                                  Delete
+                                </Button>
+                              )}
+                            </>
                           )}
                         </TableCell>
                       )}
-                    </TableRow>
-                  );
-                })
-              )}
+                     </TableRow>
+                   );
+                 })
+               )}
             </TableBody>
           </Table>
         </TableContainer>
 
-        <Box mt={2} display="flex" justifyContent="center">
+        <Box mt={2} display="flex" justifyContent="center" className="item-list-pagination">
           <Pagination count={pageCount} page={page} onChange={(_, value) => setPage(value)} color="primary" />
         </Box>
       </Box>

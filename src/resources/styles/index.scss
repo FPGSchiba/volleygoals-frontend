@@ -10,9 +10,11 @@ body {
   // Components
   @include meta.load-css("components/navigation");
   @include meta.load-css("components/notification");
+  @include meta.load-css("components/itemlist");
 
   // Pages
   @include meta.load-css("pages/login");
+  @include meta.load-css("pages/team-details");
 
   .app {
     &.app-container {

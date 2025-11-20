@@ -2,7 +2,7 @@
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
 import {ITeamFilterOption} from "./types";
-import {ITeam} from "../store/types";
+import {ITeam, ITeamSettings} from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
 class VolleyGoalsAPI {
@@ -129,7 +129,7 @@ class VolleyGoalsAPI {
     }
   }
 
-  public async getTeam(id: string): Promise<any> {
+  public async getTeam(id: string): Promise<{message: string, error?: string, team?: ITeam, teamSettings?: ITeamSettings}> {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/teams/${id}`);

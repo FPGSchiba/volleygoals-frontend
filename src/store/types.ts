@@ -34,8 +34,17 @@ export interface ITeam {
   id: string;
   name: string;
   status: 'active' | 'inactive';
-  description?: string;
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
+}
+
+export interface ITeamSettings {
+  id: string;
+  teamId: string;
+  allowFileUploads: boolean;
+  allowTeamGoalComments: boolean;
+  allowIndividualGoalComments: boolean;
+  createdAt: string;
+  updatedAt: string;
 }

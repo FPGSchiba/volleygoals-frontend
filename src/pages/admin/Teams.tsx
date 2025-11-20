@@ -1,9 +1,10 @@
 import React from 'react';
-import { Grid, TextField, MenuItem, TableCell } from '@mui/material';
+import { Grid, TextField, MenuItem, TableCell, Chip, Button } from '@mui/material';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { ITeam } from '../../store/types';
 import { ITeamFilterOption } from '../../services/types';
 import { useTeamStore } from '../../store/teams';
+import {useNavigate} from "react-router-dom";
 
 export function Teams() {
   const fetchTeams = useTeamStore(state => state.fetchTeams);
@@ -12,6 +13,7 @@ export function Teams() {
   const deleteTeam = useTeamStore(state => state.deleteTeam);
   const teams = useTeamStore(state => state.teamList.teams);
   const count = useTeamStore(state => state.teamList.count);
+  const navigate = useNavigate();
   const initialFilter: ITeamFilterOption = {};
   const sortableFields = [
     {
@@ -45,8 +47,7 @@ export function Teams() {
   };
 
   const handleEdit = async (team: ITeam) => {
-    if (!editTeam) return;
-    await editTeam(team.id, team.name, team.status);
+    navigate(`/teams/${team.id}`);
   };
 
   const handleDelete = async (id: string) => {
@@ -83,9 +84,35 @@ export function Teams() {
   const renderRow = (team: ITeam) => {
     return [
       <TableCell key="name">{team.name}</TableCell>,
-      <TableCell key="status">{team.status}</TableCell>,
+      <TableCell key="status"><Chip label={team.status} color={team.status == 'active' ? 'success' : 'error'} /></TableCell>,
       <TableCell key="created">{new Date(team.createdAt).toLocaleString('de-CH')}</TableCell>,
       <TableCell key="updated">{team.updatedAt ? new Date(team.updatedAt).toLocaleString('de-CH') : '-'}</TableCell>,
+    ];
+  };
+
+  const renderActions = (team: ITeam) => {
+    // Edit button - directly call local handler
+    const editBtn = (
+      <Button key="edit" variant="contained" size="small" onClick={() => handleEdit(team)} style={{ marginRight: 8 }}>
+        Edit
+      </Button>
+    );
+
+    // If team is active, show a Deactivate button; otherwise show Delete
+    if (team.status === 'active') {
+      return [
+        editBtn,
+        <Button key="deactivate" variant="contained" size="small" color="warning" onClick={async () => { await editTeam(team.id, team.name, 'inactive'); }}>
+          Deactivate
+        </Button>
+      ];
+    }
+
+    return [
+      editBtn,
+      <Button key="delete" variant="contained" size="small" color="error" onClick={() => handleDelete(team.id)}>
+        Delete
+      </Button>
     ];
   };
 
@@ -100,7 +127,8 @@ export function Teams() {
       onEdit={handleEdit}
       onDelete={handleDelete}
       renderFilterFields={renderFilterFields}
-      renderRow={(item, handlers) => renderRow(item)}
+      renderRow={(item) => renderRow(item)}
+      renderActions={(item) => renderActions(item as ITeam)}
       sortableFields={sortableFields}
       items={teams}
       count={count}

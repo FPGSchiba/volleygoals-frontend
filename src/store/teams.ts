@@ -1,4 +1,4 @@
-import {ITeam} from "./types";
+import {ITeam, ITeamSettings} from "./types";
 import {create} from "zustand";
 import {ITeamFilterOption} from "../services/types";
 import VolleyGoalsAPI from "../services/backend.api";
@@ -13,6 +13,8 @@ type TeamState = {
     nextToken: string;
     filter?: ITeamFilterOption
   };
+  currentTeam?: ITeam;
+  currentTeamSettings?: ITeamSettings;
 }
 
 type TeamActions = {
@@ -20,6 +22,7 @@ type TeamActions = {
   updateTeam: (id: string, name?: string, status?: string) => Promise<void>;
   deleteTeam: (id: string) => Promise<void>;
   fetchTeams: (filter?: ITeamFilterOption) => Promise<void>;
+  getTeam: (id: string) => Promise<void>;
 }
 
 const useTeamStore = create<TeamState & TeamActions>((set) => ({
@@ -30,6 +33,8 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
     nextToken: '',
     filter: undefined
   },
+  currentTeam: undefined,
+  currentTeamSettings: undefined,
   createTeam: (async (name: string) => {
     const response = await VolleyGoalsAPI.createTeam(name);
     if (!response.team) {
@@ -79,6 +84,22 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
       useNotificationStore.getState().notify({
         level: 'error',
         message: i18next.t(`${response.message}.message`, "Something went wrong while fetching the teams."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    }
+  }),
+  getTeam: (async (id: string) => {
+    const response = await VolleyGoalsAPI.getTeam(id);
+    if (response.team) {
+      set(() => ({
+        currentTeam: response.team,
+        currentTeamSettings: response.teamSettings
+      }))
+    } else {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while fetching the team."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });

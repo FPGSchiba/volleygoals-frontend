@@ -1,0 +1,84 @@
+.item-list {
+  padding: 16px;
+  margin-top: 15px;
+  background: var(--palette-background-paper);
+  border-radius: 6px;
+  color: var(--palette-text-primary);
+  border: 1px solid var(--palette-divider);
+}
+
+.item-list-header {
+  display: flex;
+  align-items: center;
+}
+
+.item-list-title {
+  margin-right: 12px;
+  font-weight: 600;
+}
+
+.item-list-create-button {
+  height: 36px;
+}
+
+.item-list-filter {
+  background: transparent;
+  box-shadow: none;
+}
+
+.item-list-filter-grid {
+  width: 100%;
+}
+
+.item-list-filter-field {
+  min-width: 160px;
+  max-width: 320px;
+}
+
+.item-list-textfield {
+  min-width: 160px;
+}
+
+.item-list-apply-button {
+  height: 36px;
+}
+
+.item-list-table {
+  overflow: auto;
+}
+
+.item-list-no-items {
+  text-align: center;
+  padding: 24px 0;
+  color: var(--palette-text-secondary);
+}
+
+.item-list-row {
+  transition: background-color 0.12s ease-in-out;
+}
+
+.item-list-row:hover {
+  background-color: var(--palette-divider);
+}
+
+.item-list-custom-row {
+  /* allow custom rows to inherit our row styles */
+}
+
+.item-list-action-button {
+  min-width: 64px;
+}
+
+.item-list-action-edit {
+  background-color: var(--palette-primary-main);
+  color: var(--palette-text-primary);
+}
+
+.item-list-action-delete {
+  background-color: var(--palette-error-main);
+  color: var(--palette-text-primary);
+}
+
+.item-list-pagination {
+  margin-top: 12px;
+}
