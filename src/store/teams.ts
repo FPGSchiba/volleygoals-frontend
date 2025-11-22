@@ -14,6 +14,7 @@ type TeamState = {
     filter?: ITeamFilterOption
   };
   currentTeam?: ITeam;
+  selectedTeam?: ITeam; // add selectedTeam to hold currently selected team
   currentTeamSettings?: ITeamSettings;
 }
 
@@ -23,6 +24,7 @@ type TeamActions = {
   deleteTeam: (id: string) => Promise<void>;
   fetchTeams: (filter?: ITeamFilterOption) => Promise<void>;
   getTeam: (id: string) => Promise<void>;
+  selectTeam: (team: ITeam) => void; // newly added action to switch current team
 }
 
 const useTeamStore = create<TeamState & TeamActions>((set) => ({
@@ -89,6 +91,9 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
       });
     }
   }),
+  selectTeam: (team: ITeam) => {
+    set(() => ({ currentTeam: team, selectedTeam: team }));
+  },
   getTeam: (async (id: string) => {
     const response = await VolleyGoalsAPI.getTeam(id);
     if (response.team) {
