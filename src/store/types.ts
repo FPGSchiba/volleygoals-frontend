@@ -21,12 +21,33 @@ export enum RoleType {
   Admin = "admin",
   Trainer = "trainer",
   Member = "member",
+}
 
+export enum TeamMemberStatus {
+  Active = "active",
+  Invited = "invited",
+  Removed = "removed",
+  Left = "left",
 }
 
 export interface ITeamAssignment {
   teamId: string;
   role: RoleType;
+}
+
+// Users
+export interface IUser {
+  id: string;
+  email: string;
+  name?: string;
+  picture?: string;
+  preferredUsername?: string;
+  enabled: boolean;
+  userStatus: string;
+  userType: UserType;
+  updatedAt: string;
+  createdAt: string;
+  birthdate?: string;
 }
 
 // Teams
@@ -47,4 +68,16 @@ export interface ITeamSettings {
   allowIndividualGoalComments: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ITeamMember {
+  id: string;
+  cognitoSub: string;
+  teamId: string;
+  role: RoleType;
+  status: TeamMemberStatus;
+  createdAt: string;
+  updatedAt: string;
+  joinedAt?: string;
+  leftAt?: string;
 }

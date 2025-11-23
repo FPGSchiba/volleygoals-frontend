@@ -67,7 +67,7 @@ const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: Au
   }
 }
 
-const useUserStore = create<UserState & UserActions>((set, get) => {
+const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
   loadUserStore().then(({ user, session, userType }) => set({ user, session, userType, availableTeams: [], selectedTeam: undefined }));
 
   return {
@@ -101,4 +101,4 @@ const useUserStore = create<UserState & UserActions>((set, get) => {
   };
 });
 
-export {useUserStore};
+export {useCognitoUserStore};

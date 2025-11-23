@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
-import {ITeamFilterOption} from "./types";
-import {ITeam, ITeamSettings} from "../store/types";
+import {ITeamFilterOption, IUserFilterOption} from "./types";
+import {ITeam, ITeamMember, ITeamSettings, IUser} from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
 class VolleyGoalsAPI {
@@ -60,8 +60,6 @@ class VolleyGoalsAPI {
     const intervalMs = 100;
     const deadline = Date.now() + maxWaitMs;
 
-    console.log("Ensuring VolleyGoalsAPI endpoints are initialized");
-
     // Ensure endpoints are initialized (retry until deadline)
     while (!VolleyGoalsAPI.endpoint && Date.now() < deadline) {
       this.reloadEndpoints();
@@ -69,8 +67,6 @@ class VolleyGoalsAPI {
       // eslint-disable-next-line no-await-in-loop
       await new Promise(resolve => setTimeout(resolve, intervalMs));
     }
-
-    console.log("Ensured VolleyGoalsAPI endpoints are initialized");
 
     // If token is not yet set, wait until it appears (or until deadline)
     while (!this.token && Date.now() < deadline) {
@@ -84,12 +80,9 @@ class VolleyGoalsAPI {
       throw new Error('error.tokenTimeout');
     }
 
-    console.log("Ensured VolleyGoalsAPI token are initialized");
-
     // If token became available, ensure endpoints carry the header
     if (this.token && VolleyGoalsAPI.endpoint) {
       VolleyGoalsAPI.endpoint.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
-      console.log("Token set for VolleyGoalsAPI endpoints");
     }
 
     // Final attempt to initialize endpoints if still missing
@@ -121,7 +114,6 @@ class VolleyGoalsAPI {
       const response = await VolleyGoalsAPI.endpoint.get('/teams', { params: filter });
       return response.data;
     } catch (reason: any) {
-      console.log(reason);
       return {
         message: reason.response?.data?.message || 'error.internalServerError',
         error: reason.response?.data?.error,
@@ -137,7 +129,7 @@ class VolleyGoalsAPI {
     } catch (reason: any) {
       return {
         message: reason.response?.data?.message || 'error.internalServerError',
-        error: reason.response?.data?.error || 'No additional error information available',
+        error: reason.response?.data?.error,
       };
     }
   }
@@ -150,25 +142,25 @@ class VolleyGoalsAPI {
     } catch (reason: any) {
       return {
         message: reason.response?.data?.message || 'error.internalServerError',
-        error: reason.response?.data?.error || 'No additional error information available',
+        error: reason.response?.data?.error,
       }
     }
   }
 
-  public async updateTeam(id: string, data: any): Promise<any> {
+  public async updateTeam(id: string, data: any): Promise<{ message: string, error?: string, team?: ITeam}> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.put(`/teams/${id}`, data);
+      const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${id}`, data);
       return response.data;
     } catch (reason: any) {
       return {
         message: reason.response?.data?.message || 'error.internalServerError',
-        error: reason.response?.data?.error || 'No additional error information available',
+        error: reason.response?.data?.error,
       }
     }
   }
 
-  public async deleteTeam(id: string): Promise<any> {
+  public async deleteTeam(id: string): Promise<{ message: string, error?: string}> {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${id}`);
@@ -176,7 +168,59 @@ class VolleyGoalsAPI {
     } catch (reason: any) {
       return {
         message: reason.response?.data?.message || 'error.internalServerError',
-        error: reason.response?.data?.error || 'No additional error information available',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async updateTeamSettings(teamId: string, settings: Partial<ITeamSettings>): Promise<{ message: string, error?: string, teamSettings?: ITeamSettings}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${teamId}/settings`, settings);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async fetchUsers(filter?: IUserFilterOption): Promise<{message: string, error?: string, paginationToken?: string, users?: IUser[]}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get('/users', { params: filter });
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async getUser(id: string): Promise<{message: string, error?: string, user?: IUser, memberships?: ITeamMember[]}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/users/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async deleteUser(id: string): Promise<{ message: string, error?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/users/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
       }
     }
   }

@@ -35,3 +35,84 @@
     }
   }
 }
+
+// Top area (team, theme, profile) and heading tweaks
+.nav {
+  &.nav-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.5rem 0.5rem 0.75rem; // top/right/bottom/left - align left with heading
+    box-sizing: border-box;
+    width: 100%;
+  }
+
+  & .nav-top-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  // Keep placeholders/buttons the same size as avatars
+  .nav-team-button, .nav-profile-button, .nav-theme-toggle {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    background: transparent;
+  }
+
+  .nav-team-avatar, .nav-profile-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+  .nav-top-placeholder {
+    width: 40px;
+    height: 40px;
+  }
+
+  // Prevent profile avatar from shrinking and overflowing
+  .nav-profile-button {
+    flex-shrink: 0;
+  }
+
+  // Heading area: align theme toggle to the left edge of the navigation box
+  &.nav-heading {
+    &.nav-heading-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.5rem 0.5rem 0.75rem; // match left padding of .nav-top
+      box-sizing: border-box;
+    }
+  }
+
+  .nav-heading-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    // ensure the left cluster lines up with the top cluster
+    margin-left: 0;
+  }
+
+  .nav-theme-toggle {
+    // inherit sizing from .nav-team-button; keep visual minimal
+    background: transparent;
+  }
+}
+
+// Ensure top area is always a horizontal flex row; use higher specificity to avoid overrides
+.nav.nav-top {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+}

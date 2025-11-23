@@ -13,6 +13,7 @@ export function TeamDetails() {
   const { teamId } = useParams<{ teamId?: string }>();
   const getTeam = useTeamStore(state => state.getTeam);
   const updateTeam = useTeamStore(state => state.updateTeam);
+  const updateTeamSettings = useTeamStore(state => state.updateTeamSettings);
   const currentTeam = useTeamStore(state => state.currentTeam);
   const currentTeamSettings = useTeamStore(state => state.currentTeamSettings);
   const notify = useNotificationStore(state => state.notify);
@@ -23,12 +24,6 @@ export function TeamDetails() {
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [teamSettings, setTeamSettings] = useState<{ allowFileUploads: boolean; allowTeamGoalComments: boolean; allowIndividualGoalComments: boolean } | undefined>(undefined);
   const [saving, setSaving] = useState(false);
-
-  // Dummy updater for team settings (simulates API call)
-  const dummyUpdateTeamSettings = async (id: string, settings: any) => {
-    // simulate network latency
-    return new Promise((resolve) => setTimeout(() => resolve({ ok: true, settings }), 400));
-  };
 
   useEffect(() => {
     let mounted = true;
@@ -70,24 +65,16 @@ export function TeamDetails() {
     setSaving(true);
     try {
       await updateTeam(currentTeam.id, name, status);
-      // update settings with dummy function for now
       if (teamSettings) {
-        try {
-          await dummyUpdateTeamSettings(currentTeam.id, teamSettings as any);
-        } catch (err) {
-          console.error('Failed to update team settings (dummy):', err);
-        }
+        await updateTeamSettings(currentTeam.id, teamSettings);
       }
-      // refresh
-      if (teamId) await getTeam(teamId);
-      // show simple success notification if notify exists
-      try { notify({ level: 'success', message: 'Team updated', title: 'Success' }); } catch {}
+      notify({ level: 'success', message: 'Team updated', title: 'Success' });
     } catch (err) {
       console.error(err);
     } finally {
       setSaving(false);
     }
-  }, [currentTeam, name, status, updateTeam, getTeam, teamId, notify, teamSettings, dummyUpdateTeamSettings]);
+  }, [currentTeam, name, status, updateTeam, getTeam, teamId, notify, teamSettings, updateTeamSettings]);
 
   const onCancel = useCallback(() => {
     if (currentTeam) {

@@ -7,7 +7,7 @@ import {LoginTOTP} from "./LoginTOTP";
 import {ConfirmSignInOutput, SignInOutput} from "aws-amplify/auth";
 import {SetupTOTP} from "./SetupTOTP";
 import {SetupNewPassword} from "./SetupNewPassword";
-import {useUserStore} from "../../store/user";
+import {useCognitoUserStore} from "../../store/cognitoUser";
 import {useNavigate} from "react-router-dom";
 import {SetupInitialPassword} from "./SetupInitialPassword";
 import {UserType} from "../../store/types";
@@ -26,9 +26,9 @@ function Login() {
   const [totpSetupUrl, setTotpSetupUrl] = React.useState<URL | null>(null);
   const [username, setUsername] = React.useState<string>("");
 
-  const setUser = useUserStore(state => state.setUser);
+  const setUser = useCognitoUserStore(state => state.setUser);
   const navigate = useNavigate();
-  const userType = useUserStore(state => state.userType);
+  const userType = useCognitoUserStore(state => state.userType);
 
   useEffect(() => { // in order to redirect on login if user is already set and if user gets set by login flow
     if (userType) {

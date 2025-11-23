@@ -14,6 +14,8 @@ import {ResetPassword} from "./pages/auth/ResetPassword";
 import {UserType} from "./store/types";
 import { Box } from "@mui/material";
 import {Profile} from "./pages/user/Profile";
+import {UserDetails} from "./pages/admin/UserDetails";
+import {Users} from "./pages/admin/Users";
 
 const PathsWithoutHeader = [
   "login",
@@ -82,6 +84,10 @@ function App() {
             <Route path={"/teams"} element={<PrivateRoute allowedRoles={[UserType.Admin]} />} >
               <Route path={""} element={<Teams />} />
               <Route path={":teamId"} element={<TeamDetails />} />
+            </Route>
+            <Route path={"/users"} element={<PrivateRoute allowedRoles={[UserType.Admin]} />} >
+              <Route path={""} element={<Users />} />
+              <Route path={":userId"} element={<UserDetails />} />
             </Route>
             <Route path={"/profile"} element={<PrivateRoute allowedRoles={[UserType.User, UserType.Admin]} />} >
               <Route path={""} element={<Profile />} />

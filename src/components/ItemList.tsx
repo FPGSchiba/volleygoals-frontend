@@ -111,8 +111,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
     try {
       setLoading(true);
       const withLimit = { ...(f as any), limit: f.limit ?? effectiveRows } as FilterOptions;
-      const res = await fetch(withLimit);
-      return res;
+      return await fetch(withLimit);
     } catch (err) {
       console.error('ItemList fetch error', err);
     } finally {
@@ -207,8 +206,8 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                 </TextField>
               </Grid>
 
-              <Grid className="item-list-filter-field">
-                {sortableFields && sortableFields.length > 0 ? (
+              {sortableFields && sortableFields.length > 0 && (
+                <Grid className="item-list-filter-field">
                   <TextField
                     select
                     fullWidth
@@ -225,31 +224,26 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                       </MenuItem>
                     ))}
                   </TextField>
-                ) : (
-                  <TextField
-                    fullWidth
-                    label="Sort By"
-                    value={draftFilter.sortBy ?? ''}
-                    onChange={(e) => setDraftFilter({ ...(draftFilter as any), sortBy: e.target.value || undefined } as FilterOptions)}
-                  />
-                )}
-              </Grid>
+                </Grid>
+              )}
 
-              <Grid className="item-list-filter-field">
-                <TextField
-                  select
-                  fullWidth
-                  label="Sort Order"
-                  value={draftFilter.sortOrder ?? 'asc'}
-                  onChange={(e) =>
-                    setDraftFilter({ ...(draftFilter as any), sortOrder: (e.target.value as 'asc' | 'desc') } as FilterOptions)
-                  }
-                  className="item-list-textfield"
-                >
-                  <MenuItem value="asc">Ascending</MenuItem>
-                  <MenuItem value="desc">Descending</MenuItem>
-                </TextField>
-              </Grid>
+              {sortableFields && sortableFields.length > 0 && (
+                <Grid className="item-list-filter-field">
+                  <TextField
+                    select
+                    fullWidth
+                    label="Sort Order"
+                    value={draftFilter.sortOrder ?? 'asc'}
+                    onChange={(e) =>
+                      setDraftFilter({ ...(draftFilter as any), sortOrder: (e.target.value as 'asc' | 'desc') } as FilterOptions)
+                    }
+                    className="item-list-textfield"
+                  >
+                    <MenuItem value="asc">Ascending</MenuItem>
+                    <MenuItem value="desc">Descending</MenuItem>
+                  </TextField>
+                </Grid>
+              )}
 
               {/* Custom filter fields (if provided) receive the draft filter and setter) */}
               {renderFilterFields ? renderFilterFields(draftFilter, setDraftFilter) : null}
