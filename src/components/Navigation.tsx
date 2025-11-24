@@ -59,6 +59,12 @@ export function Navigation(props: NavigationProps) {
   const [visibleItems, setVisibleItems] = React.useState<NavItem[]>([]);
   const [teamMenuAnchor, setTeamMenuAnchor] = React.useState<HTMLElement | null>(null);
   const openTeamMenu = Boolean(teamMenuAnchor);
+  // Profile menu anchor for avatar dropdown
+  const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<HTMLElement | null>(null);
+  const openProfileMenu = Boolean(profileMenuAnchor);
+
+  // logout action from store
+  const logout = useCognitoUserStore(state => state.logout);
 
   const { toggleTheme, mode: themeMode } = useThemeToggle();
 
@@ -162,9 +168,25 @@ export function Navigation(props: NavigationProps) {
             )}
 
             {/* User Avatar: navigates to /profile (always visible) */}
-            <IconButton aria-label={displayName ? `Open profile for ${displayName}` : 'Open profile'} onClick={() => navigate('/profile')} size="small" className="nav-profile-button">
-              <Avatar alt={displayName ?? 'Profile'} className="nav-profile-avatar">{initials ?? <PersonIcon />}</Avatar>
-            </IconButton>
+            <>
+              <IconButton
+                aria-label={displayName ? `Open profile for ${displayName}` : 'Open profile'}
+                onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
+                size="small"
+                className="nav-profile-button"
+              >
+                <Avatar alt={displayName ?? 'Profile'} className="nav-profile-avatar">{initials ?? <PersonIcon />}</Avatar>
+              </IconButton>
+
+              <Menu
+                anchorEl={profileMenuAnchor}
+                open={openProfileMenu}
+                onClose={() => setProfileMenuAnchor(null)}
+              >
+                <MenuItem onClick={() => { setProfileMenuAnchor(null); navigate('/profile'); }}>Profile</MenuItem>
+                <MenuItem onClick={() => { setProfileMenuAnchor(null); logout(); navigate('/login'); }}>Logout</MenuItem>
+              </Menu>
+            </>
           </Box>
 
           <Box className={"nav nav-heading nav-heading-wrapper"}>

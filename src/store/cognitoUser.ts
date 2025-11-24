@@ -95,7 +95,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
       }
     },
     logout: () => {
-      set({ user: undefined, session: undefined, userType: undefined });
+      set({ user: undefined, session: undefined, userType: undefined, selectedTeam: undefined, availableTeams: [] });
       signOut();
     }
   };

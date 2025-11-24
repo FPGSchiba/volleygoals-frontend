@@ -75,7 +75,7 @@ function App() {
           >
             <Routes>
             <Route path={"/login"} element={<Login />} />
-            <Route path={"/accept-invite/:token"} element={<AcceptInvite />} />
+            <Route path={"/accept-invite"} element={<AcceptInvite />} />
             <Route path={"/reset-password"} element={<ResetPassword />} />
             <Route path={"/"} element={<PrivateRoute allowedRoles={[UserType.User]} />} >
               <Route path="" element={<Dashboard />} />
