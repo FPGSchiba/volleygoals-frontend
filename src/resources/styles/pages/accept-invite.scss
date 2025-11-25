@@ -1,0 +1,57 @@
+.accept-invite {
+  padding: 1rem;
+
+  .accept-invite-paper {
+    max-width: 560px;
+    margin: 4rem auto;
+    padding: 1.5rem;
+    background-color: var(--palette-background-paper);
+    color: var(--palette-text-primary);
+  }
+
+  .accept-invite-header {
+    margin-bottom: 0.5rem;
+
+    .accept-invite-title {
+      margin: 0 0 0.25rem 0;
+      color: var(--palette-text-primary);
+    }
+
+    .accept-invite-subtitle {
+      color: var(--palette-text-secondary);
+    }
+  }
+
+  .accept-invite-form {
+    margin-top: 1rem;
+
+    .accept-invite-input {
+      margin-bottom: 0.5rem;
+    }
+
+    .accept-invite-token {
+      color: var(--palette-text-secondary);
+      word-break: break-all;
+      margin-top: 0.5rem;
+      display: block;
+    }
+
+    .accept-invite-accept {
+      background-color: var(--palette-primary-main);
+      color: var(--palette-text-primary);
+      &:hover {
+        background-color: var(--palette-primary-main);
+        filter: brightness(0.95);
+      }
+    }
+
+    .accept-invite-decline {
+      border-color: var(--palette-error-main);
+      color: var(--palette-error-main);
+      &:hover {
+        background-color: rgba(204, 30, 58, 0.04);
+      }
+    }
+  }
+}
+

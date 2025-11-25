@@ -2,7 +2,7 @@
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
 import {ITeamFilterOption, IUserFilterOption} from "./types";
-import {ITeam, ITeamMember, ITeamSettings, IUser} from "../store/types";
+import {IInvite, ITeam, ITeamMember, ITeamSettings, IUser} from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
 class VolleyGoalsAPI {
@@ -55,7 +55,7 @@ class VolleyGoalsAPI {
   }
 
   // Modified to ensure endpoints are fresh
-  private async ensureEndpoints(): Promise<void> {
+  private async ensureEndpoints(needsToken: boolean = true): Promise<void> {
     const maxWaitMs = 10000;
     const intervalMs = 100;
     const deadline = Date.now() + maxWaitMs;
@@ -68,21 +68,23 @@ class VolleyGoalsAPI {
       await new Promise(resolve => setTimeout(resolve, intervalMs));
     }
 
-    // If token is not yet set, wait until it appears (or until deadline)
-    while (!this.token && Date.now() < deadline) {
-      // eslint-disable-next-line no-await-in-loop
-      await new Promise(resolve => setTimeout(resolve, intervalMs));
-    }
+    if (needsToken) {
+      // If token is not yet set, wait until it appears (or until deadline)
+      while (!this.token && Date.now() < deadline) {
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise(resolve => setTimeout(resolve, intervalMs));
+      }
 
-    // If token still isn't set after waiting, cancel by throwing an error
-    if (!this.token && this.token === '') {
-      console.warn("Token not set within deadline - cancelling request");
-      throw new Error('error.tokenTimeout');
-    }
+      // If token still isn't set after waiting, cancel by throwing an error
+      if (!this.token && this.token === '') {
+        console.warn("Token not set within deadline - cancelling request");
+        throw new Error('error.tokenTimeout');
+      }
 
-    // If token became available, ensure endpoints carry the header
-    if (this.token && VolleyGoalsAPI.endpoint) {
-      VolleyGoalsAPI.endpoint.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+      // If token became available, ensure endpoints carry the header
+      if (this.token && VolleyGoalsAPI.endpoint) {
+        VolleyGoalsAPI.endpoint.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
+      }
     }
 
     // Final attempt to initialize endpoints if still missing
@@ -216,6 +218,19 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/users/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async completeInvite(token: string, email: string, accepted: boolean): Promise<{ message: string, error?: string, member?: ITeamMember, invite?: IInvite, userCreated?: boolean, temporaryPassword?: string}> {
+    try {
+      await this.ensureEndpoints(false);
+      const response = await VolleyGoalsAPI.endpoint.post('/invites/complete', { token, email, accepted });
       return response.data;
     } catch (reason: any) {
       return {

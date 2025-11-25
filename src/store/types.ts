@@ -81,3 +81,20 @@ export interface ITeamMember {
   joinedAt?: string;
   leftAt?: string;
 }
+
+// Invites
+export interface IInvite {
+  id: string;
+  teamId: string;
+  email: string;
+  role: RoleType;
+  token: string;
+  message?: string;
+  invitedBy: string;
+  acceptedBy?: string;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+  acceptedAt?: string;
+  declinedAt?: string;
+}

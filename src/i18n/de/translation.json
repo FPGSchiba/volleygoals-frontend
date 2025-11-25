@@ -245,6 +245,24 @@
           "message": "Kein Konto für diese E-Mail gefunden."
         }
       }
+    },
+    "invite": {
+      "exists": {
+        "title": "[DE] Invite Already Exists",
+        "message": "[DE] An invite for this email already exists."
+      },
+      "invalidToken": {
+        "title": "[DE] Invalid Invite Token",
+        "message": "[DE] The invite token is invalid or has already been used."
+      },
+      "expired": {
+        "title": "[DE] Invite Expired",
+        "message": "[DE] The invite token has expired. Please request a new invite."
+      },
+      "alreadyCompleted": {
+        "title": "[DE] Invite Already Completed",
+        "message": "[DE] This invite has already been completed."
+      }
     }
   },
   "success": {
@@ -261,6 +279,69 @@
         "title": "Team Deleted",
         "message": "The team has been deleted successfully."
       }
+    }
+  },
+  "invitePage": {
+    "accept": {
+      "title": "Einladung",
+      "subtitle": "Sie haben einen Einladungslink per E-Mail erhalten. Bitte geben Sie die E-Mail-Adresse ein, an die diese Einladung gesendet wurde, und wählen Sie, ob Sie die Einladung annehmen oder ablehnen möchten.",
+      "email": {
+        "label": "E-Mail",
+        "required": "E-Mail ist erforderlich",
+        "invalid": "Geben Sie eine gültige E-Mail-Adresse ein"
+      },
+      "tokenLabel": "Token: {{token}}",
+      "button": {
+        "accept": "Annehmen",
+        "decline": "Ablehnen"
+      }
+    },
+    "complete": {
+      "title": "Einladung abgeschlossen",
+      "subtitle": "Danke — die Einladung wurde erfolgreich abgeschlossen."
+    },
+    "error": {
+      "no_token": {
+        "title": "Kein Token vorhanden",
+        "message": "Es wurde kein Einladungstoken in der URL gefunden.",
+        "explain": "Es sieht so aus, als fehle dem Einladungslink ein Token. Bitte überprüfen Sie den Link in Ihrer E-Mail oder kontaktieren Sie den Absender, um die Einladung erneut zu senden."
+      },
+      "invalid_token": {
+        "title": "Ungültiges Token",
+        "message": "Das Einladungstoken ist ungültig oder wurde bereits verwendet.",
+        "explain": "Das Token im Link stimmt mit keiner ausstehenden Einladung überein. Dies kann passieren, wenn der Link geändert wurde oder die Einladung bereits abgeschlossen wurde. Bitten Sie den Absender, eine neue Einladung auszustellen."
+      },
+      "expired_token": {
+        "title": "Einladung abgelaufen",
+        "message": "Das Einladungstoken ist abgelaufen. Bitte fordern Sie eine neue Einladung an.",
+        "explain": "Einladungen sind aus Sicherheitsgründen zeitlich begrenzt. Bitten Sie den Team-Admin, eine neue Einladung zu senden oder fordern Sie die Einladung erneut über die Anwendung an."
+      },
+      "already_completed": {
+        "title": "Einladung bereits abgeschlossen",
+        "message": "Diese Einladung wurde bereits abgeschlossen.",
+        "explain": "Diese Einladung wurde bereits angenommen oder abgelehnt. Wenn Sie glauben, dass dies ein Fehler ist, wenden Sie sich an den Absender oder Ihren Team-Administrator."
+      },
+      "unknown_error": {
+        "title": "Unbekannter Fehler",
+        "message": "Beim Verarbeiten der Einladung ist ein unbekannter Fehler aufgetreten.",
+        "explain": "Beim Verarbeiten der Einladung ist ein unerwarteter Fehler aufgetreten. Versuchen Sie es später erneut oder kontaktieren Sie den Support, wenn das Problem weiterhin besteht."
+      },
+      "actions": {
+        "home": "Zur Startseite",
+        "contact": "Support kontaktieren",
+        "requestNew": "Neue Einladung anfordern"
+      }
+    }
+  },
+  "notFoundPage": {
+    "title": "Seite nicht gefunden",
+    "subtitle": "Wir konnten die angeforderte Seite nicht finden.",
+    "explain": "Die Seite, die Sie aufrufen möchten, wurde möglicherweise verschoben oder gelöscht. Überprüfen Sie die Adresse und versuchen Sie es erneut.",
+    "actions": {
+      "dashboard": "Zum Dashboard",
+      "teams": "Zu Teams",
+      "login": "Anmelden",
+      "home": "Zur Startseite"
     }
   }
 }

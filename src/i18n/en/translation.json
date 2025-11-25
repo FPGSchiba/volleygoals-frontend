@@ -245,6 +245,24 @@
           "message": "No account found for that email."
         }
       }
+    },
+    "invite": {
+      "exists": {
+        "title": "Invite Already Exists",
+        "message": "An invite for this email already exists."
+      },
+      "invalidToken": {
+        "title": "Invalid Invite Token",
+        "message": "The invite token is invalid or has already been used."
+      },
+      "expired": {
+        "title": "Invite Expired",
+        "message": "The invite token has expired. Please request a new invite."
+      },
+      "alreadyCompleted": {
+        "title": "Invite Already Completed",
+        "message": "This invite has already been completed."
+      }
     }
   },
   "success": {
@@ -261,6 +279,69 @@
         "title": "Team Deleted",
         "message": "The team has been deleted successfully."
       }
+    }
+  },
+  "invitePage": {
+    "accept": {
+      "title": "Invitation",
+      "subtitle": "You received an invitation link by email. Please enter the email address this invite was sent to and choose to accept or decline the invitation.",
+      "email": {
+        "label": "Email",
+        "required": "Email is required",
+        "invalid": "Enter a valid email"
+      },
+      "tokenLabel": "Token: {{token}}",
+      "button": {
+        "accept": "Accept",
+        "decline": "Decline"
+      }
+    },
+    "complete": {
+      "title": "Invite Completed",
+      "subtitle": "Thank you — the invite has been completed successfully."
+    },
+    "error": {
+      "no_token": {
+        "title": "No Token Provided",
+        "message": "No invite token was found in the URL.",
+        "explain": "It looks like the invitation link is missing a token. Please check the link in your email or contact the sender to resend the invite."
+      },
+      "invalid_token": {
+        "title": "Invalid Token",
+        "message": "The invite token is invalid or has already been used.",
+        "explain": "The token in the link doesn't match any pending invitation. This can happen if the link was modified or the invite was already completed. Ask the sender to issue a new invite."
+      },
+      "expired_token": {
+        "title": "Invite Expired",
+        "message": "The invite token has expired. Please request a new invite.",
+        "explain": "Invitations are time-limited for security. Ask the team admin to send a new invite or request one again from the application."
+      },
+      "already_completed": {
+        "title": "Invite Already Completed",
+        "message": "This invite has already been completed.",
+        "explain": "This invitation was already accepted or declined. If you believe this is a mistake, contact the sender or your team administrator for assistance."
+      },
+      "unknown_error": {
+        "title": "Unknown Error",
+        "message": "An unknown error occurred while processing the invite.",
+        "explain": "An unexpected error occurred while processing the invitation. Try again later or contact support if the problem persists."
+      },
+      "actions": {
+        "home": "Go to Home",
+        "contact": "Contact Support",
+        "requestNew": "Request a new invite"
+      }
+    }
+  },
+  "notFoundPage": {
+    "title": "Page not found",
+    "subtitle": "We couldn't find the page you were looking for.",
+    "explain": "The page you're trying to reach may have been moved or deleted. If you typed the URL directly, please check it and try again.",
+    "actions": {
+      "dashboard": "Go to Dashboard",
+      "teams": "Go to Teams",
+      "login": "Sign In",
+      "home": "Go to Home"
     }
   }
 }

@@ -1,5 +1,5 @@
-import React, {useEffect} from 'react';
-import {BrowserRouter, Route, Routes, useLocation, useNavigate} from "react-router-dom";
+import React from 'react';
+import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Login from "./pages/auth/Login";
 import {AcceptInvite} from "./pages/auth/AcceptInvite";
 import {PrivateRoute} from "./components/PrivateRoute";
@@ -16,11 +16,26 @@ import { Box } from "@mui/material";
 import {Profile} from "./pages/user/Profile";
 import {UserDetails} from "./pages/admin/UserDetails";
 import {Users} from "./pages/admin/Users";
+import {CompleteInvite} from "./pages/auth/CompleteInvite";
+import {InviteError} from "./pages/help/InviteError";
+import {useCognitoUserStore} from './store/cognitoUser';
 
 const PathsWithoutHeader = [
   "login",
   "accept-invite",
+  "complete-invite",
+  "invite-error",
   "reset-password",
+];
+
+// Whitelist of top-level segments where the main navigation should be visible
+const HeaderVisibleSegments = [
+  '', // root/dashboard
+  'dashboard',
+  'teams',
+  'users',
+  'profile',
+  'no-access'
 ];
 
 function App() {
@@ -30,7 +45,24 @@ function App() {
   // derive path from window.location (avoid useLocation outside Router) and watch history changes
   React.useEffect(() => {
     const getPathSegment = () => (window.location.pathname.split("/")[1] || '');
-    const updateHidden = () => setHidden(PathsWithoutHeader.includes(getPathSegment()));
+
+    const shouldHide = () => {
+      const segment = getPathSegment();
+      const { user, session } = useCognitoUserStore.getState();
+      const noAuth = !user && !session;
+
+      // If user is not authenticated, hide navigation
+      if (noAuth) return true;
+
+      // If the segment is explicitly in the without-header list, hide it
+      if (PathsWithoutHeader.includes(segment)) return true;
+
+      // Only show navigation when the segment is one of the known app segments
+      const showForSegment = HeaderVisibleSegments.includes(segment);
+      return !showForSegment;
+    }
+
+    const updateHidden = () => setHidden(shouldHide());
 
     updateHidden();
 
@@ -45,11 +77,15 @@ function App() {
     const onLocationChange = () => updateHidden();
     window.addEventListener('locationchange', onLocationChange);
 
+    // subscribe to auth store so that when user/session changes we re-evaluate visibility
+    const unsub = useCognitoUserStore.subscribe(() => updateHidden());
+
     return () => {
       window.removeEventListener('popstate', onPop);
       window.removeEventListener('locationchange', onLocationChange);
       (history as any).pushState = origPush;
       (history as any).replaceState = origReplace;
+      unsub();
     };
   }, []);
 
@@ -76,6 +112,7 @@ function App() {
             <Routes>
             <Route path={"/login"} element={<Login />} />
             <Route path={"/accept-invite"} element={<AcceptInvite />} />
+            <Route path={"/complete-invite"} element={<CompleteInvite />} />
             <Route path={"/reset-password"} element={<ResetPassword />} />
             <Route path={"/"} element={<PrivateRoute allowedRoles={[UserType.User]} />} >
               <Route path="" element={<Dashboard />} />
@@ -92,6 +129,7 @@ function App() {
             <Route path={"/profile"} element={<PrivateRoute allowedRoles={[UserType.User, UserType.Admin]} />} >
               <Route path={""} element={<Profile />} />
             </Route>
+            <Route path={"/invite-error"} element={<InviteError />} />
             <Route path={"/no-access"} element={<NoAccess />} />
             <Route path={"/*"} element={<NotFound />} />
           </Routes>

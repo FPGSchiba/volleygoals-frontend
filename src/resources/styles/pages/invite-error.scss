@@ -1,0 +1,18 @@
+.invite-error-page {
+  padding: 1rem;
+
+  .invite-error-paper {
+    max-width: 720px;
+    margin: 3rem auto;
+    padding: 1.5rem;
+    background: var(--palette-background-paper);
+    color: var(--palette-text-primary);
+  }
+
+  .invite-error-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.5rem;
+  }
+}
+
