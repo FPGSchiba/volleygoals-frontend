@@ -16,6 +16,7 @@ type InvitesState = {
 
 type InvitesActions = {
   completeInvite: (token: string, email: string, accepted: boolean) => Promise<{success: boolean, error?: InviteErrorType}>
+  getInvite: (token: string) => Promise<void>
 }
 
 const useInvitesStore = create<InvitesState & InvitesActions>((set) => ({
@@ -51,6 +52,25 @@ const useInvitesStore = create<InvitesState & InvitesActions>((set) => ({
         default:
           return {success: false, error: InviteErrorType.UnknownError};
       }
+    }
+  },
+  getInvite: async (token: string) => {
+    const response = await VolleyGoalsAPI.getInvite(token);
+    if (response?.invite != null) {
+      set({
+        currentInvite: {
+          invite: response.invite as IInvite,
+          member: {} as ITeamMember,
+          userCreated: false
+        }
+      });
+    } else {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while retrieving the invite."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
     }
   }
 }))

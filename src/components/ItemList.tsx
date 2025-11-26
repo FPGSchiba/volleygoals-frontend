@@ -299,29 +299,45 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
 
                   return (
                     <TableRow key={id} className="item-list-row">
-                      {Array.isArray(rendered) ? rendered : <TableCell>{rendered}</TableCell>}
-                      {(renderActions || onEdit || onDelete) && (
-                        <TableCell align="right">
-                          {renderActions ? (
-                            renderActions(item)
-                          ) : (
-                            <>
-                              {onEdit && (
-                                <Button style={{ marginRight: '5px' }} variant="contained" size="small" onClick={() => handleEdit(item)} className="item-list-action-button item-list-action-edit">
-                                  Edit
-                                </Button>
-                              )}
-                              {onDelete && (
-                                <Button variant="contained" size="small" onClick={() => handleDelete(id)} className="item-list-action-button item-list-action-delete">
-                                  Delete
-                                </Button>
-                              )}
-                            </>
-                          )}
-                        </TableCell>
+                      {Array.isArray(rendered) ? (
+                        rendered.map((cell, idx) => {
+                          // Robust detection for existing TableCell: check MUI's muiName or component prop
+                          if (
+                            React.isValidElement(cell) && (
+                              ((cell.type as any)?.muiName === 'TableCell') ||
+                              cell.type === TableCell ||
+                              (cell as any).props?.component === 'td'
+                            )
+                          ) {
+                            return React.cloneElement(cell as React.ReactElement, { key: idx } as any);
+                          }
+                          return <TableCell key={idx}>{cell}</TableCell>;
+                        })
+                      ) : (
+                        <TableCell>{rendered}</TableCell>
                       )}
-                     </TableRow>
-                   );
+                       {(renderActions || onEdit || onDelete) && (
+                         <TableCell align="right">
+                           {renderActions ? (
+                             renderActions(item)
+                           ) : (
+                             <>
+                               {onEdit && (
+                                 <Button style={{ marginRight: '5px' }} variant="contained" size="small" onClick={() => handleEdit(item)} className="item-list-action-button item-list-action-edit">
+                                   Edit
+                                 </Button>
+                               )}
+                               {onDelete && (
+                                 <Button variant="contained" size="small" onClick={() => handleDelete(id)} className="item-list-action-button item-list-action-delete">
+                                   Delete
+                                 </Button>
+                               )}
+                             </>
+                           )}
+                         </TableCell>
+                       )}
+                      </TableRow>
+                    );
                  })
                )}
             </TableBody>

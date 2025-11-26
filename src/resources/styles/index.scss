@@ -18,6 +18,7 @@ body {
   @include meta.load-css("pages/accept-invite");
   @include meta.load-css("pages/invite-error");
   @include meta.load-css("pages/not-found");
+  @include meta.load-css("pages/complete-invite");
 
   .app {
     &.app-container {

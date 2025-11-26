@@ -262,6 +262,10 @@
       "alreadyCompleted": {
         "title": "[DE] Invite Already Completed",
         "message": "[DE] This invite has already been completed."
+      },
+      "userAlreadyMember": {
+        "title": "[DE] User Already a Member",
+        "message": "[DE] The user is already a member of the team."
       }
     }
   },
@@ -297,6 +301,26 @@
       }
     },
     "complete": {
+      "loading": "Lade Einladung...",
+      "details": {
+        "emailLabel": "E-Mail",
+        "roleLabel": "Rolle",
+        "invitedByLabel": "Eingeladen von",
+        "messageLabel": "Nachricht",
+        "expiresAtLabel": "Ablaufdatum",
+        "statusLabel": "Status",
+        "statusUnknown": "Unbekannt",
+        "temporaryPasswordLabel": "Temporäres Passwort"
+      },
+      "memberCreatedTitle": "Konto erstellt",
+      "memberCreatedMessage": "Ein Konto wurde für Sie erstellt. Verwenden Sie das temporäre Passwort, um sich anzumelden und ein neues Passwort festzulegen.",
+      "copy": "Kopieren",
+      "copied": "Kopiert!",
+      "actions": {
+        "login": "Anmelden",
+        "continue": "Weiter",
+        "home": "Zur Startseite"
+      },
       "title": "Einladung abgeschlossen",
       "subtitle": "Danke — die Einladung wurde erfolgreich abgeschlossen."
     },
@@ -332,6 +356,78 @@
         "requestNew": "Neue Einladung anfordern"
       }
     }
+  },
+  "admin": {
+    "userDetails": {
+      "title": "Benutzerdetails",
+      "couldNotLoad": "Benutzer konnte nicht geladen werden."
+    },
+    "team": {
+      "invites": {
+        "title": "Einladungen",
+        "create": "Einladung erstellen"
+      },
+      "members": {
+        "tabs": {
+          "members": "Mitglieder",
+          "invites": "Einladungen"
+        }
+      }
+    },
+    "user": {
+      "email": "E-Mail",
+      "created": "Erstellt",
+      "updated": "Aktualisiert",
+      "status": "Status",
+      "type": "Typ"
+    },
+    "memberships": {
+      "title": "Mitgliedschaften",
+      "subtitle": "Verwalten Sie Mitgliedschaften für diesen Benutzer.",
+      "columns": {
+        "team": "Team",
+        "role": "Rolle",
+        "status": "Status",
+        "joined": "Beigetreten",
+        "updated": "Aktualisiert"
+      }
+    },
+    "teams": {
+      "prompt": { "newName": "Neuer Teamname" },
+      "filter": { "name": "Name", "status": "Status", "any": "Beliebig" },
+      "columns": { "name": "Name", "status": "Status", "created": "Erstellt", "updated": "Aktualisiert" }
+    },
+    "teamDetails": { "title": "Teamdetails" },
+    "team": {
+      "created": "Erstellt:",
+      "updated": "Aktualisiert:",
+      "status": "Status:",
+      "editName": "Teamnamen bearbeiten",
+      "editStatus": "Status bearbeiten",
+      "settings": {
+        "title": "Team Einstellungen",
+        "allowFileUploads": "Datei-Uploads erlauben",
+        "allowTeamGoalComments": "Kommentare zu Teamzielen erlauben",
+        "allowIndividualGoalComments": "Kommentare zu Einzelzielen erlauben",
+        "noSettings": "Keine Einstellungen für dieses Team vorhanden."
+      },
+      "members": {
+        "title": "Teammitglieder",
+        "subtitle": "Mitgliederliste wird hier angezeigt. (Platzhalter)",
+        "placeholder": "Teammitglieder werden hier angezeigt, sobald implementiert."
+      },
+      "save": "Änderungen speichern"
+    },
+    "actions": {
+      "goToUsers": "Zu Benutzern",
+      "deactivate": "Deaktivieren",
+      "delete": "Löschen"
+    }
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "active": "aktiv",
+    "inactive": "inaktiv"
   },
   "notFoundPage": {
     "title": "Seite nicht gefunden",

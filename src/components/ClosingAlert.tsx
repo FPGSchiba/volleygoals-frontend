@@ -14,7 +14,7 @@ export function ClosingAlert(props: Readonly<{ notification: Notification }>) {
   useEffect(() => {
     setTimeout(() => {
       closeNotification(notification.id);
-    }, 8000);
+    }, notification.details !== undefined ? 20000 : 8000);
   }, []);
 
   return (

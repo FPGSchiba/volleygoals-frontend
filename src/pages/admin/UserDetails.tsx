@@ -4,9 +4,10 @@ import { useParams, Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useUsersStore } from '../../store/users';
 import { useLoading } from '../../hooks/useLoading';
 import { ItemList, FetchResult } from '../../components/ItemList';
+import i18next from 'i18next';
 
 // MUI
-import { Box, Typography, Card, CardContent, Paper, Chip, Avatar, Button, IconButton } from '@mui/material';
+import { Box, Typography, Card, CardContent, Paper, Chip, Avatar, Button, IconButton, TableCell, Link } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { ITeamMember, TeamMemberStatus } from '../../store/types';
 import { IFilterOption } from '../../services/types';
@@ -51,12 +52,30 @@ export function UserDetails() {
   };
 
   const renderMembershipRow = (m: ITeamMember) => {
+    const idKey = m.id || m.teamId || Math.random().toString(36).slice(2, 9);
+    const roleColor = (() => {
+      switch (m.role) {
+        case 'admin':
+          return 'primary';
+        case 'trainer':
+          return 'secondary';
+        default:
+          return 'default';
+      }
+    })();
+
     return [
-      <React.Fragment key="teamId"><Box component="span">{m.teamId}</Box></React.Fragment>,
-      <React.Fragment key="role"><Box component="span">{m.role}</Box></React.Fragment>,
-      <React.Fragment key="status"><Chip label={m.status} color={m.status === TeamMemberStatus.Active ? 'success' : 'default'} size="small" /></React.Fragment>,
-      <React.Fragment key="joined">{m.joinedAt ? new Date(m.joinedAt).toLocaleString('de-CH') : '-'}</React.Fragment>,
-      <React.Fragment key="updated">{m.updatedAt ? new Date(m.updatedAt).toLocaleString('de-CH') : '-'}</React.Fragment>,
+      <TableCell key={`${idKey}-team`} component="td">
+        <Link component={RouterLink} to={`/teams/${m.teamId}`}>{m.teamId}</Link>
+      </TableCell>,
+      <TableCell key={`${idKey}-role`} component="td">
+        <Chip label={m.role} color={roleColor as any} size="small" />
+      </TableCell>,
+      <TableCell key={`${idKey}-status`} component="td">
+        <Chip label={m.status} color={m.status === TeamMemberStatus.Active ? 'success' : 'default'} size="small" />
+      </TableCell>,
+      <TableCell key={`${idKey}-joined`} component="td">{m.joinedAt ? new Date(m.joinedAt).toLocaleString('de-CH') : '-'}</TableCell>,
+      <TableCell key={`${idKey}-updated`} component="td">{m.updatedAt ? new Date(m.updatedAt).toLocaleString('de-CH') : '-'}</TableCell>,
     ];
   };
 
@@ -74,9 +93,9 @@ export function UserDetails() {
       {!loading && !currentUser && (
         <Card>
           <CardContent>
-            <Typography variant="h6">Could not load user.</Typography>
+            <Typography variant="h6">{i18next.t('admin.userDetails.couldNotLoad', 'Could not load user.')}</Typography>
             <Box mt={2}>
-              <Button variant="outlined" onClick={() => navigate('/users')}>Go to Users</Button>
+              <Button variant="outlined" onClick={() => navigate('/users')}>{i18next.t('admin.actions.goToUsers', 'Go to Users')}</Button>
             </Box>
           </CardContent>
         </Card>
@@ -90,7 +109,7 @@ export function UserDetails() {
                 <IconButton size="small" component={RouterLink} to="/users">
                   <ArrowBackIcon />
                 </IconButton>
-                <Typography variant="h5">User Details</Typography>
+                <Typography variant="h5">{i18next.t('admin.userDetails.title', 'User Details')}</Typography>
               </Box>
             </Box>
 
@@ -105,27 +124,27 @@ export function UserDetails() {
               <Box flex={1}>
                 <Box display="flex" gap={2} mb={1}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Email</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.email', 'Email')}</Typography>
                     <Typography>{currentUser.email}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Created</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.created', 'Created')}</Typography>
                     <Typography>{currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleString('de-CH') : '-'}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Updated</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.updated', 'Updated')}</Typography>
                     <Typography>{currentUser.updatedAt ? new Date(currentUser.updatedAt).toLocaleString('de-CH') : '-'}</Typography>
                   </Box>
                 </Box>
 
                 <Box display="flex" gap={2} alignItems="center">
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Status</Typography>
-                    <Box mt={0.5}><Chip label={currentUser.enabled ? 'active' : 'inactive'} color={currentUser.enabled ? 'success' : 'default'} /></Box>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.status', 'Status')}</Typography>
+                    <Box mt={0.5}><Chip label={currentUser.enabled ? i18next.t('common.active','active') : i18next.t('common.inactive','inactive')} color={currentUser.enabled ? 'success' : 'default'} /></Box>
                   </Box>
 
                   <Box>
-                    <Typography variant="body2" color="text.secondary">Type</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.type', 'Type')}</Typography>
                     <Box mt={0.5}><Chip label={currentUser.userType} color={currentUser.userType === 'ADMINS' ? 'primary' : 'default'} /></Box>
                   </Box>
                 </Box>
@@ -134,12 +153,12 @@ export function UserDetails() {
           </Paper>
 
           <Paper elevation={1} sx={{ p: 2 }}>
-            <Typography variant="h6">Memberships</Typography>
-            <Typography color="text.secondary" mb={1}>Manage memberships for this user.</Typography>
+            <Typography variant="h6">{i18next.t('admin.memberships.title', 'Memberships')}</Typography>
+            <Typography color="text.secondary" mb={1}>{i18next.t('admin.memberships.subtitle', 'Manage memberships for this user.')}</Typography>
 
             <ItemList<ITeamMember, IFilterOption>
-              title="Memberships"
-              columns={["Team","Role","Status","Joined","Updated"]}
+              title={i18next.t('admin.memberships.title','Memberships')}
+              columns={[i18next.t('admin.memberships.columns.team','Team'),i18next.t('admin.memberships.columns.role','Role'),i18next.t('admin.memberships.columns.status','Status'),i18next.t('admin.memberships.columns.joined','Joined'),i18next.t('admin.memberships.columns.updated','Updated')]}
               initialFilter={{} as IFilterOption}
               rowsPerPage={10}
               fetch={fetchMemberships}

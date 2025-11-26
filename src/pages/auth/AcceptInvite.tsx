@@ -63,7 +63,7 @@ export function AcceptInvite() {
       setLoading(true);
       const result = await completeInvite(token, email, accepted);
       if (result.success) {
-        navigate('/complete-invite');
+        navigate(`/complete-invite?token=${token}`);
       } else {
         navigate(`/invite-error?type=${result?.error}`);
       }

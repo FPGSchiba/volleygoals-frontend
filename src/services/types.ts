@@ -10,6 +10,13 @@ export interface ITeamFilterOption extends IFilterOption {
   status?: string,
 }
 
+export interface ITeamInviteFilterOption extends IFilterOption {
+  email?: string,
+  status?: string,
+  role?: string,
+  invitedBy?: string,
+}
+
 export interface IUserFilterOption {
   limit?: number,
   nextToken?: string,

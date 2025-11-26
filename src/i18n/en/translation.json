@@ -262,6 +262,10 @@
       "alreadyCompleted": {
         "title": "Invite Already Completed",
         "message": "This invite has already been completed."
+      },
+      "userAlreadyMember": {
+        "title": "User Already a Member",
+        "message": "The user is already a member of the team."
       }
     }
   },
@@ -297,6 +301,26 @@
       }
     },
     "complete": {
+      "loading": "Loading invite...",
+      "details": {
+        "emailLabel": "Email",
+        "roleLabel": "Role",
+        "invitedByLabel": "Invited By",
+        "messageLabel": "Message",
+        "expiresAtLabel": "Expires At",
+        "statusLabel": "Status",
+        "statusUnknown": "Unknown",
+        "temporaryPasswordLabel": "Temporary Password"
+      },
+      "memberCreatedTitle": "Account created",
+      "memberCreatedMessage": "An account was created for you. Use the temporary password to sign in and set a new password.",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "actions": {
+        "login": "Sign In",
+        "continue": "Continue",
+        "home": "Go to Home"
+      },
       "title": "Invite Completed",
       "subtitle": "Thank you — the invite has been completed successfully."
     },
@@ -332,6 +356,74 @@
         "requestNew": "Request a new invite"
       }
     }
+  },
+  "admin": {
+    "userDetails": {
+      "title": "User Details",
+      "couldNotLoad": "Could not load user."
+    },
+    "user": {
+      "email": "Email",
+      "created": "Created",
+      "updated": "Updated",
+      "status": "Status",
+      "type": "Type"
+    },
+    "memberships": {
+      "title": "Memberships",
+      "subtitle": "Manage memberships for this user.",
+      "columns": {
+        "team": "Team",
+        "role": "Role",
+        "status": "Status",
+        "joined": "Joined",
+        "updated": "Updated"
+      }
+    },
+    "teams": {
+      "prompt": { "newName": "New team name" },
+      "filter": { "name": "Name", "status": "Status", "any": "Any" },
+      "columns": { "name": "Name", "status": "Status", "created": "Created", "updated": "Updated" }
+    },
+    "teamDetails": { "title": "Team Details" },
+    "team": {
+      "invites": { "title": "Invites", "create": "Create Invite" },
+      "members": { "tabs": { "members": "Members", "invites": "Invites" } },
+      "created": "Created:",
+      "updated": "Updated:",
+      "status": "Status:",
+      "editName": "Edit team name",
+      "editStatus": "Edit status",
+      "settings": {
+        "title": "Team Settings",
+        "allowFileUploads": "Allow file uploads",
+        "allowTeamGoalComments": "Allow team goal comments",
+        "allowIndividualGoalComments": "Allow individual goal comments",
+        "noSettings": "No settings available for this team."
+      },
+      "members": {
+        "title": "Team Members",
+        "subtitle": "Members list will appear here. (Placeholder)",
+        "placeholder": "Team members will be shown here once implemented."
+      },
+      "save": "Save changes"
+    },
+    "actions": {
+      "goToUsers": "Go to Users",
+      "deactivate": "Deactivate",
+      "delete": "Delete"
+    }
+  },
+  "admin.invites": {
+    "columns": {
+      "created": "Created",
+      "expires": "Expires"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "active": "active",
+    "inactive": "inactive"
   },
   "notFoundPage": {
     "title": "Page not found",

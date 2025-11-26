@@ -29,3 +29,15 @@ It correctly bundles React in production mode and optimizes the build for the be
 The production build is served at: [https://volleygoals.schiba-apps.net](volleygoals.schiba-apps.net)
 
 The development build is served at: [https://volleygoals-test.schiba-apps.net](volleygoals-test.schiba-apps.net)
+
+
+## Prompts
+
+### Frontend Development
+
+1. Only use MaterialUI as components
+2. Use class names and scss to style the page (Do not forget to register the new scss page in `index.scss`)
+3. Please always use i18next to translate all Labels (translations are in `i18n/{lang}/translation.json`)
+4. If a Form is needed use react-hook-form
+5. Use axios to call the backend
+6. Use zustand to manage the state

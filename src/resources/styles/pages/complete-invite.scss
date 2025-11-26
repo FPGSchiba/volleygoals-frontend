@@ -1,0 +1,60 @@
+@use "sass:meta";
+
+.complete-invite {
+  .complete-invite-paper {
+    padding: 2rem;
+  }
+
+  .complete-invite-header {
+    .complete-invite-title {
+      color: var(--palette-text-primary);
+    }
+    .complete-invite-subtitle {
+      color: var(--palette-text-secondary);
+    }
+  }
+
+  .complete-invite-details {
+    margin-top: 1rem;
+
+    .detail-label {
+      color: var(--palette-text-secondary);
+      margin-top: 0.75rem;
+    }
+
+    .detail-value {
+      color: var(--palette-text-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .created-title {
+      margin-top: 0.5rem;
+      color: var(--palette-primary-main);
+    }
+
+    .created-note {
+      color: var(--palette-text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .temporary-password-row {
+      margin-top: 0.5rem;
+
+      .temporary-password {
+        background-color: var(--palette-background-paper);
+        padding: 0.4rem 0.6rem;
+        border-radius: 4px;
+        color: var(--palette-text-primary);
+        border: 1px solid var(--palette-divider);
+      }
+
+      .temporary-password-copy {
+        color: var(--palette-text-secondary);
+      }
+    }
+  }
+
+  .complete-invite-actions {
+    margin-top: 1.25rem;
+  }
+}

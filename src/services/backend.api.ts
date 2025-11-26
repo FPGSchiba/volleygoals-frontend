@@ -1,12 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
-import {ITeamFilterOption, IUserFilterOption} from "./types";
+import {ITeamFilterOption, ITeamInviteFilterOption, IUserFilterOption} from "./types";
 import {IInvite, ITeam, ITeamMember, ITeamSettings, IUser} from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
 class VolleyGoalsAPI {
   protected static endpoint: AxiosInstance;
+  private static inflight = new Map<string, Promise<any>>();
+  private static cache = new Map<string, { value: any; expiresAt?: number }>();
   private token: string | undefined;
   private static instance: VolleyGoalsAPI;
 
@@ -237,6 +239,132 @@ class VolleyGoalsAPI {
         message: reason.response?.data?.message || 'error.internalServerError',
         error: reason.response?.data?.error,
       }
+    }
+  }
+
+  public async getInvite(token: string): Promise<{ message: string, error?: string, invite?: IInvite}> {
+    try {
+      await this.ensureEndpoints(false);
+      const response = await VolleyGoalsAPI.endpoint.get(`/invites/${token}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  private static serializeParams(params: any): string {
+    if (!params) return '';
+    // stable serialization: sort keys
+    const build = (obj: any): any => {
+      if (obj === null || obj === undefined) return obj;
+      if (Array.isArray(obj)) return obj.map(build);
+      if (typeof obj === 'object') {
+        return Object.keys(obj).sort().reduce((acc: any, key) => {
+          acc[key] = build(obj[key]);
+          return acc;
+        }, {} as any);
+      }
+      return obj;
+    };
+    try {
+      return JSON.stringify(build(params));
+    } catch (e) {
+      return String(params);
+    }
+  }
+
+  private static makeKey(method: string, path: string, params?: any) {
+    const p = this.serializeParams(params);
+    return `${method.toUpperCase()}|${path}|${p}`;
+  }
+
+  private async requestDeduped<T>(method: 'GET'|'POST'|'PATCH'|'DELETE'|'PUT', path: string, axiosFn: () => Promise<any>, params?: any, ttlMs: number = 1000): Promise<T> {
+    // Only dedupe GET requests; other methods bypass
+    // For GET requests normalize params for the dedupe key so undefined vs defaulted params are equivalent
+    let keyParams = params;
+    if (method === 'GET') {
+      keyParams = { ...(params || {}), limit: params?.limit ?? 10, sortOrder: params?.sortOrder ?? 'asc', sortBy: params?.sortBy };
+    }
+    const key = VolleyGoalsAPI.makeKey(method, path, keyParams);
+
+    // check cache
+    const cached = VolleyGoalsAPI.cache.get(key);
+    if (cached && cached.expiresAt && cached.expiresAt > Date.now()) {
+      return cached.value as T;
+    }
+
+    // only dedupe GET
+    if (method !== 'GET') {
+      const resp = await axiosFn();
+      return resp.data as T;
+    }
+
+    const inflight = VolleyGoalsAPI.inflight.get(key);
+    if (inflight) return inflight as Promise<T>;
+
+    const p = (async () => {
+      try {
+        try {
+          const resp = await axiosFn();
+          const data = resp.data as T;
+          if (ttlMs && ttlMs > 0) {
+            VolleyGoalsAPI.cache.set(key, { value: data, expiresAt: Date.now() + ttlMs });
+          }
+          return data;
+        } catch (err: any) {
+          // Standardize error response shape so callers receive the same structure
+          const errorResp = {
+            message: err?.response?.data?.message || err?.message || 'error.internalServerError',
+            error: err?.response?.data?.error,
+          } as unknown as T;
+          if (ttlMs && ttlMs > 0) {
+            VolleyGoalsAPI.cache.set(key, { value: errorResp, expiresAt: Date.now() + ttlMs });
+          }
+          return errorResp;
+        }
+      } finally {
+        VolleyGoalsAPI.inflight.delete(key);
+      }
+    })();
+
+    VolleyGoalsAPI.inflight.set(key, p);
+    return p;
+  }
+
+  public async listTeamMembers(teamId: string, filter?: any): Promise<{ message: string, error?: string, count?: number, items?: ITeamMember[] }> {
+    try {
+      // Normalize filter so dedupe keys match (e.g. explicit defaults vs undefined)
+      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy };
+      // Use centralized dedupe for GETs with a short TTL (1s)
+      const data = await this.requestDeduped('GET', `/teams/${teamId}/members`, async () => {
+        await this.ensureEndpoints();
+        return VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/members`, { params: normFilter });
+      }, normFilter, 1000);
+      return data as any;
+    } catch (reason: any) {
+      return {
+        message: reason?.response?.data?.message || reason?.message || 'error.internalServerError',
+        error: reason?.response?.data?.error,
+      };
+    }
+  }
+
+  public async listTeamInvites(teamId: string, filter?: ITeamInviteFilterOption): Promise<{ message: string, error?: string, count?: number, items?: IInvite[], nextToken?: string, hasMore?: boolean }> {
+    try {
+      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as ITeamInviteFilterOption;
+      const data = await this.requestDeduped('GET', `/teams/${teamId}/invites`, async () => {
+        await this.ensureEndpoints();
+        return VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/invites`, { params: normFilter });
+      }, normFilter, 1000);
+      return data as any;
+    } catch (reason: any) {
+      return {
+        message: reason?.response?.data?.message || reason?.message || 'error.internalServerError',
+        error: reason?.response?.data?.error,
+      };
     }
   }
 }

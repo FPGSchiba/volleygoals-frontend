@@ -1,4 +1,5 @@
 import React from 'react';
+import i18next from 'i18next';
 import { Grid, TextField, MenuItem, TableCell, Chip, Button } from '@mui/material';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { ITeam } from '../../store/types';
@@ -41,7 +42,7 @@ export function Teams() {
 
   const handleCreate = async () => {
     if (!createTeam) return;
-    const name = window.prompt('New team name');
+    const name = window.prompt(i18next.t('admin.teams.prompt.newName', 'New team name'));
     if (!name) return;
     await createTeam(name);
   };
@@ -60,7 +61,7 @@ export function Teams() {
       <Grid key="name">
         <TextField
           fullWidth
-          label="Name"
+          label={i18next.t('admin.teams.filter.name','Name')}
           value={filter.name ?? ''}
           onChange={(e) => setFilter({ ...filter, name: e.target.value })}
         />
@@ -69,13 +70,13 @@ export function Teams() {
         <TextField
           fullWidth
           select
-          label="Status"
+          label={i18next.t('admin.teams.filter.status','Status')}
           value={filter.status ?? ''}
           onChange={(e) => setFilter({ ...filter, status: e.target.value })}
         >
-          <MenuItem value="">Any</MenuItem>
-          <MenuItem value="active">active</MenuItem>
-          <MenuItem value="inactive">inactive</MenuItem>
+          <MenuItem value="">{i18next.t('admin.teams.filter.any','Any')}</MenuItem>
+          <MenuItem value="active">{i18next.t('common.active','active')}</MenuItem>
+          <MenuItem value="inactive">{i18next.t('common.inactive','inactive')}</MenuItem>
         </TextField>
       </Grid>,
     ];
@@ -103,7 +104,7 @@ export function Teams() {
       return [
         editBtn,
         <Button key="deactivate" variant="contained" size="small" color="warning" onClick={async () => { await editTeam(team.id, team.name, 'inactive'); }}>
-          Deactivate
+          {i18next.t('admin.actions.deactivate','Deactivate')}
         </Button>
       ];
     }
@@ -111,7 +112,7 @@ export function Teams() {
     return [
       editBtn,
       <Button key="delete" variant="contained" size="small" color="error" onClick={() => handleDelete(team.id)}>
-        Delete
+        {i18next.t('admin.actions.delete','Delete')}
       </Button>
     ];
   };
@@ -119,7 +120,7 @@ export function Teams() {
   return (
     <ItemList<ITeam, ITeamFilterOption>
       title="Teams"
-      columns={['Name', 'Status', 'Created', 'Updated']}
+      columns={[i18next.t('admin.teams.columns.name','Name'), i18next.t('admin.teams.columns.status','Status'), i18next.t('admin.teams.columns.created','Created'), i18next.t('admin.teams.columns.updated','Updated')]}
       initialFilter={initialFilter}
       rowsPerPage={10}
       fetch={fetchAdapter}
