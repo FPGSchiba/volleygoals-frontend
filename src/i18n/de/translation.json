@@ -362,18 +362,6 @@
       "title": "Benutzerdetails",
       "couldNotLoad": "Benutzer konnte nicht geladen werden."
     },
-    "team": {
-      "invites": {
-        "title": "Einladungen",
-        "create": "Einladung erstellen"
-      },
-      "members": {
-        "tabs": {
-          "members": "Mitglieder",
-          "invites": "Einladungen"
-        }
-      }
-    },
     "user": {
       "email": "E-Mail",
       "created": "Erstellt",
@@ -399,6 +387,13 @@
     },
     "teamDetails": { "title": "Teamdetails" },
     "team": {
+      "invites": { "title": "Einladungen", "create": "Einladung erstellen" },
+      "members": {
+        "tabs": { "members": "Mitglieder", "invites": "Einladungen" },
+        "title": "Teammitglieder",
+        "subtitle": "Mitgliederliste wird hier angezeigt. (Platzhalter)",
+        "placeholder": "Teammitglieder werden hier angezeigt, sobald implementiert."
+      },
       "created": "Erstellt:",
       "updated": "Aktualisiert:",
       "status": "Status:",
@@ -410,11 +405,6 @@
         "allowTeamGoalComments": "Kommentare zu Teamzielen erlauben",
         "allowIndividualGoalComments": "Kommentare zu Einzelzielen erlauben",
         "noSettings": "Keine Einstellungen für dieses Team vorhanden."
-      },
-      "members": {
-        "title": "Teammitglieder",
-        "subtitle": "Mitgliederliste wird hier angezeigt. (Platzhalter)",
-        "placeholder": "Teammitglieder werden hier angezeigt, sobald implementiert."
       },
       "save": "Änderungen speichern"
     },
@@ -439,5 +429,22 @@
       "login": "Anmelden",
       "home": "Zur Startseite"
     }
+  },
+  "selectTeam": {
+    "title": "Team auswählen",
+    "loading": "Lade Teams...",
+    "unknownTeam": "Unbekanntes Team",
+    "selectTeam": "Wähle {{team}}"
+  },
+  "profile": {
+    "title": "Profil",
+    "upload": "Bild hochladen",
+    "uploading": "Wird hochgeladen...",
+    "name": "Name",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "birthdate": "Geburtsdatum",
+    "save": "Speichern",
+    "cancel": "Abbrechen"
   }
 }

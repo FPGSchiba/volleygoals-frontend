@@ -31,8 +31,9 @@ export enum TeamMemberStatus {
 }
 
 export interface ITeamAssignment {
-  teamId: string;
+  team: ITeam
   role: RoleType;
+  status: TeamMemberStatus;
 }
 
 // Users
@@ -50,11 +51,19 @@ export interface IUser {
   birthdate?: string;
 }
 
+export interface IUserUpdate {
+  name?: string;
+  picture?: string;
+  preferredUsername?: string;
+  birthdate?: string;
+}
+
 // Teams
 export interface ITeam {
   id: string;
   name: string;
   status: 'active' | 'inactive';
+  picture: string
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;

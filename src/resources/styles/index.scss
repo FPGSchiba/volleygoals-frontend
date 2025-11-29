@@ -19,6 +19,8 @@ body {
   @include meta.load-css("pages/invite-error");
   @include meta.load-css("pages/not-found");
   @include meta.load-css("pages/complete-invite");
+  @include meta.load-css("pages/select-team");
+  @include meta.load-css("pages/profile");
 
   .app {
     &.app-container {

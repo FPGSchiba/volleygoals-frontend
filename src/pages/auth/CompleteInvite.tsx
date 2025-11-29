@@ -13,7 +13,7 @@ export function CompleteInvite() {
   const token = params.get('token');
   const currentInvite = useInvitesStore(state => state.currentInvite);
   const getInvite = useInvitesStore(state => state.getInvite);
-  const { user, session } = useCognitoUserStore();
+  const { cognitoUser, session } = useCognitoUserStore();
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -80,7 +80,7 @@ export function CompleteInvite() {
             </>
           )}
 
-          {/* If a user was created show temporary password + description + copy button */}
+          {/* If a cognitoUser was created show temporary password + description + copy button */}
           {userCreated && (
             <>
               <Divider sx={{marginY: 2}} />
@@ -104,10 +104,10 @@ export function CompleteInvite() {
         <Divider sx={{marginY: 2}} />
 
         <div className="complete-invite-actions" style={{display: 'flex', gap: 12}}>
-          {(!user || !session) && (
+          {(!cognitoUser || !session) && (
             <Button variant="outlined" color="primary" onClick={() => navigate('/login')} className="complete-invite-login">{i18next.t('invitePage.complete.actions.login')}</Button>
           )}
-          {(user && session) && (
+          {(cognitoUser && session) && (
             <Button variant="outlined" color="primary" onClick={() => navigate('/dashboard')} className="complete-invite-profile">{i18next.t('invitePage.complete.actions.profile')}</Button>
           )}
         </div>

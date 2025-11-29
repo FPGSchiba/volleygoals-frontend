@@ -21,7 +21,7 @@ export function Users() {
   };
 
   const handleEdit = async (user: IUser) => {
-    // navigate to user details/edit page if it exists
+    // navigate to cognitoUser details/edit page if it exists
     navigate(`/users/${user.id}`);
   };
 

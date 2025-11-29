@@ -388,7 +388,12 @@
     "teamDetails": { "title": "Team Details" },
     "team": {
       "invites": { "title": "Invites", "create": "Create Invite" },
-      "members": { "tabs": { "members": "Members", "invites": "Invites" } },
+      "members": {
+        "tabs": { "members": "Members", "invites": "Invites" },
+        "title": "Team Members",
+        "subtitle": "Members list will appear here. (Placeholder)",
+        "placeholder": "Team members will be shown here once implemented."
+      },
       "created": "Created:",
       "updated": "Updated:",
       "status": "Status:",
@@ -400,11 +405,6 @@
         "allowTeamGoalComments": "Allow team goal comments",
         "allowIndividualGoalComments": "Allow individual goal comments",
         "noSettings": "No settings available for this team."
-      },
-      "members": {
-        "title": "Team Members",
-        "subtitle": "Members list will appear here. (Placeholder)",
-        "placeholder": "Team members will be shown here once implemented."
       },
       "save": "Save changes"
     },
@@ -435,5 +435,22 @@
       "login": "Sign In",
       "home": "Go to Home"
     }
+  },
+  "selectTeam": {
+    "title": "Select a Team",
+    "loading": "Loading teams...",
+    "unknownTeam": "Unknown team",
+    "selectTeam": "Select {{team}}"
+  },
+  "profile": {
+    "title": "Profile",
+    "upload": "Upload picture",
+    "uploading": "Uploading...",
+    "name": "Name",
+    "username": "Username",
+    "email": "Email",
+    "birthdate": "Birthdate",
+    "save": "Save",
+    "cancel": "Cancel"
   }
 }

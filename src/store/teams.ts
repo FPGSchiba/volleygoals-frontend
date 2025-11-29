@@ -18,7 +18,6 @@ type TeamState = {
   currentTeam?: ITeam;
   teamMembers?: ITeamMember[];
   teamInvites?: { invites: IInvite[]; count: number; nextToken?: string; hasMore?: boolean; filter?: ITeamInviteFilterOption };
-  selectedTeamId?: string;
   currentTeamSettings?: ITeamSettings;
 }
 
@@ -28,7 +27,6 @@ type TeamActions = {
   deleteTeam: (id: string) => Promise<void>;
   fetchTeams: (filter?: ITeamFilterOption) => Promise<void>;
   getTeam: (id: string) => Promise<void>;
-  selectTeam: (teamId: string) => void; // newly added action to switch current team
   updateTeamSettings: (teamId: string, settings: Partial<ITeamSettings>) => Promise<void>;
   fetchTeamMembers: (teamId: string, filter?: IFilterOption) => Promise<{ items: ITeamMember[]; count: number }>;
   fetchTeamInvites: (teamId: string, filter?: ITeamInviteFilterOption) => Promise<{ items: IInvite[]; count: number }>;
@@ -46,7 +44,6 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
   teamMembers: [],
   teamInvites: { invites: [], count: 0, nextToken: undefined, hasMore: false, filter: {} },
   currentTeamSettings: undefined,
-  selectedTeamId: getSessionItem(SELECTED_TEAM_KEY),
    createTeam: (async (name: string) => {
      const response = await VolleyGoalsAPI.createTeam(name);
      if (!response.team) {
@@ -104,14 +101,6 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
        });
      }
    }),
-   selectTeam: (teamId: string) => {
-     try {
-       setSessionItem(SELECTED_TEAM_KEY, teamId);
-     } catch (e) {
-       // ignore
-     }
-     set(() => ({ selectedTeamId: teamId }));
-   },
    getTeam: (async (id: string) => {
      const response = await VolleyGoalsAPI.getTeam(id);
      if (response.team) {

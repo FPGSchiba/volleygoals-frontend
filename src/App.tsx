@@ -19,6 +19,7 @@ import {Users} from "./pages/admin/Users";
 import {CompleteInvite} from "./pages/auth/CompleteInvite";
 import {InviteError} from "./pages/help/InviteError";
 import {useCognitoUserStore} from './store/cognitoUser';
+import {SelectTeam} from "./pages/help/SelectTeam";
 
 const PathsWithoutHeader = [
   "login",
@@ -26,6 +27,7 @@ const PathsWithoutHeader = [
   "complete-invite",
   "invite-error",
   "reset-password",
+  "select-team"
 ];
 
 // Whitelist of top-level segments where the main navigation should be visible
@@ -51,7 +53,7 @@ function App() {
       const { user, session } = useCognitoUserStore.getState();
       const noAuth = !user && !session;
 
-      // If user is not authenticated, hide navigation
+      // If cognitoUser is not authenticated, hide navigation
       if (noAuth) return true;
 
       // If the segment is explicitly in the without-header list, hide it
@@ -77,7 +79,7 @@ function App() {
     const onLocationChange = () => updateHidden();
     window.addEventListener('locationchange', onLocationChange);
 
-    // subscribe to auth store so that when user/session changes we re-evaluate visibility
+    // subscribe to auth store so that when cognitoUser/session changes we re-evaluate visibility
     const unsub = useCognitoUserStore.subscribe(() => updateHidden());
 
     return () => {
@@ -114,19 +116,20 @@ function App() {
             <Route path={"/accept-invite"} element={<AcceptInvite />} />
             <Route path={"/complete-invite"} element={<CompleteInvite />} />
             <Route path={"/reset-password"} element={<ResetPassword />} />
-            <Route path={"/"} element={<PrivateRoute allowedRoles={[UserType.User]} />} >
+            <Route path={"/"} element={<PrivateRoute userTypes={[UserType.User]} />} >
               <Route path="" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path={"/select-team"} element={<SelectTeam />} />
             </ Route>
-            <Route path={"/teams"} element={<PrivateRoute allowedRoles={[UserType.Admin]} />} >
+            <Route path={"/teams"} element={<PrivateRoute userTypes={[UserType.Admin]} />} >
               <Route path={""} element={<Teams />} />
               <Route path={":teamId"} element={<TeamDetails />} />
             </Route>
-            <Route path={"/users"} element={<PrivateRoute allowedRoles={[UserType.Admin]} />} >
+            <Route path={"/users"} element={<PrivateRoute userTypes={[UserType.Admin]} />} >
               <Route path={""} element={<Users />} />
               <Route path={":userId"} element={<UserDetails />} />
             </Route>
-            <Route path={"/profile"} element={<PrivateRoute allowedRoles={[UserType.User, UserType.Admin]} />} >
+            <Route path={"/profile"} element={<PrivateRoute userTypes={[UserType.User, UserType.Admin]} />} >
               <Route path={""} element={<Profile />} />
             </Route>
             <Route path={"/invite-error"} element={<InviteError />} />

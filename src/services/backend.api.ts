@@ -2,7 +2,15 @@
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
 import {ITeamFilterOption, ITeamInviteFilterOption, IUserFilterOption} from "./types";
-import {IInvite, ITeam, ITeamMember, ITeamSettings, IUser} from "../store/types";
+import {
+  IInvite,
+  ITeam,
+  ITeamAssignment,
+  ITeamMember,
+  ITeamSettings,
+  IUser,
+  IUserUpdate
+} from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
 class VolleyGoalsAPI {
@@ -109,6 +117,153 @@ class VolleyGoalsAPI {
         endpoint.defaults.headers.common['Authorization'] = `Bearer ${this.token}`;
       }
     });
+  }
+
+  private static serializeParams(params: any): string {
+    if (!params) return '';
+    // stable serialization: sort keys
+    const build = (obj: any): any => {
+      if (obj === null || obj === undefined) return obj;
+      if (Array.isArray(obj)) return obj.map(build);
+      if (typeof obj === 'object') {
+        return Object.keys(obj).sort().reduce((acc: any, key) => {
+          acc[key] = build(obj[key]);
+          return acc;
+        }, {} as any);
+      }
+      return obj;
+    };
+    try {
+      return JSON.stringify(build(params));
+    } catch (e) {
+      return String(params);
+    }
+  }
+
+  private static makeKey(method: string, path: string, params?: any) {
+    const p = this.serializeParams(params);
+    return `${method.toUpperCase()}|${path}|${p}`;
+  }
+
+  private async requestDeduped<T>(method: 'GET'|'POST'|'PATCH'|'DELETE'|'PUT', path: string, axiosFn: () => Promise<any>, params?: any, ttlMs: number = 1000): Promise<T> {
+    // Only dedupe GET requests; other methods bypass
+    // For GET requests normalize params for the dedupe key so undefined vs defaulted params are equivalent
+    let keyParams = params;
+    if (method === 'GET') {
+      keyParams = { ...(params || {}), limit: params?.limit ?? 10, sortOrder: params?.sortOrder ?? 'asc', sortBy: params?.sortBy };
+    }
+    const key = VolleyGoalsAPI.makeKey(method, path, keyParams);
+
+    // check cache
+    const cached = VolleyGoalsAPI.cache.get(key);
+    if (cached && cached.expiresAt && cached.expiresAt > Date.now()) {
+      return cached.value as T;
+    }
+
+    // only dedupe GET
+    if (method !== 'GET') {
+      const resp = await axiosFn();
+      return resp.data as T;
+    }
+
+    const inflight = VolleyGoalsAPI.inflight.get(key);
+    if (inflight) return inflight as Promise<T>;
+
+    const p = (async () => {
+      try {
+        try {
+          const resp = await axiosFn();
+          const data = resp.data as T;
+          if (ttlMs && ttlMs > 0) {
+            VolleyGoalsAPI.cache.set(key, { value: data, expiresAt: Date.now() + ttlMs });
+          }
+          return data;
+        } catch (err: any) {
+          // Standardize error response shape so callers receive the same structure
+          const errorResp = {
+            message: err?.response?.data?.message || err?.message || 'error.internalServerError',
+            error: err?.response?.data?.error,
+          } as unknown as T;
+          if (ttlMs && ttlMs > 0) {
+            VolleyGoalsAPI.cache.set(key, { value: errorResp, expiresAt: Date.now() + ttlMs });
+          }
+          return errorResp;
+        }
+      } finally {
+        VolleyGoalsAPI.inflight.delete(key);
+      }
+    })();
+
+    VolleyGoalsAPI.inflight.set(key, p);
+    return p;
+  }
+
+  // Self
+  public async getSelf(): Promise<{message: string, error?: string, user?: IUser, assignments?: ITeamAssignment[]}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get('/self');
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async updateSelf(data: IUserUpdate): Promise<{message: string, error?: string, user?: IUser}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch('/self', data);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async getPresignedSelfAvatarUploadUrl(filename: string, contentType: string): Promise<{ message: string, error?: string, uploadUrl?: string, key?: string, fileUrl?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get('/self/picture/presign', { params: { filename, contentType }});
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async uploadSelfAvatar(file: File, onProgress?: (pct: number) => void): Promise<{message: string, error?: string, fileUrl?: string}> {
+    const presign = await this.getPresignedSelfAvatarUploadUrl(file.name, file.type);
+    if (presign.error || !presign.uploadUrl) {
+      return presign;
+    }
+    const url = presign.uploadUrl; // presigned PUT URL
+
+    try {
+      // Use PUT to upload the raw file. Axios in browser will set Content-Type properly if provided.
+      await axios.put(url, file, {
+        headers: {
+          'Content-Type': file.type,
+        },
+        onUploadProgress: (progressEvent) => {
+          if (!onProgress) return;
+          const pct = Math.round((progressEvent.loaded * 100) / (progressEvent.total || file.size));
+          onProgress(pct);
+        },
+      });
+      return presign;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
   }
 
   // Teams
@@ -253,85 +408,6 @@ class VolleyGoalsAPI {
         error: reason.response?.data?.error,
       }
     }
-  }
-
-  private static serializeParams(params: any): string {
-    if (!params) return '';
-    // stable serialization: sort keys
-    const build = (obj: any): any => {
-      if (obj === null || obj === undefined) return obj;
-      if (Array.isArray(obj)) return obj.map(build);
-      if (typeof obj === 'object') {
-        return Object.keys(obj).sort().reduce((acc: any, key) => {
-          acc[key] = build(obj[key]);
-          return acc;
-        }, {} as any);
-      }
-      return obj;
-    };
-    try {
-      return JSON.stringify(build(params));
-    } catch (e) {
-      return String(params);
-    }
-  }
-
-  private static makeKey(method: string, path: string, params?: any) {
-    const p = this.serializeParams(params);
-    return `${method.toUpperCase()}|${path}|${p}`;
-  }
-
-  private async requestDeduped<T>(method: 'GET'|'POST'|'PATCH'|'DELETE'|'PUT', path: string, axiosFn: () => Promise<any>, params?: any, ttlMs: number = 1000): Promise<T> {
-    // Only dedupe GET requests; other methods bypass
-    // For GET requests normalize params for the dedupe key so undefined vs defaulted params are equivalent
-    let keyParams = params;
-    if (method === 'GET') {
-      keyParams = { ...(params || {}), limit: params?.limit ?? 10, sortOrder: params?.sortOrder ?? 'asc', sortBy: params?.sortBy };
-    }
-    const key = VolleyGoalsAPI.makeKey(method, path, keyParams);
-
-    // check cache
-    const cached = VolleyGoalsAPI.cache.get(key);
-    if (cached && cached.expiresAt && cached.expiresAt > Date.now()) {
-      return cached.value as T;
-    }
-
-    // only dedupe GET
-    if (method !== 'GET') {
-      const resp = await axiosFn();
-      return resp.data as T;
-    }
-
-    const inflight = VolleyGoalsAPI.inflight.get(key);
-    if (inflight) return inflight as Promise<T>;
-
-    const p = (async () => {
-      try {
-        try {
-          const resp = await axiosFn();
-          const data = resp.data as T;
-          if (ttlMs && ttlMs > 0) {
-            VolleyGoalsAPI.cache.set(key, { value: data, expiresAt: Date.now() + ttlMs });
-          }
-          return data;
-        } catch (err: any) {
-          // Standardize error response shape so callers receive the same structure
-          const errorResp = {
-            message: err?.response?.data?.message || err?.message || 'error.internalServerError',
-            error: err?.response?.data?.error,
-          } as unknown as T;
-          if (ttlMs && ttlMs > 0) {
-            VolleyGoalsAPI.cache.set(key, { value: errorResp, expiresAt: Date.now() + ttlMs });
-          }
-          return errorResp;
-        }
-      } finally {
-        VolleyGoalsAPI.inflight.delete(key);
-      }
-    })();
-
-    VolleyGoalsAPI.inflight.set(key, p);
-    return p;
   }
 
   public async listTeamMembers(teamId: string, filter?: any): Promise<{ message: string, error?: string, count?: number, items?: ITeamMember[] }> {

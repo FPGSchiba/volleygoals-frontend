@@ -1,27 +1,41 @@
 import {create} from "zustand";
 import { fetchAuthSession, AuthSession, getCurrentUser, AuthUser, signOut } from 'aws-amplify/auth';
-import {ITeamAssignment, UserType} from "./types";
+import {ITeamAssignment, IUser, IUserUpdate, UserType} from "./types";
 import VolleyGoalsAPI from "../services/backend.api";
+import {getSessionItem, setSessionItem} from "./util";
+import {SELECTED_TEAM_KEY} from "./consts";
+import {useNotificationStore} from "./notification";
+import i18next from "i18next";
 
 type UserState = {
-  user: AuthUser | undefined;
+  cognitoUser: AuthUser | undefined;
+  user?: IUser;
   session: AuthSession | undefined;
   userType: UserType | undefined;
-  availableTeams?: ITeamAssignment[];
+  availableTeams: ITeamAssignment[];
   selectedTeam?: ITeamAssignment;
 }
 
 type UserActions = {
   setUser: () => Promise<void>
   logout: () => void
+  setSelectedTeam: (teamId: string) => void
+  fetchSelf: () => Promise<void>
+  updateSelf: (userData: IUserUpdate) => Promise<void>
+  uploadSelfPicture: (file: File, onProgress?: (pct: number) => void) => Promise<string | undefined>
 }
 
-const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: AuthSession | undefined, userType: UserType | undefined}> => {
+const loadSelf = async (): Promise<{user?: IUser, assignments: ITeamAssignment[]}> => {
+  const response = await VolleyGoalsAPI.getSelf();
+  return { user: response.user, assignments: response.assignments || [] };
+}
+
+const loadUserStore = async (): Promise<{cognitoUser?: AuthUser, session?: AuthSession, userType?: UserType, user?: IUser, availableTeams: ITeamAssignment[], selectedTeam?: ITeamAssignment}> => {
   try {
     const maxAttempts = 3;
     const isSessionError = (err: any) => {
       const msg = String(err?.message ?? err ?? '').toLowerCase();
-      return /no current user|no user|no session|not authenticated|not signed in/.test(msg);
+      return /no current cognitoUser|no cognitoUser|no session|not authenticated|not signed in/.test(msg);
     };
 
     let session: AuthSession | undefined;
@@ -29,12 +43,12 @@ const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: Au
       session = await fetchAuthSession();
     } catch (err) {
       if (isSessionError(err)) {
-        return { user: undefined, session: undefined, userType: undefined };
+        return { availableTeams: [] };
       }
       throw err;
     }
 
-    const user = await getCurrentUser();
+    const cognitoUser = await getCurrentUser();
 
     // @ts-ignore
     let idToken = session?.tokens?.idToken;
@@ -48,7 +62,7 @@ const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: Au
         if (idToken) break;
       } catch (err) {
         if (isSessionError(err)) {
-          return { user: undefined, session: undefined, userType: undefined };
+          return {availableTeams: []};
         }
         // ignore other errors and continue retrying
       }
@@ -60,25 +74,27 @@ const loadUserStore = async (): Promise<{user: AuthUser | undefined, session: Au
     const groups = payload?.['cognito:groups'] ?? [];
     const userRoles: string[] = Array.isArray(groups) ? groups : [groups].filter(Boolean);
     VolleyGoalsAPI.setToken(idToken);
-
-    return { user, session, userType: userRoles.map((role) => role as UserType)[0] };
+    const { user, assignments } = await loadSelf();
+    const selectedTeamId = getSessionItem(SELECTED_TEAM_KEY);
+    const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
+    return { cognitoUser, session, userType: userRoles.map((role) => role as UserType)[0], user, availableTeams: assignments, selectedTeam };
   } catch (error) {
-    return {user: undefined, session: undefined, userType: undefined};
+    return {availableTeams: []};
   }
 }
 
 const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
-  loadUserStore().then(({ user, session, userType }) => set({ user, session, userType, availableTeams: [], selectedTeam: undefined }));
+  loadUserStore().then(({ cognitoUser, session, userType, user, availableTeams, selectedTeam }) => set({ cognitoUser, session, userType, availableTeams, user, selectedTeam }));
 
   return {
-    user: undefined,
+    cognitoUser: undefined,
     session: undefined,
     userType: undefined,
     availableTeams: [],
     selectedTeam: undefined,
     setUser: async () => {
       try {
-        const user = await getCurrentUser();
+        const cognitoUser = await getCurrentUser();
         const session = await fetchAuthSession();
 
         // @ts-ignore
@@ -89,14 +105,48 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
 
         VolleyGoalsAPI.setToken(idToken);
 
-        set({ user, session, userType: userRoles.map((role) => role as UserType)[0] });
+        set({ cognitoUser, session, userType: userRoles.map((role) => role as UserType)[0] });
       } catch (error) {
-        set({ user: undefined, session: undefined, userType: undefined });
+        set({ cognitoUser: undefined, session: undefined, userType: undefined });
       }
     },
     logout: () => {
-      set({ user: undefined, session: undefined, userType: undefined, selectedTeam: undefined, availableTeams: [] });
+      set({ cognitoUser: undefined, session: undefined, userType: undefined, selectedTeam: undefined, availableTeams: [] });
       signOut();
+    },
+    setSelectedTeam: (teamId: string) => {
+      const { availableTeams } = get();
+      const selected = availableTeams?.find(t => t.team.id === teamId);
+      setSessionItem(SELECTED_TEAM_KEY, teamId);
+      set({ selectedTeam: selected });
+    },
+    fetchSelf: async () => {
+      const { user, assignments } = await loadSelf();
+      const selectedTeamId = getSessionItem(SELECTED_TEAM_KEY);
+      const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
+      set({ user, availableTeams: assignments, selectedTeam });
+    },
+    updateSelf: async (userData: IUserUpdate) => {
+      const response = await VolleyGoalsAPI.updateSelf(userData);
+      if (response.user) {
+        set({ user: response.user });
+      } else{
+        useNotificationStore.getState().notify({ level: 'error', message: i18next.t(`${response.message}.message`, 'Something went wrong while fetching team invites.'), title: i18next.t(`${response.message}.title`, 'Something went wrong'), details: response.error });
+      }
+    },
+    uploadSelfPicture: async (file: File, onProgress?: (pct: number) => void): Promise<string | undefined> => {
+      const response = await VolleyGoalsAPI.uploadSelfAvatar(file, onProgress);
+      if (response.fileUrl) {
+        // update user store
+        const currentUser = get().user;
+        if (currentUser) {
+          set({ user: { ...currentUser, picture: response.fileUrl } });
+        }
+        return response.fileUrl;
+      } else {
+        useNotificationStore.getState().notify({ level: 'error', message: i18next.t(`${response.message}.message`, 'Something went wrong while uploading the profile picture.'), title: i18next.t(`${response.message}.title`, 'Something went wrong'), details: response.error });
+        return undefined;
+      }
     }
   };
 });

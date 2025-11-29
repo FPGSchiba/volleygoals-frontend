@@ -14,8 +14,8 @@ export function AcceptInvite() {
   const navigate = useNavigate();
   const completeInvite = useInvitesStore(state => state.completeInvite);
   const [loading, setLoading] = useState(false);
-  // read cognito user/session to possibly prefill the email
-  const { user, session } = useCognitoUserStore();
+  // read cognito cognitoUser/session to possibly prefill the email
+  const { cognitoUser, session } = useCognitoUserStore();
 
   useEffect(() => {
     if (!token) {
@@ -27,16 +27,16 @@ export function AcceptInvite() {
     defaultValues: { email: '' }
   });
 
-  // Prefill email from Cognito user/session if available and the field is empty
+  // Prefill email from Cognito cognitoUser/session if available and the field is empty
   useEffect(() => {
     try {
       const current = getValues('email');
-      if (current) return; // don't override a user-typed value
+      if (current) return; // don't override a cognitoUser-typed value
 
-      if (user && session) {
+      if (cognitoUser && session) {
         // try common locations for email
-        // user may contain attributes.email or username; session idToken payload may contain email
-        const u: any = user as any;
+        // cognitoUser may contain attributes.email or username; session idToken payload may contain email
+        const u: any = cognitoUser as any;
         let email: string | undefined = undefined;
         if (u?.attributes?.email) email = u.attributes.email;
         if (!email && u?.username) email = u.username;
@@ -52,7 +52,7 @@ export function AcceptInvite() {
     } catch (err) {
       // silent — prefilling isn't critical
     }
-  }, [user, session, setValue, getValues]);
+  }, [cognitoUser, session, setValue, getValues]);
 
   const submit = async (email: string, accepted: boolean) => {
     if (!token) {

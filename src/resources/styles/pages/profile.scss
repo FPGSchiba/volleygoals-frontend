@@ -1,0 +1,20 @@
+// filepath: src/resources/styles/pages/profile.scss
+.page-profile {
+  .profile-avatar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .profile-form {
+    max-width: 720px;
+  }
+
+  .profile-avatar img,
+  .profile-avatar .MuiAvatar-root {
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+}
+

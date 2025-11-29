@@ -9,7 +9,7 @@ import ListItemText from '@mui/material/ListItemText';
 import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import DateRangeIcon from '@mui/icons-material/DateRange';
-import {UserType} from "../store/types";
+import {RoleType, UserType} from "../store/types";
 import {useCognitoUserStore} from "../store/cognitoUser";
 import { Box, IconButton, Typography, Avatar, Tooltip } from "@mui/material";
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
@@ -27,17 +27,17 @@ type NavItem = {
   label: string;
   path: string;
   icon?: React.ReactNode;
-  roles: UserType[];
+  userType: UserType;
+  roles?: RoleType[]; // future use for role-based access
 };
 
 const NAV_ITEMS: NavItem[] = [
   // Admin View
-  { key: 'teams', label: 'Teams', path: '/teams', icon: <GroupIcon />, roles: [UserType.Admin] },
-  { key: 'users', label: 'Users', path: '/users', icon: <PersonIcon />, roles: [UserType.Admin] },
+  { key: 'teams', label: 'Teams', path: '/teams', icon: <GroupIcon />, userType: UserType.Admin },
+  { key: 'users', label: 'Users', path: '/users', icon: <PersonIcon />, userType: UserType.Admin },
   // Trainer Only
-  { key: 'seasons', label: 'Seasons', path: '/seasons', icon: <DateRangeIcon />, roles: [UserType.User] },
-  // Members and Trainers
-  { key: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, roles: [UserType.User] },
+  { key: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, userType: UserType.User },
+  { key: 'seasons', label: 'Seasons', path: '/seasons', icon: <DateRangeIcon />, userType: UserType.User },
 ];
 
 type NavigationProps = {
@@ -51,11 +51,12 @@ export function Navigation(props: NavigationProps) {
   const { collapsed, setCollapsed, drawerWidth, hidden } = props;
   const navigate = useNavigate();
   const userType = useCognitoUserStore(state => state.userType);
-  const user = useCognitoUserStore(state => state.user);
-  const teams = useTeamStore(state => state.teamList?.teams ?? []);
-  const currentTeam = useTeamStore(state => state.currentTeam);
-  const selectTeam = useTeamStore(state => state.selectTeam);
-  const fetchTeams = useTeamStore(state => state.fetchTeams);
+  const user = useCognitoUserStore(state => state.cognitoUser);
+  const teamAssignments = useCognitoUserStore(state => state.availableTeams);
+  const selectedTeam = useCognitoUserStore(state => state.selectedTeam);
+  const selectTeam = useCognitoUserStore(state => state.setSelectedTeam);
+  const fetchSelf = useCognitoUserStore(state => state.fetchSelf);
+
   const [visibleItems, setVisibleItems] = React.useState<NavItem[]>([]);
   const [teamMenuAnchor, setTeamMenuAnchor] = React.useState<HTMLElement | null>(null);
   const openTeamMenu = Boolean(teamMenuAnchor);
@@ -70,7 +71,7 @@ export function Navigation(props: NavigationProps) {
 
   // Derive a display name and initials for the avatar placeholder
   const getDisplayName = () => {
-    // Common AWS Cognito / Amplify user shape: user.attributes.name, given_name, family_name
+    // Common AWS Cognito / Amplify cognitoUser shape: cognitoUser.attributes.name, given_name, family_name
     const attrs: any = (user && (((user as any).attributes) || user));
     if (attrs) {
       if (attrs.name) return attrs.name;
@@ -91,22 +92,22 @@ export function Navigation(props: NavigationProps) {
   const initials = getInitials(displayName);
 
   useEffect(() => {
-    const items = NAV_ITEMS.filter(item => item.roles.includes(userType!));
+    const items = NAV_ITEMS.filter(item => item.userType === userType);
     setVisibleItems(items);
   }, [userType]);
 
   // Fetch teams for regular users and ensure a current team is selected
   React.useEffect(() => {
     if (userType === UserType.User) {
-      if (teams.length === 0) {
+      if (teamAssignments.length === 0) {
         // best-effort fetch, ignore promise errors here
-        fetchTeams().catch(() => {});
+        fetchSelf().catch(() => {});
       }
-      if (!currentTeam && teams.length > 0) {
-        selectTeam(teams[0].id);
+      if (!selectedTeam && teamAssignments.length > 0) {
+        navigate('/select-team');
       }
     }
-  }, [userType, teams, currentTeam, fetchTeams, selectTeam]);
+  }, [userType, teamAssignments, selectedTeam, fetchSelf, selectTeam]);
 
   return (
     <>
@@ -134,17 +135,17 @@ export function Navigation(props: NavigationProps) {
             {(userType === UserType.User || !collapsed) && (
               <Box className="nav-top-left">
                 {/* Team Avatar: only show for regular users */}
-                {userType === UserType.User && (
+                {(userType === UserType.User && !collapsed) && (
                   <>
                     <IconButton aria-label="Select team" onClick={(e) => setTeamMenuAnchor(e.currentTarget)} size="small" className="nav-team-button">
-                      <Avatar alt={currentTeam?.name ?? 'Team'} className="nav-team-avatar">{(currentTeam?.name && currentTeam.name[0]) || 'T'}</Avatar>
+                      <Avatar alt={selectedTeam?.team.name ?? 'Team'} className="nav-team-avatar">{(selectedTeam?.team.name && selectedTeam?.team.name[0]) || 'T'}</Avatar>
                     </IconButton>
                     <Menu anchorEl={teamMenuAnchor} open={openTeamMenu} onClose={() => setTeamMenuAnchor(null)}>
-                      {teams.length === 0 ? (
+                      {teamAssignments.length === 0 ? (
                         <MenuItem disabled>No teams</MenuItem>
                       ) : (
-                        teams.map((t) => (
-                          <MenuItem key={t.id} onClick={() => { selectTeam(t.id); setTeamMenuAnchor(null); }}>{t.name}</MenuItem>
+                        teamAssignments.map((t) => (
+                          <MenuItem key={t.team.id} onClick={() => { selectTeam(t.team.id); setTeamMenuAnchor(null); }}>{t.team.name}</MenuItem>
                         ))
                       )}
                     </Menu>

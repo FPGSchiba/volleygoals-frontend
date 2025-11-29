@@ -29,8 +29,9 @@ function Login() {
   const setUser = useCognitoUserStore(state => state.setUser);
   const navigate = useNavigate();
   const userType = useCognitoUserStore(state => state.userType);
+  const fetchSelf = useCognitoUserStore(state => state.fetchSelf);
 
-  useEffect(() => { // in order to redirect on login if user is already set and if user gets set by login flow
+  useEffect(() => { // in order to redirect on login if cognitoUser is already set and if cognitoUser gets set by login flow
     if (userType) {
       if (userType === UserType.Admin) {
         navigate("/teams");
@@ -42,7 +43,8 @@ function Login() {
 
   const handleStepChange = (output: ConfirmSignInOutput | SignInOutput) => {
     if (output.isSignedIn) {
-      setUser(); // ignore this as we already listen to changes in user store and use useEffect to redirect
+      setUser(); // ignore this as we already listen to changes in cognitoUser store and use useEffect to redirect
+      fetchSelf();
     } else {
       switch (output.nextStep.signInStep) {
         case "CONFIRM_SIGN_IN_WITH_TOTP_CODE":

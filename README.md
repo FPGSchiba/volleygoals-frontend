@@ -39,5 +39,5 @@ The development build is served at: [https://volleygoals-test.schiba-apps.net](v
 2. Use class names and scss to style the page (Do not forget to register the new scss page in `index.scss`)
 3. Please always use i18next to translate all Labels (translations are in `i18n/{lang}/translation.json`)
 4. If a Form is needed use react-hook-form
-5. Use axios to call the backend
+5. Never implement your own API Functions. Please leave that to me as I know the API.
 6. Use zustand to manage the state

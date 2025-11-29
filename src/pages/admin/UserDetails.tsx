@@ -93,7 +93,7 @@ export function UserDetails() {
       {!loading && !currentUser && (
         <Card>
           <CardContent>
-            <Typography variant="h6">{i18next.t('admin.userDetails.couldNotLoad', 'Could not load user.')}</Typography>
+            <Typography variant="h6">{i18next.t('admin.userDetails.couldNotLoad', 'Could not load cognitoUser.')}</Typography>
             <Box mt={2}>
               <Button variant="outlined" onClick={() => navigate('/users')}>{i18next.t('admin.actions.goToUsers', 'Go to Users')}</Button>
             </Box>
@@ -124,27 +124,27 @@ export function UserDetails() {
               <Box flex={1}>
                 <Box display="flex" gap={2} mb={1}>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.email', 'Email')}</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.cognitoUser.email', 'Email')}</Typography>
                     <Typography>{currentUser.email}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.created', 'Created')}</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.cognitoUser.created', 'Created')}</Typography>
                     <Typography>{currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleString('de-CH') : '-'}</Typography>
                   </Box>
                   <Box>
-                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.updated', 'Updated')}</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.cognitoUser.updated', 'Updated')}</Typography>
                     <Typography>{currentUser.updatedAt ? new Date(currentUser.updatedAt).toLocaleString('de-CH') : '-'}</Typography>
                   </Box>
                 </Box>
 
                 <Box display="flex" gap={2} alignItems="center">
                   <Box>
-                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.status', 'Status')}</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.cognitoUser.status', 'Status')}</Typography>
                     <Box mt={0.5}><Chip label={currentUser.enabled ? i18next.t('common.active','active') : i18next.t('common.inactive','inactive')} color={currentUser.enabled ? 'success' : 'default'} /></Box>
                   </Box>
 
                   <Box>
-                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.user.type', 'Type')}</Typography>
+                    <Typography variant="body2" color="text.secondary">{i18next.t('admin.cognitoUser.type', 'Type')}</Typography>
                     <Box mt={0.5}><Chip label={currentUser.userType} color={currentUser.userType === 'ADMINS' ? 'primary' : 'default'} /></Box>
                   </Box>
                 </Box>
@@ -154,7 +154,7 @@ export function UserDetails() {
 
           <Paper elevation={1} sx={{ p: 2 }}>
             <Typography variant="h6">{i18next.t('admin.memberships.title', 'Memberships')}</Typography>
-            <Typography color="text.secondary" mb={1}>{i18next.t('admin.memberships.subtitle', 'Manage memberships for this user.')}</Typography>
+            <Typography color="text.secondary" mb={1}>{i18next.t('admin.memberships.subtitle', 'Manage memberships for this cognitoUser.')}</Typography>
 
             <ItemList<ITeamMember, IFilterOption>
               title={i18next.t('admin.memberships.title','Memberships')}

@@ -8,7 +8,7 @@ export function useAuthRedirect() {
 
   // Select primitives individually to avoid returning a new object reference
   // (which can trigger infinite update loops when used with useSyncExternalStore).
-  const user = useCognitoUserStore((state) => state.user);
+  const user = useCognitoUserStore((state) => state.cognitoUser);
   const session = useCognitoUserStore((state) => state.session);
   const userType = useCognitoUserStore((state) => state.userType);
 

@@ -7,14 +7,14 @@ import {UserType} from '../../store/types';
 
 export function NotFound() {
   const navigate = useNavigate();
-  const { user, session, userType } = useCognitoUserStore();
+  const { cognitoUser, session, userType } = useCognitoUserStore();
 
   const title = i18next.t('notFoundPage.title');
   const subtitle = i18next.t('notFoundPage.subtitle');
   const explain = i18next.t('notFoundPage.explain');
 
   const goPrimary = () => {
-    if (user || session) {
+    if (cognitoUser || session) {
       // signed in: decide based on role
       if (userType === UserType.Admin) navigate('/teams');
       else navigate('/dashboard');
@@ -25,7 +25,7 @@ export function NotFound() {
   }
 
   const primaryLabel = () => {
-    if (user || session) {
+    if (cognitoUser || session) {
       return userType === UserType.Admin ? i18next.t('notFoundPage.actions.teams') : i18next.t('notFoundPage.actions.dashboard');
     }
     return i18next.t('notFoundPage.actions.login');
