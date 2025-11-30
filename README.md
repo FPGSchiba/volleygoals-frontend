@@ -36,8 +36,11 @@ The development build is served at: [https://volleygoals-test.schiba-apps.net](v
 ### Frontend Development
 
 1. Only use MaterialUI as components
-2. Use class names and scss to style the page (Do not forget to register the new scss page in `index.scss`)
-3. Please always use i18next to translate all Labels (translations are in `i18n/{lang}/translation.json`)
-4. If a Form is needed use react-hook-form
-5. Never implement your own API Functions. Please leave that to me as I know the API.
-6. Use zustand to manage the state
+2. Please keep in mind that each page should be its own component in the `pages` folder
+   1. Also each page should have its own scss file in the `styles/pages` folder
+   2. Additionally each page should have one paper as its root component
+3. Use class names and scss to style the page (Do not forget to register the new scss page in `index.scss`)
+4. Please always use i18next to translate all Labels (translations are in `i18n/{lang}/translation.json`)
+5. If a Form is needed use react-hook-form
+6. Never implement your own API Functions. Please leave that to me as I know the API.
+7. Use zustand to manage the state

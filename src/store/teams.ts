@@ -30,6 +30,8 @@ type TeamActions = {
   updateTeamSettings: (teamId: string, settings: Partial<ITeamSettings>) => Promise<void>;
   fetchTeamMembers: (teamId: string, filter?: IFilterOption) => Promise<{ items: ITeamMember[]; count: number }>;
   fetchTeamInvites: (teamId: string, filter?: ITeamInviteFilterOption) => Promise<{ items: IInvite[]; count: number }>;
+  // Mock upload - reads the file locally and sets the team's picture to a data URL
+  uploadTeamPicture: (teamId: string, file: File, onProgress?: (pct: number) => void) => Promise<string | null>;
 }
 
 const useTeamStore = create<TeamState & TeamActions>((set) => ({
@@ -152,6 +154,39 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
     }
     useNotificationStore.getState().notify({ level: 'error', message: i18next.t(`${response.message}.message`, 'Something went wrong while fetching team invites.'), title: i18next.t(`${response.message}.title`, 'Something went wrong'), details: response.error });
     return { items: [], count: 0 };
+  },
+  // Mock uploadTeamPicture implementation: read file to data URL and update local state
+  uploadTeamPicture: async (teamId: string, file: File, onProgress?: (pct: number) => void) => {
+    // Read file as data URL
+    const readFileAsDataUrl = (f: File) => new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.onload = () => resolve(String(reader.result));
+      reader.readAsDataURL(f);
+    });
+
+    try {
+      // Optionally simulate progress
+      if (onProgress) onProgress(10);
+      const url = await readFileAsDataUrl(file);
+      if (onProgress) onProgress(90);
+
+      // Update teamList and currentTeam if present
+      set((state) => {
+        const teams = (state.teamList && state.teamList.teams) ? state.teamList.teams.map(t => t.id === teamId ? ({ ...t, picture: url }) : t) : [];
+        const currentTeam = state.currentTeam && state.currentTeam.id === teamId ? ({ ...state.currentTeam, picture: url } as ITeam) : state.currentTeam;
+        return {
+          teamList: { ...(state.teamList || { teams: [], count: 0, hasMore: false, nextToken: '' }), teams },
+          currentTeam
+        } as any;
+      });
+
+      if (onProgress) onProgress(100);
+      return url;
+    } catch (err) {
+      console.error('uploadTeamPicture mock failed', err);
+      return null;
+    }
   },
  }))
 

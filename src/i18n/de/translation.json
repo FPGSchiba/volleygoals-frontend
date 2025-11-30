@@ -383,7 +383,10 @@
     "teams": {
       "prompt": { "newName": "Neuer Teamname" },
       "filter": { "name": "Name", "status": "Status", "any": "Beliebig" },
-      "columns": { "name": "Name", "status": "Status", "created": "Erstellt", "updated": "Aktualisiert" }
+      "columns": { "picture": "Bild", "name": "Name", "status": "Status", "created": "Erstellt", "updated": "Aktualisiert" }
+    },
+    "teamsList": {
+      "title": "Teams"
     },
     "teamDetails": { "title": "Teamdetails" },
     "team": {
@@ -445,6 +448,41 @@
     "email": "E-Mail",
     "birthdate": "Geburtsdatum",
     "save": "Speichern",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "subtitle": "Verwalten Sie Ihre Benachrichtigungseinstellungen.",
+      "emailUpdates": {
+        "label": "E-Mail-Benachrichtigungen",
+        "description": "Erhalten Sie Updates und Benachrichtigungen per E-Mail."
+      },
+      "smsUpdates": {
+        "label": "SMS-Benachrichtigungen",
+        "description": "Erhalten Sie Updates und Benachrichtigungen per SMS."
+      }
+    },
+    "security": {
+      "title": "Sicherheit",
+      "subtitle": "Verwalten Sie Ihre Sicherheitseinstellungen.",
+      "twoFactorAuth": {
+        "label": "Zwei-Faktor-Authentifizierung",
+        "description": "Zusätzliche Sicherheitsebene für Ihr Konto."
+      },
+      "activeSessions": {
+        "label": "Aktive Sitzungen",
+        "description": "Überblick über alle aktiven Sitzungen in Ihrem Konto."
+      }
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "teams": "Teams",
+    "calendar": "Kalender",
+    "goals": "Ziele",
+    "profile": "Profil",
+    "admin": "Admin",
+    "logout": "Abmelden",
+    "seasons": "Saisons",
+    "users": "Benutzer"
   }
 }

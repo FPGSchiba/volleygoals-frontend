@@ -17,14 +17,15 @@ import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrow
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import {useTeamStore} from "../store/teams";
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import { useThemeToggle } from "../index";
+import { useTranslation } from 'react-i18next';
 
 type NavItem = {
   key: string;
-  label: string;
+  labelKey: string;
+  labelDefault?: string;
   path: string;
   icon?: React.ReactNode;
   userType: UserType;
@@ -33,11 +34,11 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   // Admin View
-  { key: 'teams', label: 'Teams', path: '/teams', icon: <GroupIcon />, userType: UserType.Admin },
-  { key: 'users', label: 'Users', path: '/users', icon: <PersonIcon />, userType: UserType.Admin },
+  { key: 'teams', labelKey: 'nav.teams', path: '/teams', icon: <GroupIcon />, userType: UserType.Admin },
+  { key: 'users', labelKey: 'nav.users', path: '/users', icon: <PersonIcon />, userType: UserType.Admin },
   // Trainer Only
-  { key: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon />, userType: UserType.User },
-  { key: 'seasons', label: 'Seasons', path: '/seasons', icon: <DateRangeIcon />, userType: UserType.User },
+  { key: 'dashboard', labelKey: 'nav.dashboard', path: '/dashboard', icon: <DashboardIcon />, userType: UserType.User },
+  { key: 'seasons', labelKey: 'nav.seasons', path: '/seasons', icon: <DateRangeIcon />, userType: UserType.User },
 ];
 
 type NavigationProps = {
@@ -50,8 +51,10 @@ type NavigationProps = {
 export function Navigation(props: NavigationProps) {
   const { collapsed, setCollapsed, drawerWidth, hidden } = props;
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const userType = useCognitoUserStore(state => state.userType);
-  const user = useCognitoUserStore(state => state.cognitoUser);
+  const cognitoUser = useCognitoUserStore(state => state.cognitoUser);
+  const user = useCognitoUserStore(state => state.user);
   const teamAssignments = useCognitoUserStore(state => state.availableTeams);
   const selectedTeam = useCognitoUserStore(state => state.selectedTeam);
   const selectTeam = useCognitoUserStore(state => state.setSelectedTeam);
@@ -69,16 +72,20 @@ export function Navigation(props: NavigationProps) {
 
   const { toggleTheme, mode: themeMode } = useThemeToggle();
 
-  // Derive a display name and initials for the avatar placeholder
+  // Prefer the shaped user object (from API) but fall back to cognitoUser attributes
   const getDisplayName = () => {
-    // Common AWS Cognito / Amplify cognitoUser shape: cognitoUser.attributes.name, given_name, family_name
-    const attrs: any = (user && (((user as any).attributes) || user));
+    if (user) {
+      if (user.name) return user.name;
+      if (user.preferredUsername) return user.preferredUsername;
+      if (user.email) return user.email;
+    }
+    const attrs: any = (cognitoUser && (((cognitoUser as any).attributes) || cognitoUser));
     if (attrs) {
       if (attrs.name) return attrs.name;
       if (attrs.given_name || attrs.family_name) return `${attrs.given_name || ''} ${attrs.family_name || ''}`.trim();
       if (attrs.email) return attrs.email;
     }
-    if (user && ((user as any).username)) return (user as any).username;
+    if (cognitoUser && ((cognitoUser as any).username)) return (cognitoUser as any).username;
     return undefined;
   };
 
@@ -142,7 +149,7 @@ export function Navigation(props: NavigationProps) {
                     </IconButton>
                     <Menu anchorEl={teamMenuAnchor} open={openTeamMenu} onClose={() => setTeamMenuAnchor(null)}>
                       {teamAssignments.length === 0 ? (
-                        <MenuItem disabled>No teams</MenuItem>
+                        <MenuItem disabled>{t('nav.noTeams', 'No teams')}</MenuItem>
                       ) : (
                         teamAssignments.map((t) => (
                           <MenuItem key={t.team.id} onClick={() => { selectTeam(t.team.id); setTeamMenuAnchor(null); }}>{t.team.name}</MenuItem>
@@ -154,7 +161,7 @@ export function Navigation(props: NavigationProps) {
 
                 {/* Theme toggle lives here so it aligns with the top cluster; hidden when collapsed */}
                 {!collapsed && (
-                  <Tooltip title={themeMode === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}>
+                  <Tooltip title={themeMode === 'dark' ? t('nav.switchToLight', 'Switch to light theme') : t('nav.switchToDark', 'Switch to dark theme')}>
                     <IconButton
                       className="nav-theme-toggle"
                       aria-label="Toggle theme"
@@ -168,15 +175,15 @@ export function Navigation(props: NavigationProps) {
               </Box>
             )}
 
-            {/* User Avatar: navigates to /profile (always visible) */}
+            {/* User Avatar: use user's profile picture if available, otherwise initials */}
             <>
               <IconButton
-                aria-label={displayName ? `Open profile for ${displayName}` : 'Open profile'}
+                aria-label={displayName ? t('nav.openProfile', { defaultValue: `Open profile for ${displayName}`, name: displayName }) : t('nav.openProfileFallback', 'Open profile')}
                 onClick={(e) => setProfileMenuAnchor(e.currentTarget)}
                 size="small"
                 className="nav-profile-button"
               >
-                <Avatar alt={displayName ?? 'Profile'} className="nav-profile-avatar">{initials ?? <PersonIcon />}</Avatar>
+                <Avatar alt={displayName ?? t('nav.profileAlt', 'Profile')} src={user?.picture} className="nav-profile-avatar">{!user?.picture && (initials ?? <PersonIcon />)}</Avatar>
               </IconButton>
 
               <Menu
@@ -184,15 +191,15 @@ export function Navigation(props: NavigationProps) {
                 open={openProfileMenu}
                 onClose={() => setProfileMenuAnchor(null)}
               >
-                <MenuItem onClick={() => { setProfileMenuAnchor(null); navigate('/profile'); }}>Profile</MenuItem>
-                <MenuItem onClick={() => { setProfileMenuAnchor(null); logout(); navigate('/login'); }}>Logout</MenuItem>
+                <MenuItem onClick={() => { setProfileMenuAnchor(null); navigate('/profile'); }}>{t('nav.profile', 'Profile')}</MenuItem>
+                <MenuItem onClick={() => { setProfileMenuAnchor(null); logout(); navigate('/login'); }}>{t('nav.logout', 'Logout')}</MenuItem>
               </Menu>
             </>
           </Box>
 
           <Box className={"nav nav-heading nav-heading-wrapper"}>
             <Box className="nav-heading-left">
-              <Typography variant={"h5"} className={"nav nav-heading nav-heading-title"}>{!collapsed && 'Navigation'}</Typography>
+              <Typography variant={"h5"} className={"nav nav-heading nav-heading-title"}>{!collapsed && t('nav.title', 'Navigation')}</Typography>
             </Box>
             <IconButton aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'} onClick={() => setCollapsed(!collapsed)} className={"nav nav-heading nav-heading-button"}>
               {collapsed ? <KeyboardDoubleArrowRightIcon /> : <KeyboardDoubleArrowLeftIcon />}
@@ -217,7 +224,7 @@ export function Navigation(props: NavigationProps) {
                     </ListItemIcon>
                   )}
                   {!collapsed && (
-                    <ListItemText className="nav nav-sidebar nav-sidebar-item-text" primary={item.label} />
+                    <ListItemText className="nav nav-sidebar nav-sidebar-item-text" primary={t(item.labelKey, item.labelKey)} />
                   )}
                 </ListItemButton>
               );

@@ -10,6 +10,12 @@ import TextField from '@mui/material/TextField';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
+import Paper from '@mui/material/Paper';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemText from '@mui/material/ListItemText';
+import Divider from '@mui/material/Divider';
 
 export function Profile() {
   const { t } = useTranslation();
@@ -17,6 +23,7 @@ export function Profile() {
   const fetchSelf = useCognitoUserStore((s) => s.fetchSelf);
   const updateSelf = useCognitoUserStore((s) => s.updateSelf);
   const uploadSelfPicture = useCognitoUserStore((s) => s.uploadSelfPicture);
+  const availableTeams = useCognitoUserStore((s) => s.availableTeams || []);
 
   const [uploading, setUploading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(user?.picture);
@@ -70,7 +77,8 @@ export function Profile() {
   };
 
   return (
-    <Box className="page page-profile">
+    <>
+    <Paper className="page page-profile page-profile-paper" elevation={3} sx={{ padding: 3 }}>
       <Typography variant="h4" gutterBottom>{t('profile.title', 'Profile')}</Typography>
 
       <Grid container spacing={4}>
@@ -86,7 +94,7 @@ export function Profile() {
               style={{ display: 'none' }}
             />
             <label htmlFor="profile-picture-input">
-              <Button variant="outlined" component="span" sx={{ mt: 2 }} disabled={uploading}>
+              <Button variant="outlined" component="span" sx={{ mt: 2 }} disabled={uploading} className="profile-upload-button">
                 {uploading ? <><CircularProgress size={16} />&nbsp;{t('profile.uploading', 'Uploading...')}</> : t('profile.upload', 'Upload picture')}
               </Button>
             </label>
@@ -101,7 +109,7 @@ export function Profile() {
                   name="name"
                   control={control}
                   render={({ field }) => (
-                    <TextField fullWidth label={t('profile.name', 'Name')} {...field} />
+                    <TextField fullWidth label={t('profile.name', 'Name')} {...field} helperText={t('profile.editable.name', 'Editable')} />
                   )}
                 />
               </Grid>
@@ -111,13 +119,13 @@ export function Profile() {
                   name="preferredUsername"
                   control={control}
                   render={({ field }) => (
-                    <TextField fullWidth label={t('profile.username', 'Username')} {...field} />
+                    <TextField fullWidth label={t('profile.username', 'Username')} {...field} helperText={t('profile.editable.username', 'Editable')} />
                   )}
                 />
               </Grid>
 
               <Grid className="profile-field profile-field-half">
-                <TextField fullWidth label={t('profile.email', 'Email')} value={user?.email || ''} disabled />
+                <TextField fullWidth label={t('profile.email', 'Email')} value={user?.email || ''} disabled className="readonly-field" helperText={t('profile.readOnly.email', 'Read only')} />
               </Grid>
 
               <Grid className="profile-field profile-field-half">
@@ -125,7 +133,7 @@ export function Profile() {
                   name="birthdate"
                   control={control}
                   render={({ field }) => (
-                    <TextField fullWidth type="date" InputLabelProps={{ shrink: true }} label={t('profile.birthdate', 'Birthdate')} {...field} />
+                    <TextField fullWidth type="date" InputLabelProps={{ shrink: true }} label={t('profile.birthdate', 'Birthdate')} {...field} helperText={t('profile.editable.birthdate', 'Editable')} />
                   )}
                 />
               </Grid>
@@ -140,6 +148,31 @@ export function Profile() {
           </Box>
         </Grid>
       </Grid>
-    </Box>
+    </Paper>
+
+    {/* Secondary paper: List available teams for this user */}
+    <Paper className="page page-profile page-profile-teams" elevation={1} sx={{ padding: 2, marginTop: 2 }}>
+      <Typography variant="h6" gutterBottom>{t('profile.teams.title', 'Teams')}</Typography>
+      <List>
+        {availableTeams.length === 0 ? (
+          <ListItem>
+            <ListItemText primary={t('profile.teams.none', 'No teams available')} />
+          </ListItem>
+        ) : (
+          availableTeams.map((ta: any) => (
+            <React.Fragment key={ta.team?.id ?? ta.team?.name}>
+              <ListItem className="profile-team-item">
+                <ListItemAvatar>
+                  <Avatar className="profile-team-avatar">{ta.team?.name ? ta.team.name[0] : 'T'}</Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={ta.team?.name ?? ''} secondary={ta.role ? `${t('profile.teams.role', 'Role')}: ${ta.role}` : null} />
+              </ListItem>
+              <Divider component="li" />
+            </React.Fragment>
+          ))
+        )}
+      </List>
+    </Paper>
+    </>
   );
 }

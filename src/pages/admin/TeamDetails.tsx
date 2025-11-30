@@ -9,7 +9,7 @@ import { ItemList, FetchResult } from '../../components/ItemList';
 import { IFilterOption, ITeamInviteFilterOption } from '../../services/types';
 
 // MUI
-import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, Typography, Card, CardContent, CircularProgress, Alert, Stack, Divider, IconButton, Paper, FormControlLabel, Switch, FormGroup, Chip, Tabs, Tab, TableCell } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, Typography, Card, CardContent, CircularProgress, Alert, Stack, Divider, IconButton, Paper, FormControlLabel, Switch, FormGroup, Chip, Tabs, Tab, TableCell, Avatar } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
 
@@ -24,6 +24,7 @@ export function TeamDetails() {
   const teamInvites = useTeamStore(state => state.teamInvites) || { invites: [], count: 0, nextToken: undefined, hasMore: false, filter: {} as any };
   const fetchTeamMembers = useTeamStore(state => state.fetchTeamMembers);
   const fetchTeamInvites = useTeamStore(state => state.fetchTeamInvites);
+  const uploadTeamPicture = useTeamStore(state => state.uploadTeamPicture);
   const notify = useNotificationStore(state => state.notify);
   const navigate = useNavigate();
   const { loading, setLoading, Loading } = useLoading(true);
@@ -31,6 +32,9 @@ export function TeamDetails() {
   const [name, setName] = useState<string>('');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
   const [teamSettings, setTeamSettings] = useState<{ allowFileUploads: boolean; allowTeamGoalComments: boolean; allowIndividualGoalComments: boolean } | undefined>(undefined);
+  const [picturePreview, setPicturePreview] = useState<string | undefined>(undefined);
+  const [uploadingPicture, setUploadingPicture] = useState(false);
+  const pictureInputRef = React.useRef<HTMLInputElement | null>(null);
   const [saving, setSaving] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
 
@@ -55,6 +59,7 @@ export function TeamDetails() {
     if (currentTeam) {
       setName(currentTeam.name || '');
       setStatus((currentTeam.status as 'active' | 'inactive') || 'active');
+      setPicturePreview(currentTeam.picture);
     }
   }, [currentTeam]);
 
@@ -102,6 +107,29 @@ export function TeamDetails() {
 
   const onTabChange = (_: any, newIndex: number) => setTabIndex(newIndex);
 
+  const handlePictureFile = async (file?: File) => {
+    if (!file || !currentTeam) return;
+    try {
+      setUploadingPicture(true);
+      const url = await uploadTeamPicture(currentTeam.id, file, (pct) => {
+        // could set progress state here
+      });
+      if (url) {
+        setPicturePreview(url);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setUploadingPicture(false);
+      if (pictureInputRef.current) pictureInputRef.current.value = '';
+    }
+  };
+
+  const onPictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) handlePictureFile(f);
+  };
+
   return (
     <Box p={3} className="team-details-root">
       <Loading />
@@ -140,6 +168,17 @@ export function TeamDetails() {
               <Box display="flex" gap={3} alignItems="flex-start">
                 {/* Left column: Static data (kept to the left as requested) */}
                 <Box sx={{ width: 280 }}>
+                  <Box display="flex" flexDirection="column" alignItems="center" mb={2}>
+                    <Avatar alt={currentTeam?.name || ''} src={picturePreview} sx={{ width: 120, height: 120, mb: 1 }}>
+                      {!picturePreview && (currentTeam?.name ? currentTeam.name[0] : 'T')}
+                    </Avatar>
+                    <input accept="image/*" id="team-picture-input" type="file" onChange={onPictureChange} ref={pictureInputRef} style={{ display: 'none' }} />
+                    <label htmlFor="team-picture-input">
+                      <Button variant="outlined" component="span" size="small" disabled={uploadingPicture}>
+                        {uploadingPicture ? <><CircularProgress size={16} />&nbsp;{i18next.t('profile.uploading','Uploading...')}</> : i18next.t('profile.upload','Upload picture')}
+                      </Button>
+                    </label>
+                  </Box>
                   <Box mt={1} mb={1}>
                     <Box display="flex" alignItems="center" gap={1} style={{marginBottom: 8}}>
                       <Typography variant="body2" color="text.secondary">{i18next.t('admin.team.status','Status:')}</Typography>

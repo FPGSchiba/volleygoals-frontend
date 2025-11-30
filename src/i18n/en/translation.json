@@ -383,7 +383,10 @@
     "teams": {
       "prompt": { "newName": "New team name" },
       "filter": { "name": "Name", "status": "Status", "any": "Any" },
-      "columns": { "name": "Name", "status": "Status", "created": "Created", "updated": "Updated" }
+      "columns": { "picture": "Picture", "name": "Name", "status": "Status", "created": "Created", "updated": "Updated" }
+    },
+    "teamsList": {
+      "title": "Teams"
     },
     "teamDetails": { "title": "Team Details" },
     "team": {
@@ -451,6 +454,34 @@
     "email": "Email",
     "birthdate": "Birthdate",
     "save": "Save",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "editable": {
+      "name": "Editable Name",
+      "username": "Editable Username",
+      "email": "Editable Email",
+      "birthdate": "Editable Birthdate"
+    },
+    "readOnly": {
+      "name": "Read-Only Name",
+      "username": "Read-Only Username",
+      "email": "Read-Only Email",
+      "birthdate": "Read-Only Birthdate"
+    },
+    "teams": {
+      "title": "My Teams",
+      "empty": "You are not a member of any team.",
+      "join": "Join a Team",
+      "create": "Create a New Team"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "teams": "Teams",
+    "profile": "Profile",
+    "admin": "Admin",
+    "logout": "Logout",
+    "seasons": "Seasons",
+    "users": "Users"
   }
 }

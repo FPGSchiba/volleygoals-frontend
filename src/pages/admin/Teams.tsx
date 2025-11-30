@@ -1,6 +1,6 @@
 import React from 'react';
 import i18next from 'i18next';
-import { Grid, TextField, MenuItem, TableCell, Chip, Button } from '@mui/material';
+import { Grid, TextField, MenuItem, TableCell, Chip, Button, Avatar } from '@mui/material';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { ITeam } from '../../store/types';
 import { ITeamFilterOption } from '../../services/types';
@@ -84,6 +84,7 @@ export function Teams() {
 
   const renderRow = (team: ITeam) => {
     return [
+      <TableCell key="picture" className="teams-avatar-cell"><Avatar src={team.picture} alt={team.name} className="teams-avatar">{!team.picture && (team.name ? team.name[0] : 'T')}</Avatar></TableCell>,
       <TableCell key="name">{team.name}</TableCell>,
       <TableCell key="status"><Chip label={team.status} color={team.status == 'active' ? 'success' : 'error'} /></TableCell>,
       <TableCell key="created">{new Date(team.createdAt).toLocaleString('de-CH')}</TableCell>,
@@ -119,8 +120,8 @@ export function Teams() {
 
   return (
     <ItemList<ITeam, ITeamFilterOption>
-      title="Teams"
-      columns={[i18next.t('admin.teams.columns.name','Name'), i18next.t('admin.teams.columns.status','Status'), i18next.t('admin.teams.columns.created','Created'), i18next.t('admin.teams.columns.updated','Updated')]}
+      title={i18next.t('admin.teams.title','Teams')}
+      columns={[i18next.t('admin.teams.columns.picture','Picture'), i18next.t('admin.teams.columns.name','Name'), i18next.t('admin.teams.columns.status','Status'), i18next.t('admin.teams.columns.created','Created'), i18next.t('admin.teams.columns.updated','Updated')]}
       initialFilter={initialFilter}
       rowsPerPage={10}
       fetch={fetchAdapter}
