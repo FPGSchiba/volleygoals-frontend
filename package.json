@@ -20,7 +20,7 @@
     "esbuild-plugin-copy": "^2.1.1",
     "esbuild-plugin-yaml": "^0.0.1",
     "esbuild-sass-plugin": "^3.3.1",
-    "esbuild-yaml": "^3.0.4",
+    "esbuild-yaml": "^3.2.0",
     "https-browserify": "^1.0.0",
     "i18next": "^25.7.0",
     "js-cookie": "^3.0.5",
