@@ -136,12 +136,14 @@ const Root = () => {
   );
 };
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
+const rootEl = document.getElementById('root');
 
-root.render(
-  <React.StrictMode>
-    <Root />
-  </React.StrictMode>
-);
+if (rootEl) {
+  const root = ReactDOM.createRoot(rootEl as HTMLElement);
+
+  root.render(
+    <React.StrictMode>
+      <Root />
+    </React.StrictMode>
+  );
+}
