@@ -91,6 +91,19 @@ export interface ITeamMember {
   leftAt?: string;
 }
 
+export interface ITeamUser {
+  id: string;
+  name?: string;
+  email: string;
+  picture?: string;
+  preferredUsername?: string;
+  role: RoleType;
+  status: string;
+  userStatus: string;
+  birthdate?: string;
+  joinedAt?: string;
+}
+
 // Invites
 export interface IInvite {
   id: string;

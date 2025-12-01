@@ -6,12 +6,16 @@ import {useNotificationStore} from "../../store/notification";
 import { useLoading } from '../../hooks/useLoading';
 import i18next from 'i18next';
 import { ItemList, FetchResult } from '../../components/ItemList';
-import { IFilterOption, ITeamInviteFilterOption } from '../../services/types';
+import {
+  ITeamInviteFilterOption,
+  ITeamMemberFilterOption
+} from '../../services/types';
 
 // MUI
 import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, Typography, Card, CardContent, CircularProgress, Alert, Stack, Divider, IconButton, Paper, FormControlLabel, Switch, FormGroup, Chip, Tabs, Tab, TableCell, Avatar } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
+import {ITeamUser} from "../../store/types";
 
 export function TeamDetails() {
   const { teamId } = useParams<{ teamId?: string }>();
@@ -111,7 +115,7 @@ export function TeamDetails() {
     if (!file || !currentTeam) return;
     try {
       setUploadingPicture(true);
-      const url = await uploadTeamPicture(currentTeam.id, file, (pct) => {
+      const url = await uploadTeamPicture(currentTeam.id, file, (_pct) => {
         // could set progress state here
       });
       if (url) {
@@ -261,22 +265,78 @@ export function TeamDetails() {
 
               {tabIndex === 0 && (
                 <Box mt={2} className="team-members-list">
-                  <ItemList<any, IFilterOption>
+                  <ItemList<ITeamUser, ITeamMemberFilterOption>
                     title={i18next.t('admin.team.members.title','Members')}
-                    columns={[i18next.t('admin.memberships.columns.team','Team'), i18next.t('admin.memberships.columns.role','Role'), i18next.t('admin.memberships.columns.status','Status'), i18next.t('admin.memberships.columns.joined','Joined'), i18next.t('admin.memberships.columns.updated','Updated')]}
-                    initialFilter={{} as IFilterOption}
+                    // include Name and Email columns with avatar
+                    columns={[i18next.t('common.name','Name'), i18next.t('common.email','Email'), i18next.t('admin.memberships.columns.role','Role'), i18next.t('admin.memberships.columns.status','Status'), i18next.t('admin.memberships.columns.joined','Joined')]}
+                    initialFilter={{} as ITeamMemberFilterOption}
                     rowsPerPage={10}
+                    // render typed filter controls
+                    renderFilterFields={(draftFilter: ITeamMemberFilterOption, setDraftFilter: (f: ITeamMemberFilterOption) => void) => (
+                      <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
+                        <TextField
+                          size="small"
+                          label={i18next.t('common.search','Search')}
+                          value={(draftFilter as any).userId ?? ''}
+                          onChange={e => setDraftFilter({ ...(draftFilter || {}), userId: e.target.value || undefined } as ITeamMemberFilterOption)}
+                        />
+
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                          <InputLabel id="filter-role-label">{i18next.t('admin.memberships.columns.role','Role')}</InputLabel>
+                          <Select
+                            labelId="filter-role-label"
+                            label={i18next.t('admin.memberships.columns.role','Role')}
+                            value={(draftFilter as any).role ?? ''}
+                            onChange={e => setDraftFilter({ ...(draftFilter || {}), role: e.target.value || undefined } as ITeamMemberFilterOption)}
+                          >
+                            <MenuItem value="">{i18next.t('common.all','All')}</MenuItem>
+                            <MenuItem value="member">{i18next.t('admin.memberships.role.member','Member')}</MenuItem>
+                            <MenuItem value="owner">{i18next.t('admin.memberships.role.owner','Owner')}</MenuItem>
+                            <MenuItem value="admin">{i18next.t('admin.memberships.role.admin','Admin')}</MenuItem>
+                          </Select>
+                        </FormControl>
+
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                          <InputLabel id="filter-status-label">{i18next.t('admin.memberships.columns.status','Status')}</InputLabel>
+                          <Select
+                            labelId="filter-status-label"
+                            label={i18next.t('admin.memberships.columns.status','Status')}
+                            value={(draftFilter as any).status ?? ''}
+                            onChange={e => setDraftFilter({ ...(draftFilter || {}), status: e.target.value || undefined } as ITeamMemberFilterOption)}
+                          >
+                            <MenuItem value="">{i18next.t('common.all','All')}</MenuItem>
+                            <MenuItem value="active">{i18next.t('common.active','Active')}</MenuItem>
+                            <MenuItem value="inactive">{i18next.t('common.inactive','Inactive')}</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    )}
                     fetch={async (filter) => {
                       const res = await fetchTeamMembers(currentTeam!.id, filter);
                       return { items: res.items as any[], count: res.count } as FetchResult<any>;
                     }}
-                    renderRow={(m) => [
-                      <TableCell key="team">{m.teamId}</TableCell>,
-                      <TableCell key="role"><Chip label={m.role} size="small" /></TableCell>,
-                      <TableCell key="status"><Chip label={m.status} color={m.status === 'active' ? 'success' : 'default'} size="small" /></TableCell>,
-                      <TableCell key="joined">{m.joinedAt ? new Date(m.joinedAt).toLocaleString('de-CH') : '-'}</TableCell>,
-                      <TableCell key="updated">{m.updatedAt ? new Date(m.updatedAt).toLocaleString('de-CH') : '-'}</TableCell>,
-                    ]}
+                    // render rows with avatar + name + email
+                    renderRow={(m) => {
+                      const displayName = (m as any).user?.name ?? (m as any).name ?? (m as any).displayName ?? (m as any).email ?? '-';
+                      const pictureSrc = (m as any).user?.picture ?? (m as any).picture;
+                      const avatarLetter = displayName && displayName.length ? displayName[0] : 'U';
+                      const displayEmail = (m as any).user?.email ?? (m as any).email ?? '-';
+
+                      return [
+                        <TableCell key="name">
+                          <Box display="flex" alignItems="center" gap={1}>
+                            <Avatar src={pictureSrc} alt={displayName} sx={{ width: 32, height: 32 }}>
+                              {!pictureSrc && avatarLetter}
+                            </Avatar>
+                            <Typography variant="body2">{displayName}</Typography>
+                          </Box>
+                        </TableCell>,
+                        <TableCell key="email"><Typography variant="body2">{displayEmail}</Typography></TableCell>,
+                        <TableCell key="role"><Chip label={m.role} size="small" /></TableCell>,
+                        <TableCell key="status"><Chip label={m.status} color={m.status === 'active' ? 'success' : 'default'} size="small" /></TableCell>,
+                        <TableCell key="joined">{m.joinedAt ? new Date(m.joinedAt).toLocaleString('de-CH') : '-'}</TableCell>,
+                      ];
+                    }}
                     items={teamMembers}
                     count={teamMembers.length}
                   />
@@ -290,6 +350,46 @@ export function TeamDetails() {
                     columns={[i18next.t('invitePage.accept.email.label','Email'), i18next.t('invitePage.complete.details.roleLabel','Role'), i18next.t('invitePage.complete.details.statusLabel','Status'), i18next.t('invitePage.complete.details.messageLabel','Message'), i18next.t('admin.invites.columns.created','Created'), i18next.t('admin.invites.columns.expires','Expires')]}
                     initialFilter={{} as ITeamInviteFilterOption}
                     rowsPerPage={10}
+                    renderFilterFields={(draftFilter: ITeamInviteFilterOption, setDraftFilter: (f: ITeamInviteFilterOption) => void) => (
+                      <Box display="flex" gap={2} alignItems="center" flexWrap="wrap">
+                        <TextField
+                          size="small"
+                          label={i18next.t('invitePage.accept.email.label','Email')}
+                          value={(draftFilter as any).email ?? ''}
+                          onChange={e => setDraftFilter({ ...(draftFilter || {}), email: e.target.value || undefined } as ITeamInviteFilterOption)}
+                        />
+
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                          <InputLabel id="filter-invite-role-label">{i18next.t('invitePage.complete.details.roleLabel','Role')}</InputLabel>
+                          <Select
+                            labelId="filter-invite-role-label"
+                            label={i18next.t('invitePage.complete.details.roleLabel','Role')}
+                            value={(draftFilter as any).role ?? ''}
+                            onChange={e => setDraftFilter({ ...(draftFilter || {}), role: e.target.value || undefined } as ITeamInviteFilterOption)}
+                          >
+                            <MenuItem value="">{i18next.t('common.all','All')}</MenuItem>
+                            <MenuItem value="member">{i18next.t('admin.memberships.role.member','Member')}</MenuItem>
+                            <MenuItem value="owner">{i18next.t('admin.memberships.role.owner','Owner')}</MenuItem>
+                            <MenuItem value="admin">{i18next.t('admin.memberships.role.admin','Admin')}</MenuItem>
+                          </Select>
+                        </FormControl>
+
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                          <InputLabel id="filter-invite-status-label">{i18next.t('invitePage.complete.details.statusLabel','Status')}</InputLabel>
+                          <Select
+                            labelId="filter-invite-status-label"
+                            label={i18next.t('invitePage.complete.details.statusLabel','Status')}
+                            value={(draftFilter as any).status ?? ''}
+                            onChange={e => setDraftFilter({ ...(draftFilter || {}), status: e.target.value || undefined } as ITeamInviteFilterOption)}
+                          >
+                            <MenuItem value="">{i18next.t('common.all','All')}</MenuItem>
+                            <MenuItem value="pending">{i18next.t('invite.status.pending','Pending')}</MenuItem>
+                            <MenuItem value="accepted">{i18next.t('invite.status.accepted','Accepted')}</MenuItem>
+                            <MenuItem value="expired">{i18next.t('invite.status.expired','Expired')}</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    )}
                     fetch={async (filter: ITeamInviteFilterOption) => {
                       const res = await fetchTeamInvites(currentTeam!.id, filter);
                       return { items: res.items as any[], count: res.count } as FetchResult<any>;

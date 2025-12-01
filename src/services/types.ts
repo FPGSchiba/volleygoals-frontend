@@ -17,6 +17,12 @@ export interface ITeamInviteFilterOption extends IFilterOption {
   invitedBy?: string,
 }
 
+export interface ITeamMemberFilterOption extends IFilterOption {
+  userId?: string,
+  role?: string,
+  status?: string,
+}
+
 export interface IUserFilterOption {
   limit?: number,
   nextToken?: string,

@@ -145,7 +145,13 @@ export function Navigation(props: NavigationProps) {
                 {(userType === UserType.User && !collapsed) && (
                   <>
                     <IconButton aria-label="Select team" onClick={(e) => setTeamMenuAnchor(e.currentTarget)} size="small" className="nav-team-button">
-                      <Avatar alt={selectedTeam?.team.name ?? 'Team'} className="nav-team-avatar">{(selectedTeam?.team.name && selectedTeam?.team.name[0]) || 'T'}</Avatar>
+                      <Avatar
+                        alt={selectedTeam?.team.name ?? 'Team'}
+                        src={selectedTeam?.team?.picture}
+                        className="nav-team-avatar"
+                      >
+                        {!selectedTeam?.team?.picture && ((selectedTeam?.team?.name && selectedTeam.team.name[0]) || 'T')}
+                      </Avatar>
                     </IconButton>
                     <Menu anchorEl={teamMenuAnchor} open={openTeamMenu} onClose={() => setTeamMenuAnchor(null)}>
                       {teamAssignments.length === 0 ? (

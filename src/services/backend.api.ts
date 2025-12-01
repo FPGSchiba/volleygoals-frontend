@@ -1,13 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
-import {ITeamFilterOption, ITeamInviteFilterOption, IUserFilterOption} from "./types";
+import {
+  ITeamFilterOption,
+  ITeamInviteFilterOption,
+  ITeamMemberFilterOption,
+  IUserFilterOption
+} from "./types";
 import {
   IInvite,
   ITeam,
   ITeamAssignment,
   ITeamMember,
-  ITeamSettings,
+  ITeamSettings, ITeamUser,
   IUser,
   IUserUpdate
 } from "../store/types";
@@ -198,6 +203,28 @@ class VolleyGoalsAPI {
     return p;
   }
 
+  public async uploadFileToPresignedUrl(file: File, presignedUrl: string, onProgress?: (pct: number) => void): Promise<{ message: string, error?: string}> {
+    try {
+      // Use PUT to upload the raw file. Axios in browser will set Content-Type properly if provided.
+      await axios.put(presignedUrl, file, {
+        headers: {
+          'Content-Type': file.type,
+        },
+        onUploadProgress: (progressEvent) => {
+          if (!onProgress) return;
+          const pct = Math.round((progressEvent.loaded * 100) / (progressEvent.total || file.size));
+          onProgress(pct);
+        },
+      });
+      return { message: 'success' };
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
   // Self
   public async getSelf(): Promise<{message: string, error?: string, user?: IUser, assignments?: ITeamAssignment[]}> {
     try {
@@ -243,27 +270,11 @@ class VolleyGoalsAPI {
     if (presign.error || !presign.uploadUrl) {
       return presign;
     }
-    const url = presign.uploadUrl; // presigned PUT URL
-
-    try {
-      // Use PUT to upload the raw file. Axios in browser will set Content-Type properly if provided.
-      await axios.put(url, file, {
-        headers: {
-          'Content-Type': file.type,
-        },
-        onUploadProgress: (progressEvent) => {
-          if (!onProgress) return;
-          const pct = Math.round((progressEvent.loaded * 100) / (progressEvent.total || file.size));
-          onProgress(pct);
-        },
-      });
-      return presign;
-    } catch (reason: any) {
-      return {
-        message: reason.response?.data?.message || 'error.internalServerError',
-        error: reason.response?.data?.error,
-      }
+    const uploadResult = await this.uploadFileToPresignedUrl(file , presign.uploadUrl, onProgress);
+    if (uploadResult.error) {
+      return uploadResult;
     }
+    return { message: 'success', fileUrl: presign.fileUrl };
   }
 
   // Teams
@@ -345,6 +356,48 @@ class VolleyGoalsAPI {
     }
   }
 
+  public async getPresignedTeamAvatarUploadUrl(teamId: string, filename: string, contentType: string): Promise<{ message: string, error?: string, uploadUrl?: string, key?: string, fileUrl?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/picture/presign`, { params: { filename, contentType }});
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async uploadTeamAvatar(teamId: string, file: File, onProgress?: (pct: number) => void): Promise<{message: string, error?: string, fileUrl?: string}> {
+    const presign = await this.getPresignedTeamAvatarUploadUrl(teamId, file.name, file.type);
+    if (presign.error || !presign.uploadUrl) {
+      return presign;
+    }
+    const uploadResult = await this.uploadFileToPresignedUrl(file , presign.uploadUrl, onProgress);
+    if (uploadResult.error) {
+      return uploadResult;
+    }
+    return { message: 'success', fileUrl: presign.fileUrl };
+  }
+
+  public async listTeamInvites(teamId: string, filter?: ITeamInviteFilterOption): Promise<{ message: string, error?: string, count?: number, items?: IInvite[], nextToken?: string, hasMore?: boolean }> {
+    try {
+      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as ITeamInviteFilterOption;
+      const data = await this.requestDeduped('GET', `/teams/${teamId}/invites`, async () => {
+        await this.ensureEndpoints();
+        return VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/invites`, { params: normFilter });
+      }, normFilter, 1000);
+      return data as any;
+    } catch (reason: any) {
+      return {
+        message: reason?.response?.data?.message || reason?.message || 'error.internalServerError',
+        error: reason?.response?.data?.error,
+      };
+    }
+  }
+
+  // Users
   public async fetchUsers(filter?: IUserFilterOption): Promise<{message: string, error?: string, paginationToken?: string, users?: IUser[]}> {
     try {
       await this.ensureEndpoints();
@@ -384,6 +437,7 @@ class VolleyGoalsAPI {
     }
   }
 
+  // Invites
   public async completeInvite(token: string, email: string, accepted: boolean): Promise<{ message: string, error?: string, member?: ITeamMember, invite?: IInvite, userCreated?: boolean, temporaryPassword?: string}> {
     try {
       await this.ensureEndpoints(false);
@@ -410,7 +464,8 @@ class VolleyGoalsAPI {
     }
   }
 
-  public async listTeamMembers(teamId: string, filter?: any): Promise<{ message: string, error?: string, count?: number, items?: ITeamMember[] }> {
+  // Team Members
+  public async listTeamMembers(teamId: string, filter?: ITeamMemberFilterOption): Promise<{ message: string, error?: string, count?: number, items?: ITeamUser[] }> {
     try {
       // Normalize filter so dedupe keys match (e.g. explicit defaults vs undefined)
       const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy };
@@ -418,22 +473,6 @@ class VolleyGoalsAPI {
       const data = await this.requestDeduped('GET', `/teams/${teamId}/members`, async () => {
         await this.ensureEndpoints();
         return VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/members`, { params: normFilter });
-      }, normFilter, 1000);
-      return data as any;
-    } catch (reason: any) {
-      return {
-        message: reason?.response?.data?.message || reason?.message || 'error.internalServerError',
-        error: reason?.response?.data?.error,
-      };
-    }
-  }
-
-  public async listTeamInvites(teamId: string, filter?: ITeamInviteFilterOption): Promise<{ message: string, error?: string, count?: number, items?: IInvite[], nextToken?: string, hasMore?: boolean }> {
-    try {
-      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as ITeamInviteFilterOption;
-      const data = await this.requestDeduped('GET', `/teams/${teamId}/invites`, async () => {
-        await this.ensureEndpoints();
-        return VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/invites`, { params: normFilter });
       }, normFilter, 1000);
       return data as any;
     } catch (reason: any) {
