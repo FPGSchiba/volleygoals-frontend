@@ -12,6 +12,7 @@
 /build
 
 # misc
+.env
 .DS_Store
 .env.local
 .env.development.local
@@ -23,9 +24,9 @@ yarn-debug.log*
 yarn-error.log*
 
 # Generated files
-public/assets
-!public/assets/favicon.ico
-!public/assets/index.html
+public/assets/index.js
+public/assets/index.js.map
+public/assets/resources
 
 # IDE
 .vscode/
@@ -34,5 +35,4 @@ public/assets
 # amplify
 node_modules
 .amplify
-amplify_outputs*
 amplifyconfiguration*

@@ -4,15 +4,26 @@ import postcss from 'postcss';
 import autoprefixer from 'autoprefixer';
 import plugin from 'node-stdlib-browser/helpers/esbuild/plugin';
 import stdLibBrowser from 'node-stdlib-browser';
-import {sentryEsbuildPlugin} from "@sentry/esbuild-plugin";
-import { YAMLPlugin } from "esbuild-yaml";
 import path from 'path';
-import data from './package.json' with { type: "json" };
-import { copy } from 'esbuild-plugin-copy';
+
+const define = {};
+for (const k of Object.keys(process.env)) {
+    const v = process.env[k];
+    if (v === undefined) continue;
+    const value = JSON.stringify(v);
+
+    // use dot-notation when the env key is a valid identifier,
+    // otherwise use bracket-notation with a JSON-escaped string
+    if (/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(k)) {
+        define[`process.env.${k}`] = value;
+    } else {
+        define[`process.env[${JSON.stringify(k)}]`] = value;
+    }
+}
 
 esbuild
     .build({
-        sourcemap: true,
+        sourcemap: false,
         entryPoints: ["src/index.tsx", "src/resources/styles/index.scss"],
         outdir: "public/assets",
         bundle: true,
@@ -21,6 +32,7 @@ esbuild
         inject: [path.resolve('node_modules/node-stdlib-browser/helpers/esbuild/shim.js')],
         define: {
             https: 'https',
+            ...define
         },
         plugins: [
             sassPlugin({
@@ -30,23 +42,6 @@ esbuild
                 },
             }),
             plugin(stdLibBrowser),
-            YAMLPlugin({}),
-            sentryEsbuildPlugin({
-                authToken: process.env.SENTRY_AUTH_TOKEN,
-                org: "fire-phoenix-games",
-                project: "home-automation-frontend",
-                release: {
-                    name: data.name,
-                    version: data.version,
-                }
-            }),
-            copy({
-                resolveFrom: "cwd",
-                assets: {
-                    from: ['src/conf.yaml'],
-                    to: ['public/assets'],
-                }
-            })
         ],
         loader: {
             ".png": "dataurl",

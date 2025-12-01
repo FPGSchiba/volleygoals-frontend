@@ -1,0 +1,27 @@
+@use "sass:meta";
+
+.team-details-root {
+  .team-main-paper {
+    margin-bottom: 1rem;
+  }
+
+  .team-settings-card {
+    .MuiCardContent-root {
+      padding: 0.75rem;
+    }
+  }
+
+  .team-members-paper {
+    margin-top: 1rem;
+  }
+
+  .team-details-tabs {
+    margin-top: 0.5rem;
+  }
+
+  .team-members-list, .team-invites-list {
+    overflow: auto;
+    max-height: 420px;
+  }
+}
+

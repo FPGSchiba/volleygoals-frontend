@@ -1,0 +1,487 @@
+{
+  "login": {
+    "emailPassword": {
+      "heading": "Sign In",
+      "subheading": "Welcome to Volley Goals!",
+      "email": {
+        "label": "Email",
+        "required": "Email is required",
+        "invalid": "Please enter a valid email address"
+      },
+      "password": {
+        "label": "Password",
+        "required": "Password is required",
+        "minLength": "Password must be at least 8 characters"
+      },
+      "submit": "Sign In",
+      "forgotPassword": "Forgot your password?"
+    },
+    "setupTOTP": {
+      "heading": "Set up TFA with TOTP",
+      "subheading": "Timed One-Time Password (TOTP) is mandatory here!",
+      "showQRInstructions": "To show the QR Code please click this area and scan it with an Authenticator App.",
+      "code": {
+        "label": "TOTP Code",
+        "required": "Enter the 6-digit code",
+        "validation": "Please enter a 6-digit code",
+        "placeholder": "123456",
+        "helperText": "Enter the 6-digit code from your authenticator app"
+      },
+      "submit": "Verify"
+    },
+    "setupInitialPassword": {
+      "heading": "Set your password",
+      "subheading": "Choose a secure password for your account.",
+      "newPassword": {
+        "label": "New Password",
+        "required": "New password is required",
+        "minLength": "Password must be at least 8 characters"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "required": "Please confirm your password",
+        "match": "Passwords must match"
+      },
+      "submit": "Set Password"
+    },
+    "setupPassword": {
+      "heading": "Set a new Password",
+      "subheading": "Please use your email to update your Password.",
+      "password": {
+        "label": "Password",
+        "required": "Password is required",
+        "minLength": "Password must be at least 8 characters"
+      },
+      "confirmPassword": {
+        "label": "Confirm Password",
+        "required": "Please confirm your password",
+        "match": "Passwords must match"
+      },
+      "codeHelperText": "Code sent to: {{email}}",
+      "code": {
+        "label": "Verification Code",
+        "required": "Verification code is required",
+        "validation": "Please enter a 6 Digit code",
+        "placeholder": "123456"
+      },
+      "resend": {
+        "stateWaiting": "Resend ({{countdown}} s)",
+        "stateActive": "Resend Code"
+      },
+      "submit": {
+        "stateActive": "Set new Password",
+        "stateLoading": "Setting Password..."
+      },
+      "success": {
+        "title": "Password Updated",
+        "message": "Your password has been successfully updated. You can now sign in with your new password."
+      }
+    },
+    "totp": {
+      "heading": "Two-Factor Authentication",
+      "subheading": "Please enter the code from your authenticator app.",
+      "code": {
+        "label": "TOTP Code",
+        "required": "Enter the 6-digit code",
+        "validation": "Please enter a 6-digit code",
+        "placeholder": "123456",
+        "helperText": "Enter the 6-digit code from your authenticator app"
+      },
+      "submit": "Verify"
+    }
+  },
+  "error": {
+    "general": {
+      "title": "An error occurred",
+      "message": "Something went wrong. Please try again later."
+    },
+    "internalServerError": {
+      "title": "Internal Server Error",
+      "message": "An unexpected error occurred on the server. Please try again later."
+    },
+    "badRequest": {
+      "title": "Bad Request",
+      "message": "The request was invalid or cannot be served. Please check and try again."
+    },
+    "forbidden": {
+      "title": "Access Denied",
+      "message": "You do not have permission to access this resource."
+    },
+    "notFound": {
+      "title": "Resource Not Found",
+      "message": "The requested resource could not be found."
+    },
+    "notImplemented": {
+      "title": "Not Implemented",
+      "message": "The requested functionality is not implemented."
+    },
+    "unauthorized": {
+      "title": "Unauthorized",
+      "message": "You are not authorized to perform this action."
+    },
+    "team": {
+      "exists": {
+        "title": "Team Already Exists",
+        "message": "A team with this name already exists. Please choose a different name."
+      },
+      "notFound": {
+        "title": "Team Not Found",
+        "message": "The specified team could not be found."
+      }
+    },
+    "teamSettings": {
+      "notFound": {
+        "title": "Team Settings Not Found",
+        "message": "The specified team settings could not be found."
+      }
+    },
+    "login": {
+      "emailPassword": {
+        "failed": {
+          "title": "Sign in failed"
+        },
+        "invalidCredentials": {
+          "title": "Invalid credentials",
+          "message": "Incorrect email or password."
+        },
+        "userNotConfirmed": {
+          "title": "Account not confirmed",
+          "message": "Your account is not confirmed. Check your email for a confirmation link."
+        },
+        "userNotFound": {
+          "title": "Account not found",
+          "message": "No account found for that email."
+        },
+        "passwordResetRequired": {
+          "title": "Password reset required",
+          "message": "A password reset is required. Please reset your password."
+        },
+        "tooManyRequests": {
+          "title": "Too many attempts",
+          "message": "Too many attempts. Try again later."
+        }
+      },
+      "setupTOTP": {
+        "verificationFailed": {
+          "title": "Verification failed",
+          "message": "TOTP verification failed, this means the code you entered is incorrect. Please try again."
+        },
+        "codeMismatch": {
+          "title": "Invalid code.",
+          "message": "The code you entered is incorrect. Please try again."
+        },
+        "expired": {
+          "title": "Code expired.",
+          "message": "The code has expired. Request a new code and try again."
+        },
+        "notAuthorized": {
+          "title": "Not authorized.",
+          "message": "You are not authorized to perform this action."
+        },
+        "limitExceeded": {
+          "title": "Too many attempts.",
+          "message": "Too many attempts. Please wait and try again later."
+        }
+      },
+      "setupPassword": {
+        "confirmForgotPassword": {
+          "title": "Invalid code or password",
+          "message": "The confirmation code or new password is invalid. Please check and try again."
+        },
+        "validation": {
+          "title": "Validation error",
+          "message": "Confirmation code, password, or username is empty or invalid."
+        },
+        "limitExceeded": {
+          "title": "Too many attempts",
+          "message": "Too many attempts. Please wait before trying again."
+        },
+        "codeMismatch": {
+          "title": "Invalid code",
+          "message": "The code you entered is invalid. Please check and try again."
+        },
+        "expiredCode": {
+          "title": "Code expired",
+          "message": "The code has expired. Request a new code to continue."
+        }
+      },
+      "totp": {
+        "verificationFailed": {
+          "title": "Verification failed",
+          "message": "The code you entered is incorrect. Please try again."
+        },
+        "codeMismatch": {
+          "title": "Invalid code",
+          "message": "The code you entered is incorrect. Please check it and try again."
+        },
+        "expired": {
+          "title": "Code expired",
+          "message": "The code has expired. Request a new code to continue."
+        },
+        "limitExceeded": {
+          "title": "Too many attempts",
+          "message": "Too many attempts. Please wait before trying again."
+        }
+      },
+      "setupInitialPassword": {
+        "notAuthorized": {
+          "title": "Password Setup Failed",
+          "message": "There was an error setting your password. Please try again."
+        },
+        "invalidPassword": {
+          "title": "Invalid password",
+          "message": "Password does not meet the required complexity."
+        },
+        "codeMismatch": {
+          "title": "Invalid code",
+          "message": "The confirmation code is incorrect. Please check and try again."
+        },
+        "expiredCode": {
+          "title": "Code expired",
+          "message": "The confirmation code has expired. Request a new code to continue."
+        },
+        "userNotFound": {
+          "title": "User not found",
+          "message": "No account found for that email."
+        }
+      }
+    },
+    "invite": {
+      "exists": {
+        "title": "Invite Already Exists",
+        "message": "An invite for this email already exists."
+      },
+      "invalidToken": {
+        "title": "Invalid Invite Token",
+        "message": "The invite token is invalid or has already been used."
+      },
+      "expired": {
+        "title": "Invite Expired",
+        "message": "The invite token has expired. Please request a new invite."
+      },
+      "alreadyCompleted": {
+        "title": "Invite Already Completed",
+        "message": "This invite has already been completed."
+      },
+      "userAlreadyMember": {
+        "title": "User Already a Member",
+        "message": "The user is already a member of the team."
+      }
+    }
+  },
+  "success": {
+    "ok": {
+      "title": "Success",
+      "message": "The operation was completed successfully."
+    },
+    "team": {
+      "created": {
+        "title": "Team Created",
+        "message": "The team has been created successfully."
+      },
+      "deleted": {
+        "title": "Team Deleted",
+        "message": "The team has been deleted successfully."
+      }
+    }
+  },
+  "invitePage": {
+    "accept": {
+      "title": "Invitation",
+      "subtitle": "You received an invitation link by email. Please enter the email address this invite was sent to and choose to accept or decline the invitation.",
+      "email": {
+        "label": "Email",
+        "required": "Email is required",
+        "invalid": "Enter a valid email"
+      },
+      "tokenLabel": "Token: {{token}}",
+      "button": {
+        "accept": "Accept",
+        "decline": "Decline"
+      }
+    },
+    "complete": {
+      "loading": "Loading invite...",
+      "details": {
+        "emailLabel": "Email",
+        "roleLabel": "Role",
+        "invitedByLabel": "Invited By",
+        "messageLabel": "Message",
+        "expiresAtLabel": "Expires At",
+        "statusLabel": "Status",
+        "statusUnknown": "Unknown",
+        "temporaryPasswordLabel": "Temporary Password"
+      },
+      "memberCreatedTitle": "Account created",
+      "memberCreatedMessage": "An account was created for you. Use the temporary password to sign in and set a new password.",
+      "copy": "Copy",
+      "copied": "Copied!",
+      "actions": {
+        "login": "Sign In",
+        "continue": "Continue",
+        "home": "Go to Home"
+      },
+      "title": "Invite Completed",
+      "subtitle": "Thank you — the invite has been completed successfully."
+    },
+    "error": {
+      "no_token": {
+        "title": "No Token Provided",
+        "message": "No invite token was found in the URL.",
+        "explain": "It looks like the invitation link is missing a token. Please check the link in your email or contact the sender to resend the invite."
+      },
+      "invalid_token": {
+        "title": "Invalid Token",
+        "message": "The invite token is invalid or has already been used.",
+        "explain": "The token in the link doesn't match any pending invitation. This can happen if the link was modified or the invite was already completed. Ask the sender to issue a new invite."
+      },
+      "expired_token": {
+        "title": "Invite Expired",
+        "message": "The invite token has expired. Please request a new invite.",
+        "explain": "Invitations are time-limited for security. Ask the team admin to send a new invite or request one again from the application."
+      },
+      "already_completed": {
+        "title": "Invite Already Completed",
+        "message": "This invite has already been completed.",
+        "explain": "This invitation was already accepted or declined. If you believe this is a mistake, contact the sender or your team administrator for assistance."
+      },
+      "unknown_error": {
+        "title": "Unknown Error",
+        "message": "An unknown error occurred while processing the invite.",
+        "explain": "An unexpected error occurred while processing the invitation. Try again later or contact support if the problem persists."
+      },
+      "actions": {
+        "home": "Go to Home",
+        "contact": "Contact Support",
+        "requestNew": "Request a new invite"
+      }
+    }
+  },
+  "admin": {
+    "userDetails": {
+      "title": "User Details",
+      "couldNotLoad": "Could not load user."
+    },
+    "user": {
+      "email": "Email",
+      "created": "Created",
+      "updated": "Updated",
+      "status": "Status",
+      "type": "Type"
+    },
+    "memberships": {
+      "title": "Memberships",
+      "subtitle": "Manage memberships for this user.",
+      "columns": {
+        "team": "Team",
+        "role": "Role",
+        "status": "Status",
+        "joined": "Joined",
+        "updated": "Updated"
+      }
+    },
+    "teams": {
+      "prompt": { "newName": "New team name" },
+      "filter": { "name": "Name", "status": "Status", "any": "Any" },
+      "columns": { "picture": "Picture", "name": "Name", "status": "Status", "created": "Created", "updated": "Updated" }
+    },
+    "teamsList": {
+      "title": "Teams"
+    },
+    "teamDetails": { "title": "Team Details" },
+    "team": {
+      "invites": { "title": "Invites", "create": "Create Invite" },
+      "members": {
+        "tabs": { "members": "Members", "invites": "Invites" },
+        "title": "Team Members",
+        "subtitle": "Members list will appear here. (Placeholder)",
+        "placeholder": "Team members will be shown here once implemented."
+      },
+      "created": "Created:",
+      "updated": "Updated:",
+      "status": "Status:",
+      "editName": "Edit team name",
+      "editStatus": "Edit status",
+      "settings": {
+        "title": "Team Settings",
+        "allowFileUploads": "Allow file uploads",
+        "allowTeamGoalComments": "Allow team goal comments",
+        "allowIndividualGoalComments": "Allow individual goal comments",
+        "noSettings": "No settings available for this team."
+      },
+      "save": "Save changes"
+    },
+    "actions": {
+      "goToUsers": "Go to Users",
+      "deactivate": "Deactivate",
+      "delete": "Delete"
+    }
+  },
+  "admin.invites": {
+    "columns": {
+      "created": "Created",
+      "expires": "Expires"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "active": "active",
+    "inactive": "inactive"
+  },
+  "notFoundPage": {
+    "title": "Page not found",
+    "subtitle": "We couldn't find the page you were looking for.",
+    "explain": "The page you're trying to reach may have been moved or deleted. If you typed the URL directly, please check it and try again.",
+    "actions": {
+      "dashboard": "Go to Dashboard",
+      "teams": "Go to Teams",
+      "login": "Sign In",
+      "home": "Go to Home"
+    }
+  },
+  "selectTeam": {
+    "title": "Select a Team",
+    "loading": "Loading teams...",
+    "unknownTeam": "Unknown team",
+    "selectTeam": "Select {{team}}"
+  },
+  "profile": {
+    "title": "Profile",
+    "upload": "Upload picture",
+    "uploading": "Uploading...",
+    "name": "Name",
+    "username": "Username",
+    "email": "Email",
+    "birthdate": "Birthdate",
+    "save": "Save",
+    "cancel": "Cancel",
+    "editable": {
+      "name": "Editable Name",
+      "username": "Editable Username",
+      "email": "Editable Email",
+      "birthdate": "Editable Birthdate"
+    },
+    "readOnly": {
+      "name": "Read-Only Name",
+      "username": "Read-Only Username",
+      "email": "Read-Only Email",
+      "birthdate": "Read-Only Birthdate"
+    },
+    "teams": {
+      "title": "My Teams",
+      "empty": "You are not a member of any team.",
+      "join": "Join a Team",
+      "create": "Create a New Team"
+    }
+  },
+  "nav": {
+    "home": "Home",
+    "dashboard": "Dashboard",
+    "teams": "Teams",
+    "profile": "Profile",
+    "admin": "Admin",
+    "logout": "Logout",
+    "seasons": "Seasons",
+    "users": "Users"
+  }
+}

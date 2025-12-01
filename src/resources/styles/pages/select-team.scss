@@ -1,0 +1,85 @@
+.select-team__container {
+  display: flex;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.select-team__card {
+  width: 100%;
+  max-width: 860px;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+.select-team__title {
+  margin-bottom: 16px;
+}
+
+.select-team__loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+}
+
+.select-team__loadingText {
+  color: var(--palette-text-secondary);
+}
+
+.select-team__list {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.select-team__item {
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+  cursor: pointer;
+  min-height: 220px;
+}
+
+.select-team__item:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.select-team__avatarWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.select-team__item .MuiAvatar-root {
+  width: 160px;
+  height: 160px;
+  font-size: 40px;
+  border-radius: 12px;
+}
+
+.select-team__item .MuiListItemText-root {
+  overflow: hidden;
+}
+
+.select-team__item .MuiTypography-h6 {
+  margin: 0;
+  font-weight: 600;
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .select-team__item {
+    min-height: 180px;
+    padding: 12px;
+  }
+  .select-team__item .MuiAvatar-root {
+    width: 120px;
+    height: 120px;
+  }
+}

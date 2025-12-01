@@ -1,0 +1,488 @@
+{
+  "login": {
+    "emailPassword": {
+      "heading": "Anmelden",
+      "subheading": "Willkommen bei Volley Goals!",
+      "email": {
+        "label": "E-Mail",
+        "required": "E-Mail ist erforderlich",
+        "invalid": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
+      },
+      "password": {
+        "label": "Passwort",
+        "required": "Passwort ist erforderlich",
+        "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein"
+      },
+      "submit": "Anmelden",
+      "forgotPassword": "Passwort vergessen?"
+    },
+    "setupTOTP": {
+      "heading": "TOTP für die Zwei-Faktor-Authentifizierung einrichten",
+      "subheading": "Zeitlich begrenzte Einmalpasswörter (TOTP) sind hier erforderlich!",
+      "showQRInstructions": "Zum Anzeigen des QR-Codes klicken Sie bitte diesen Bereich und scannen ihn mit einer Authenticator-App.",
+      "code": {
+        "label": "TOTP-Code",
+        "required": "Geben Sie den 6-stelligen Code ein",
+        "validation": "Bitte geben Sie einen 6-stelligen Code ein",
+        "placeholder": "123456",
+        "helperText": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein"
+      },
+      "submit": "Überprüfen"
+    },
+    "setupInitialPassword": {
+      "heading": "Legen Sie Ihr Passwort fest",
+      "subheading": "Wählen Sie ein sicheres Passwort für Ihr Konto.",
+      "newPassword": {
+        "label": "Neues Passwort",
+        "required": "Neues Passwort ist erforderlich",
+        "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein"
+      },
+      "confirmPassword": {
+        "label": "Passwort bestätigen",
+        "required": "Bitte bestätigen Sie Ihr Passwort",
+        "match": "Passwörter müssen übereinstimmen"
+      },
+      "submit": "Passwort festlegen"
+    },
+    "setupPassword": {
+      "heading": "Neues Passwort festlegen",
+      "subheading": "Bitte verwenden Sie Ihre E-Mail, um Ihr Passwort zu aktualisieren.",
+      "password": {
+        "label": "Passwort",
+        "required": "Passwort ist erforderlich",
+        "minLength": "Das Passwort muss mindestens 8 Zeichen lang sein"
+      },
+      "confirmPassword": {
+        "label": "Passwort bestätigen",
+        "required": "Bitte bestätigen Sie Ihr Passwort",
+        "match": "Passwörter müssen übereinstimmen"
+      },
+      "codeHelperText": "Code gesendet an: {{email}}",
+      "code": {
+        "label": "Verifizierungscode",
+        "required": "Verifizierungscode ist erforderlich",
+        "validation": "Bitte geben Sie einen 6-stelligen Code ein",
+        "placeholder": "123456"
+      },
+      "resend": {
+        "stateWaiting": "Erneut senden ({{countdown}} s)",
+        "stateActive": "Code erneut senden"
+      },
+      "submit": {
+        "stateActive": "Neues Passwort festlegen",
+        "stateLoading": "Passwort wird gesetzt..."
+      },
+      "success": {
+        "title": "Passwort aktualisiert",
+        "message": "Ihr Passwort wurde erfolgreich aktualisiert. Sie können sich nun mit Ihrem neuen Passwort anmelden."
+      }
+    },
+    "totp": {
+      "heading": "Zwei-Faktor-Authentifizierung",
+      "subheading": "Bitte geben Sie den Code aus Ihrer Authenticator-App ein.",
+      "code": {
+        "label": "TOTP-Code",
+        "required": "Geben Sie den 6-stelligen Code ein",
+        "validation": "Bitte geben Sie einen 6-stelligen Code ein",
+        "placeholder": "123456",
+        "helperText": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein"
+      },
+      "submit": "Überprüfen"
+    }
+  },
+  "error": {
+    "general": {
+      "title": "An error occurred",
+      "message": "Something went wrong. Please try again later."
+    },
+    "internalServerError": {
+      "title": "Internal Server Error",
+      "message": "An unexpected error occurred on the server. Please try again later."
+    },
+    "badRequest": {
+      "title": "Bad Request",
+      "message": "The request was invalid or cannot be served. Please check and try again."
+    },
+    "forbidden": {
+      "title": "Access Denied",
+      "message": "You do not have permission to access this resource."
+    },
+    "notFound": {
+      "title": "Resource Not Found",
+      "message": "The requested resource could not be found."
+    },
+    "notImplemented": {
+      "title": "Not Implemented",
+      "message": "The requested functionality is not implemented."
+    },
+    "unauthorized": {
+      "title": "Unauthorized",
+      "message": "You are not authorized to perform this action."
+    },
+    "team": {
+      "exists": {
+        "title": "Team Already Exists",
+        "message": "A team with this name already exists. Please choose a different name."
+      },
+      "notFound": {
+        "title": "Team Not Found",
+        "message": "The specified team could not be found."
+      }
+    },
+    "teamSettings": {
+      "notFound": {
+        "title": "Team Settings Not Found",
+        "message": "The specified team settings could not be found."
+      }
+    },
+    "login": {
+      "emailPassword": {
+        "failed": {
+          "title": "Anmeldung fehlgeschlagen"
+        },
+        "invalidCredentials": {
+          "title": "Ungültige Anmeldedaten",
+          "message": "E-Mail oder Passwort ist falsch."
+        },
+        "userNotConfirmed": {
+          "title": "Konto nicht bestätigt",
+          "message": "Ihr Konto ist nicht bestätigt. Überprüfen Sie Ihre E-Mails auf einen Bestätigungslink."
+        },
+        "userNotFound": {
+          "title": "Konto nicht gefunden",
+          "message": "Kein Konto für diese E-Mail gefunden."
+        },
+        "passwordResetRequired": {
+          "title": "Passwortzurücksetzung erforderlich",
+          "message": "Eine Zurücksetzung des Passworts ist erforderlich. Bitte setzen Sie Ihr Passwort zurück."
+        },
+        "tooManyRequests": {
+          "title": "Zu viele Versuche",
+          "message": "Zu viele Versuche. Bitte versuchen Sie es später erneut."
+        }
+      },
+      "setupTOTP": {
+        "verificationFailed": {
+          "title": "Verifizierung fehlgeschlagen",
+          "message": "TOTP-Verifizierung fehlgeschlagen, der eingegebene Code ist falsch. Bitte versuchen Sie es erneut."
+        },
+        "codeMismatch": {
+          "title": "Ungültiger Code.",
+          "message": "Der eingegebene Code ist falsch. Bitte versuchen Sie es erneut."
+        },
+        "expired": {
+          "title": "Code abgelaufen.",
+          "message": "Der Code ist abgelaufen. Fordern Sie einen neuen Code an und versuchen Sie es erneut."
+        },
+        "notAuthorized": {
+          "title": "Nicht autorisiert.",
+          "message": "Sie sind nicht berechtigt, diese Aktion durchzuführen."
+        },
+        "limitExceeded": {
+          "title": "Zu viele Versuche.",
+          "message": "Zu viele Versuche. Bitte warten Sie und versuchen Sie es später erneut."
+        }
+      },
+      "setupPassword": {
+        "confirmForgotPassword": {
+          "title": "Ungültiger Code oder Passwort",
+          "message": "Der Bestätigungscode oder das neue Passwort ist ungültig. Bitte prüfen Sie die Eingaben und versuchen Sie es erneut."
+        },
+        "validation": {
+          "title": "Validierungsfehler",
+          "message": "Bestätigungscode, Passwort oder Benutzername ist leer oder ungültig."
+        },
+        "limitExceeded": {
+          "title": "Zu viele Versuche",
+          "message": "Zu viele Versuche. Bitte warten Sie, bevor Sie es erneut versuchen."
+        },
+        "codeMismatch": {
+          "title": "Ungültiger Code",
+          "message": "Der eingegebene Code ist ungültig. Bitte prüfen Sie ihn und versuchen Sie es erneut."
+        },
+        "expiredCode": {
+          "title": "Code abgelaufen",
+          "message": "Der Code ist abgelaufen. Fordern Sie einen neuen Code an, um fortzufahren."
+        }
+      },
+      "totp": {
+        "verificationFailed": {
+          "title": "Verifizierung fehlgeschlagen",
+          "message": "Der eingegebene Code ist falsch. Bitte versuchen Sie es erneut."
+        },
+        "codeMismatch": {
+          "title": "Ungültiger Code",
+          "message": "Der eingegebene Code ist falsch. Bitte prüfen Sie ihn und versuchen Sie es erneut."
+        },
+        "expired": {
+          "title": "Code abgelaufen",
+          "message": "Der Code ist abgelaufen. Fordern Sie einen neuen Code an, um fortzufahren."
+        },
+        "limitExceeded": {
+          "title": "Zu viele Versuche",
+          "message": "Zu viele Versuche. Bitte warten Sie und versuchen Sie es später erneut."
+        }
+      },
+      "setupInitialPassword": {
+        "notAuthorized": {
+          "title": "Passworteinrichtung fehlgeschlagen",
+          "message": "Beim Einrichten Ihres Passworts ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut."
+        },
+        "invalidPassword": {
+          "title": "Ungültiges Passwort",
+          "message": "Das Passwort erfüllt nicht die erforderliche Komplexität."
+        },
+        "codeMismatch": {
+          "title": "Ungültiger Code",
+          "message": "Der Bestätigungscode ist falsch. Bitte prüfen Sie ihn und versuchen Sie es erneut."
+        },
+        "expiredCode": {
+          "title": "Code abgelaufen",
+          "message": "Der Bestätigungscode ist abgelaufen. Fordern Sie einen neuen Code an, um fortzufahren."
+        },
+        "userNotFound": {
+          "title": "Benutzer nicht gefunden",
+          "message": "Kein Konto für diese E-Mail gefunden."
+        }
+      }
+    },
+    "invite": {
+      "exists": {
+        "title": "[DE] Invite Already Exists",
+        "message": "[DE] An invite for this email already exists."
+      },
+      "invalidToken": {
+        "title": "[DE] Invalid Invite Token",
+        "message": "[DE] The invite token is invalid or has already been used."
+      },
+      "expired": {
+        "title": "[DE] Invite Expired",
+        "message": "[DE] The invite token has expired. Please request a new invite."
+      },
+      "alreadyCompleted": {
+        "title": "[DE] Invite Already Completed",
+        "message": "[DE] This invite has already been completed."
+      },
+      "userAlreadyMember": {
+        "title": "[DE] User Already a Member",
+        "message": "[DE] The user is already a member of the team."
+      }
+    }
+  },
+  "success": {
+    "ok": {
+      "title": "Success",
+      "message": "The operation was completed successfully."
+    },
+    "team": {
+      "created": {
+        "title": "Team Created",
+        "message": "The team has been created successfully."
+      },
+      "deleted": {
+        "title": "Team Deleted",
+        "message": "The team has been deleted successfully."
+      }
+    }
+  },
+  "invitePage": {
+    "accept": {
+      "title": "Einladung",
+      "subtitle": "Sie haben einen Einladungslink per E-Mail erhalten. Bitte geben Sie die E-Mail-Adresse ein, an die diese Einladung gesendet wurde, und wählen Sie, ob Sie die Einladung annehmen oder ablehnen möchten.",
+      "email": {
+        "label": "E-Mail",
+        "required": "E-Mail ist erforderlich",
+        "invalid": "Geben Sie eine gültige E-Mail-Adresse ein"
+      },
+      "tokenLabel": "Token: {{token}}",
+      "button": {
+        "accept": "Annehmen",
+        "decline": "Ablehnen"
+      }
+    },
+    "complete": {
+      "loading": "Lade Einladung...",
+      "details": {
+        "emailLabel": "E-Mail",
+        "roleLabel": "Rolle",
+        "invitedByLabel": "Eingeladen von",
+        "messageLabel": "Nachricht",
+        "expiresAtLabel": "Ablaufdatum",
+        "statusLabel": "Status",
+        "statusUnknown": "Unbekannt",
+        "temporaryPasswordLabel": "Temporäres Passwort"
+      },
+      "memberCreatedTitle": "Konto erstellt",
+      "memberCreatedMessage": "Ein Konto wurde für Sie erstellt. Verwenden Sie das temporäre Passwort, um sich anzumelden und ein neues Passwort festzulegen.",
+      "copy": "Kopieren",
+      "copied": "Kopiert!",
+      "actions": {
+        "login": "Anmelden",
+        "continue": "Weiter",
+        "home": "Zur Startseite"
+      },
+      "title": "Einladung abgeschlossen",
+      "subtitle": "Danke — die Einladung wurde erfolgreich abgeschlossen."
+    },
+    "error": {
+      "no_token": {
+        "title": "Kein Token vorhanden",
+        "message": "Es wurde kein Einladungstoken in der URL gefunden.",
+        "explain": "Es sieht so aus, als fehle dem Einladungslink ein Token. Bitte überprüfen Sie den Link in Ihrer E-Mail oder kontaktieren Sie den Absender, um die Einladung erneut zu senden."
+      },
+      "invalid_token": {
+        "title": "Ungültiges Token",
+        "message": "Das Einladungstoken ist ungültig oder wurde bereits verwendet.",
+        "explain": "Das Token im Link stimmt mit keiner ausstehenden Einladung überein. Dies kann passieren, wenn der Link geändert wurde oder die Einladung bereits abgeschlossen wurde. Bitten Sie den Absender, eine neue Einladung auszustellen."
+      },
+      "expired_token": {
+        "title": "Einladung abgelaufen",
+        "message": "Das Einladungstoken ist abgelaufen. Bitte fordern Sie eine neue Einladung an.",
+        "explain": "Einladungen sind aus Sicherheitsgründen zeitlich begrenzt. Bitten Sie den Team-Admin, eine neue Einladung zu senden oder fordern Sie die Einladung erneut über die Anwendung an."
+      },
+      "already_completed": {
+        "title": "Einladung bereits abgeschlossen",
+        "message": "Diese Einladung wurde bereits abgeschlossen.",
+        "explain": "Diese Einladung wurde bereits angenommen oder abgelehnt. Wenn Sie glauben, dass dies ein Fehler ist, wenden Sie sich an den Absender oder Ihren Team-Administrator."
+      },
+      "unknown_error": {
+        "title": "Unbekannter Fehler",
+        "message": "Beim Verarbeiten der Einladung ist ein unbekannter Fehler aufgetreten.",
+        "explain": "Beim Verarbeiten der Einladung ist ein unerwarteter Fehler aufgetreten. Versuchen Sie es später erneut oder kontaktieren Sie den Support, wenn das Problem weiterhin besteht."
+      },
+      "actions": {
+        "home": "Zur Startseite",
+        "contact": "Support kontaktieren",
+        "requestNew": "Neue Einladung anfordern"
+      }
+    }
+  },
+  "admin": {
+    "userDetails": {
+      "title": "Benutzerdetails",
+      "couldNotLoad": "Benutzer konnte nicht geladen werden."
+    },
+    "user": {
+      "email": "E-Mail",
+      "created": "Erstellt",
+      "updated": "Aktualisiert",
+      "status": "Status",
+      "type": "Typ"
+    },
+    "memberships": {
+      "title": "Mitgliedschaften",
+      "subtitle": "Verwalten Sie Mitgliedschaften für diesen Benutzer.",
+      "columns": {
+        "team": "Team",
+        "role": "Rolle",
+        "status": "Status",
+        "joined": "Beigetreten",
+        "updated": "Aktualisiert"
+      }
+    },
+    "teams": {
+      "prompt": { "newName": "Neuer Teamname" },
+      "filter": { "name": "Name", "status": "Status", "any": "Beliebig" },
+      "columns": { "picture": "Bild", "name": "Name", "status": "Status", "created": "Erstellt", "updated": "Aktualisiert" }
+    },
+    "teamsList": {
+      "title": "Teams"
+    },
+    "teamDetails": { "title": "Teamdetails" },
+    "team": {
+      "invites": { "title": "Einladungen", "create": "Einladung erstellen" },
+      "members": {
+        "tabs": { "members": "Mitglieder", "invites": "Einladungen" },
+        "title": "Teammitglieder",
+        "subtitle": "Mitgliederliste wird hier angezeigt. (Platzhalter)",
+        "placeholder": "Teammitglieder werden hier angezeigt, sobald implementiert."
+      },
+      "created": "Erstellt:",
+      "updated": "Aktualisiert:",
+      "status": "Status:",
+      "editName": "Teamnamen bearbeiten",
+      "editStatus": "Status bearbeiten",
+      "settings": {
+        "title": "Team Einstellungen",
+        "allowFileUploads": "Datei-Uploads erlauben",
+        "allowTeamGoalComments": "Kommentare zu Teamzielen erlauben",
+        "allowIndividualGoalComments": "Kommentare zu Einzelzielen erlauben",
+        "noSettings": "Keine Einstellungen für dieses Team vorhanden."
+      },
+      "save": "Änderungen speichern"
+    },
+    "actions": {
+      "goToUsers": "Zu Benutzern",
+      "deactivate": "Deaktivieren",
+      "delete": "Löschen"
+    }
+  },
+  "common": {
+    "cancel": "Abbrechen",
+    "active": "aktiv",
+    "inactive": "inaktiv"
+  },
+  "notFoundPage": {
+    "title": "Seite nicht gefunden",
+    "subtitle": "Wir konnten die angeforderte Seite nicht finden.",
+    "explain": "Die Seite, die Sie aufrufen möchten, wurde möglicherweise verschoben oder gelöscht. Überprüfen Sie die Adresse und versuchen Sie es erneut.",
+    "actions": {
+      "dashboard": "Zum Dashboard",
+      "teams": "Zu Teams",
+      "login": "Anmelden",
+      "home": "Zur Startseite"
+    }
+  },
+  "selectTeam": {
+    "title": "Team auswählen",
+    "loading": "Lade Teams...",
+    "unknownTeam": "Unbekanntes Team",
+    "selectTeam": "Wähle {{team}}"
+  },
+  "profile": {
+    "title": "Profil",
+    "upload": "Bild hochladen",
+    "uploading": "Wird hochgeladen...",
+    "name": "Name",
+    "username": "Benutzername",
+    "email": "E-Mail",
+    "birthdate": "Geburtsdatum",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "subtitle": "Verwalten Sie Ihre Benachrichtigungseinstellungen.",
+      "emailUpdates": {
+        "label": "E-Mail-Benachrichtigungen",
+        "description": "Erhalten Sie Updates und Benachrichtigungen per E-Mail."
+      },
+      "smsUpdates": {
+        "label": "SMS-Benachrichtigungen",
+        "description": "Erhalten Sie Updates und Benachrichtigungen per SMS."
+      }
+    },
+    "security": {
+      "title": "Sicherheit",
+      "subtitle": "Verwalten Sie Ihre Sicherheitseinstellungen.",
+      "twoFactorAuth": {
+        "label": "Zwei-Faktor-Authentifizierung",
+        "description": "Zusätzliche Sicherheitsebene für Ihr Konto."
+      },
+      "activeSessions": {
+        "label": "Aktive Sitzungen",
+        "description": "Überblick über alle aktiven Sitzungen in Ihrem Konto."
+      }
+    }
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "teams": "Teams",
+    "calendar": "Kalender",
+    "goals": "Ziele",
+    "profile": "Profil",
+    "admin": "Admin",
+    "logout": "Abmelden",
+    "seasons": "Saisons",
+    "users": "Benutzer"
+  }
+}
