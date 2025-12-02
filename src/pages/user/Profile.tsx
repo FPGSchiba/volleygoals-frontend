@@ -161,9 +161,22 @@ export function Profile() {
         ) : (
           availableTeams.map((ta: any) => (
             <React.Fragment key={ta.team?.id ?? ta.team?.name}>
-              <ListItem className="profile-team-item">
+              <ListItem
+                className="profile-team-item"
+                secondaryAction={
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => console.log('Leave team', ta.team?.id, ta.team?.name)}
+                  >
+                    {t('profile.teams.leave', 'Leave')}
+                  </Button>
+                }
+              >
                 <ListItemAvatar>
-                  <Avatar className="profile-team-avatar">{ta.team?.name ? ta.team.name[0] : 'T'}</Avatar>
+                  <Avatar className="profile-team-avatar" src={ta.team?.picture || undefined}>
+                    {ta.team?.name ? ta.team.name[0] : 'T'}
+                  </Avatar>
                 </ListItemAvatar>
                 <ListItemText primary={ta.team?.name ?? ''} secondary={ta.role ? `${t('profile.teams.role', 'Role')}: ${ta.role}` : null} />
               </ListItem>
