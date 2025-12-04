@@ -14,7 +14,7 @@ import {
   ITeamMember,
   ITeamSettings, ITeamUser,
   IUser,
-  IUserUpdate
+  IProfileUpdate, IUserUpdate, RoleType
 } from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
@@ -239,7 +239,7 @@ class VolleyGoalsAPI {
     }
   }
 
-  public async updateSelf(data: IUserUpdate): Promise<{message: string, error?: string, user?: IUser}> {
+  public async updateSelf(data: IProfileUpdate): Promise<{message: string, error?: string, user?: IUser}> {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch('/self', data);
@@ -437,6 +437,58 @@ class VolleyGoalsAPI {
     }
   }
 
+  public async updateUser(id: string, data: IUserUpdate): Promise<{ message: string, error?: string, user?: IUser}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/users/${id}`, data);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async deleteMembership(id: string, teamId: string): Promise<{ message: string, error?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async updateMembership(id: string, teamId: string, role: string, status: string): Promise<{ message: string, error?: string, teamMember?: ITeamMember}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${teamId}/members/${id}`, { role, status });
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async createMembership(teamId: string, userId: string, role: string): Promise<{ message: string, error?: string, teamMember?: ITeamMember}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/teams/${teamId}/members`, { role, userId });
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
   // Invites
   public async completeInvite(token: string, email: string, accepted: boolean): Promise<{ message: string, error?: string, member?: ITeamMember, invite?: IInvite, userCreated?: boolean, temporaryPassword?: string}> {
     try {
@@ -455,6 +507,45 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints(false);
       const response = await VolleyGoalsAPI.endpoint.get(`/invites/${token}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async createInvite(teamId: string, email: string, role: RoleType, message: string, sendEmail: boolean): Promise<{ message: string, error?: string, invite?: IInvite}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/invites`, { teamId, email, role, message, sendEmail });
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async resendInvite(inviteId: string): Promise<{ message: string, error?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/invites/${inviteId}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async revokeInvite(inviteId: string): Promise<{ message: string, error?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/invites/${inviteId}`);
       return response.data;
     } catch (reason: any) {
       return {

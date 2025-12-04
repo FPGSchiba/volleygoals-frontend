@@ -51,11 +51,16 @@ export interface IUser {
   birthdate?: string;
 }
 
-export interface IUserUpdate {
+export interface IProfileUpdate {
   name?: string;
   picture?: string;
   preferredUsername?: string;
   birthdate?: string;
+}
+
+export interface IUserUpdate {
+  enabled?: boolean;
+  userType?: UserType;
 }
 
 // Teams

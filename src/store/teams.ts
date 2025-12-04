@@ -39,7 +39,7 @@ type TeamActions = {
   uploadTeamPicture: (teamId: string, file: File, onProgress?: (pct: number) => void) => Promise<string | null>;
 }
 
-const useTeamStore = create<TeamState & TeamActions>((set) => ({
+const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
   teamList: {
     teams: [],
     count: 0,
@@ -60,12 +60,15 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
          title: i18next.t(`${response.message}.title`, "Something went wrong"),
          details: response.error
        });
+     } else {
+       await get().fetchTeams(get().teamList.filter);
      }
    }),
    updateTeam: (async (id: string, name?: string, status?: string) => {
      const response = await VolleyGoalsAPI.updateTeam(id, {name, status});
      if (response.team) {
        set(() => ({currentTeam: response.team}));
+       await get().fetchTeams(get().teamList.filter);
      }
      else {
        useNotificationStore.getState().notify({
@@ -85,6 +88,8 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
          title: i18next.t(`${response.message}.title`, "Something went wrong"),
          details: response.error
        });
+     } else {
+       await get().fetchTeams(get().teamList.filter);
      }
    }),
    fetchTeams: (async (filter?: ITeamFilterOption) => {

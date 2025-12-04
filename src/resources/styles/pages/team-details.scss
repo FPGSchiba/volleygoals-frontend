@@ -20,8 +20,35 @@
   }
 
   .team-members-list, .team-invites-list {
-    overflow: auto;
-    max-height: 420px;
+    overflow: visible;
+    max-height: none;
   }
-}
 
+  /* Invite related styles */
+  .team-invites-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+
+  .create-invite-button {
+    white-space: nowrap;
+  }
+
+  .create-invite-dialog {
+    .MuiDialog-paper {
+      max-width: 600px;
+    }
+  }
+
+  .invite-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .MuiTextField-root {
+      margin: 0;
+    }
+  }
+
+}

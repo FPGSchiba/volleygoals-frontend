@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import i18next from 'i18next';
 import { Grid, TextField, MenuItem, TableCell, Chip, Button, Avatar } from '@mui/material';
 import { ItemList, FetchResult } from '../../components/ItemList';
@@ -35,7 +35,7 @@ export function Teams() {
     }
   ]
 
-  const fetchAdapter = async (filter: ITeamFilterOption): Promise<FetchResult<ITeam>> => {
+  const fetchAdapter = async (filter?: ITeamFilterOption): Promise<FetchResult<ITeam>> => {
     await fetchTeams(filter);
     return { items: teams, count };
   };
@@ -51,10 +51,41 @@ export function Teams() {
     navigate(`/teams/${team.id}`);
   };
 
+  // actionLoading disables all actions while an operation is in progress
+  const [actionLoading, setActionLoading] = useState(false);
+
   const handleDelete = async (id: string) => {
     if (!deleteTeam) return;
-    await deleteTeam(id);
+    setActionLoading(true);
+    try {
+      await deleteTeam(id);
+      await fetchTeams(initialFilter);
+    } finally {
+      setActionLoading(false);
+    }
   };
+
+  const handleDeactivate = async (id: string) => {
+    if (!editTeam) return;
+    setActionLoading(true);
+    try {
+      await editTeam(id, undefined, 'inactive');
+      await fetchTeams(initialFilter);
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  const handleActivate = async (id: string) => {
+    if (!editTeam) return;
+    setActionLoading(true);
+    try {
+      await editTeam(id, undefined, 'active');
+      await fetchTeams(initialFilter);
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   const renderFilterFields = (filter: ITeamFilterOption, setFilter: (f: ITeamFilterOption) => void) => {
     return [
@@ -95,24 +126,28 @@ export function Teams() {
   const renderActions = (team: ITeam) => {
     // Edit button - directly call local handler
     const editBtn = (
-      <Button key="edit" variant="contained" size="small" onClick={() => handleEdit(team)} style={{ marginRight: 8 }}>
+      <Button key="edit" variant="contained" size="small" onClick={() => handleEdit(team)} style={{ marginRight: 8 }} disabled={actionLoading}>
         Edit
       </Button>
     );
 
-    // If team is active, show a Deactivate button; otherwise show Delete
+    // If team is active, show a Deactivate button; otherwise show Activate + Delete
     if (team.status === 'active') {
       return [
         editBtn,
-        <Button key="deactivate" variant="contained" size="small" color="warning" onClick={async () => { await editTeam(team.id, team.name, 'inactive'); }}>
+        <Button key="deactivate" variant="contained" size="small" color="warning" onClick={async () => { await handleDeactivate(team.id); }} disabled={actionLoading}>
           {i18next.t('admin.actions.deactivate','Deactivate')}
         </Button>
       ];
     }
 
+    // team is inactive -> offer Activate + Delete
     return [
       editBtn,
-      <Button key="delete" variant="contained" size="small" color="error" onClick={() => handleDelete(team.id)}>
+      <Button key="activate" variant="contained" size="small" color="success" onClick={() => handleActivate(team.id)} style={{ marginRight: 8 }} disabled={actionLoading}>
+        {i18next.t('admin.actions.activate','Activate')}
+      </Button>,
+      <Button key="delete" variant="contained" size="small" color="error" onClick={() => handleDelete(team.id)} disabled={actionLoading}>
         {i18next.t('admin.actions.delete','Delete')}
       </Button>
     ];

@@ -12,10 +12,13 @@ import {
 } from '../../services/types';
 
 // MUI
-import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, Typography, Card, CardContent, CircularProgress, Alert, Stack, Divider, IconButton, Paper, FormControlLabel, Switch, FormGroup, Chip, Tabs, Tab, TableCell, Avatar } from '@mui/material';
+import { Box, TextField, Select, MenuItem, InputLabel, FormControl, Button, Typography, Card, CardContent, CircularProgress, Alert, Stack, Divider, IconButton, Paper, FormControlLabel, Switch, FormGroup, Chip, Tabs, Tab, TableCell, Avatar, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import AddIcon from '@mui/icons-material/Add';
-import {ITeamUser} from "../../store/types";
+import {ITeamUser, RoleType, TeamMemberStatus} from "../../store/types";
+import { useUsersStore } from '../../store/users';
+import { useForm, Controller } from 'react-hook-form';
+import {useInvitesStore} from "../../store/invites";
 
 export function TeamDetails() {
   const { teamId } = useParams<{ teamId?: string }>();
@@ -30,8 +33,18 @@ export function TeamDetails() {
   const fetchTeamInvites = useTeamStore(state => state.fetchTeamInvites);
   const uploadTeamPicture = useTeamStore(state => state.uploadTeamPicture);
   const notify = useNotificationStore(state => state.notify);
+  const deleteMembership = useUsersStore(state => state.deleteMembership);
+  const updateMembership = useUsersStore(state => state.updateMembership);
+  const createInvite = useInvitesStore(state => state.createInvite);
+  const resendInvite = useInvitesStore(state => state.resendInvite);
+  const revokeInvite = useInvitesStore(state => state.revokeInvite);
   const navigate = useNavigate();
   const { loading, setLoading, Loading } = useLoading(true);
+
+  // Invite action state
+  const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const { control: inviteControl, handleSubmit: handleInviteSubmit, reset: resetInvite } = useForm<{ email: string; role: RoleType; message: string; sendEmail: boolean }>({ defaultValues: { email: '', role: RoleType.Member, message: '', sendEmail: true } as any });
 
   const [name, setName] = useState<string>('');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
@@ -41,6 +54,12 @@ export function TeamDetails() {
   const pictureInputRef = React.useRef<HTMLInputElement | null>(null);
   const [saving, setSaving] = useState(false);
   const [tabIndex, setTabIndex] = useState(0);
+
+  // Member edit/delete dialog state
+  const [memberEditOpen, setMemberEditOpen] = useState(false);
+  const [memberDeleteOpen, setMemberDeleteOpen] = useState(false);
+  const [selectedMember, setSelectedMember] = useState<ITeamUser | null>(null);
+  const { control: memberControl, handleSubmit: handleMemberSubmit, reset: resetMember } = useForm<{ role: string; status: string }>({ defaultValues: { role: RoleType.Member, status: TeamMemberStatus.Active } as any });
 
   useEffect(() => {
     let mounted = true;
@@ -77,6 +96,13 @@ export function TeamDetails() {
       });
     }
   }, [currentTeamSettings]);
+
+  useEffect(() => {
+    if (selectedMember && memberEditOpen) {
+      resetMember({ role: (selectedMember as any).role ?? RoleType.Member, status: (selectedMember as any).status ?? TeamMemberStatus.Active });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedMember, memberEditOpen]);
 
   const onSave = useCallback(async () => {
     if (!currentTeam) return;
@@ -132,6 +158,58 @@ export function TeamDetails() {
   const onPictureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (f) handlePictureFile(f);
+  };
+
+  const openCreateInvite = () => {
+    resetInvite({ email: '', role: RoleType.Member, message: '', sendEmail: true } as any);
+    setInviteDialogOpen(true);
+  };
+
+  const submitCreateInvite = async (data: { email: string; role: RoleType; message: string; sendEmail: boolean }) => {
+    if (!currentTeam) return;
+    setActionLoading(true);
+    try {
+      await createInvite(currentTeam.id, data.email, data.role, data.message || '', !!data.sendEmail);
+      await fetchTeamInvites(currentTeam.id, {} as any);
+      setInviteDialogOpen(false);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleRevokeInvite = async (id: string) => {
+    setActionLoading(true);
+    try {
+      await revokeInvite(id);
+      if (currentTeam) await fetchTeamInvites(currentTeam.id, {} as any);
+    } finally { setActionLoading(false); }
+  };
+
+  const handleResendInvite = async (id: string) => {
+    setActionLoading(true);
+    try {
+      await resendInvite(id);
+      if (currentTeam) await fetchTeamInvites(currentTeam.id, {} as any);
+    } finally { setActionLoading(false); }
+  };
+
+  const openEditMember = (m: ITeamUser) => { setSelectedMember(m); setMemberEditOpen(true); };
+  const openDeleteMember = (m: ITeamUser) => { setSelectedMember(m); setMemberDeleteOpen(true); };
+
+  const submitMemberEdit = async (data: { role: string; status: string }) => {
+    if (!selectedMember || !currentTeam) return;
+    await updateMembership(selectedMember.id, currentTeam.id, data.role, data.status);
+    await fetchTeamMembers(currentTeam.id, {} as any);
+    setMemberEditOpen(false);
+    setSelectedMember(null);
+  };
+
+  const confirmDeleteMember = async () => {
+    if (!selectedMember || !currentTeam) return;
+    await deleteMembership(selectedMember.id, currentTeam.id);
+    await fetchTeamMembers(currentTeam.id, {} as any);
+    setMemberDeleteOpen(false);
+    setSelectedMember(null);
   };
 
   return (
@@ -251,12 +329,14 @@ export function TeamDetails() {
                 <Tab label={i18next.t('admin.team.members.tabs.invites','Invites')} id="tab-invites" />
               </Tabs>
               {tabIndex === 1 && (
-                <Box display="flex" justifyContent="flex-end" mt={1}>
+                <Box className="team-invites-actions">
                   <Button
                     variant="contained"
                     color="primary"
                     startIcon={<AddIcon />}
-                    onClick={() => console.log('Create invite (stub) for team', currentTeam?.id)}
+                    onClick={openCreateInvite}
+                    disabled={actionLoading}
+                    className="create-invite-button"
                   >
                     {i18next.t('admin.team.invites.create','Create Invite')}
                   </Button>
@@ -311,10 +391,20 @@ export function TeamDetails() {
                         </FormControl>
                       </Box>
                     )}
-                    fetch={async (filter) => {
-                      const res = await fetchTeamMembers(currentTeam!.id, filter);
+                    fetch={async (filter?) => {
+                      const res = await fetchTeamMembers(currentTeam!.id, filter as any);
                       return { items: res.items as any[], count: res.count } as FetchResult<any>;
                     }}
+                    renderActions={(m) => (
+                      [
+                        <Button key="edit" variant="contained" size="small" onClick={() => openEditMember(m)} style={{ marginRight: 8 }}>
+                          {i18next.t('common.edit','Edit')}
+                        </Button>,
+                        <Button key="delete" variant="contained" size="small" color="error" onClick={() => openDeleteMember(m)}>
+                          {i18next.t('common.delete','Delete')}
+                        </Button>
+                      ]
+                    )}
                     // render rows with avatar + name + email
                     renderRow={(m) => {
                       const displayName = (m as any).user?.name ?? (m as any).name ?? (m as any).displayName ?? (m as any).email ?? '-';
@@ -390,18 +480,52 @@ export function TeamDetails() {
                         </FormControl>
                       </Box>
                     )}
-                    fetch={async (filter: ITeamInviteFilterOption) => {
-                      const res = await fetchTeamInvites(currentTeam!.id, filter);
+                    fetch={async (filter?) => {
+                      const res = await fetchTeamInvites(currentTeam!.id, filter as any);
                       return { items: res.items as any[], count: res.count } as FetchResult<any>;
                     }}
-                    renderRow={(inv) => [
-                      <TableCell key="email">{inv.email}</TableCell>,
-                      <TableCell key="role"><Chip label={inv.role} size="small" /></TableCell>,
-                      <TableCell key="status"><Chip label={inv.status} color={inv.status === 'accepted' ? 'success' : 'default'} size="small" /></TableCell>,
-                      <TableCell key="message">{inv.message ?? '-'}</TableCell>,
-                      <TableCell key="created">{inv.createdAt ? new Date(inv.createdAt).toLocaleString('de-CH') : '-'}</TableCell>,
-                      <TableCell key="expires">{inv.expiresAt ? new Date(inv.expiresAt).toLocaleString('de-CH') : '-'}</TableCell>,
-                    ]}
+                    renderActions={(inv) => {
+                      const status = (inv.status || '').toString();
+
+                      const revokeEnabled = status === 'pending';
+                      const disableResend = status === 'accepted' || status == 'declined';
+
+                      return [
+                        <Button key="revoke" variant="contained" size="small" color="warning" onClick={() => handleRevokeInvite(inv.id)} disabled={actionLoading || !revokeEnabled} style={{ marginRight: 8 }}>
+                          {i18next.t('admin.invites.revoke','Revoke')}
+                        </Button>,
+                        <Button key="resend" variant="contained" size="small" onClick={() => handleResendInvite(inv.id)} disabled={actionLoading || disableResend}>
+                          {i18next.t('admin.invites.resend','Resend')}
+                        </Button>
+                      ];
+                    }}
+                    renderRow={(inv) => {
+                      const status = (inv.status || '').toString();
+                      const statusColor = (() => {
+                        switch (status) {
+                          case 'accepted':
+                            return 'success';
+                          case 'pending':
+                            return 'info';
+                          case 'declined':
+                            return 'error';
+                          case 'revoked':
+                          case 'expired':
+                            return 'warning';
+                          default:
+                            return 'default';
+                        }
+                      })();
+
+                      return [
+                        <TableCell key="email">{inv.email}</TableCell>,
+                        <TableCell key="role"><Chip label={inv.role} size="small" /></TableCell>,
+                        <TableCell key="status"><Chip label={inv.status} color={statusColor as any} size="small" /></TableCell>,
+                        <TableCell key="message">{inv.message ?? '-'}</TableCell>,
+                        <TableCell key="created">{inv.createdAt ? new Date(inv.createdAt).toLocaleString('de-CH') : '-'}</TableCell>,
+                        <TableCell key="expires">{inv.expiresAt ? new Date(inv.expiresAt).toLocaleString('de-CH') : '-'}</TableCell>,
+                      ];
+                    }}
                     items={teamInvites.invites}
                     count={teamInvites.count}
                   />
@@ -409,6 +533,89 @@ export function TeamDetails() {
               )}
             </Box>
           </Paper>
+
+          {/* Member Edit Dialog */}
+          <Dialog open={memberEditOpen} onClose={() => { setMemberEditOpen(false); setSelectedMember(null); }} fullWidth maxWidth="sm">
+            <DialogTitle>{i18next.t('admin.memberships.editTitle','Edit Membership')}</DialogTitle>
+            <DialogContent>
+              <Box mt={1}>
+                <Controller name="role" control={memberControl} render={({ field }) => (
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="member-role-label">{i18next.t('admin.memberships.roleLabel','Role')}</InputLabel>
+                    <Select {...field} labelId="member-role-label" label={i18next.t('admin.memberships.roleLabel','Role')}>
+                      <MenuItem value={RoleType.Member}>{i18next.t('roles.member','Member')}</MenuItem>
+                      <MenuItem value={RoleType.Trainer}>{i18next.t('roles.trainer','Trainer')}</MenuItem>
+                      <MenuItem value={RoleType.Admin}>{i18next.t('roles.admin','Admin')}</MenuItem>
+                    </Select>
+                  </FormControl>
+                )} />
+
+                <Controller name="status" control={memberControl} render={({ field }) => (
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="member-status-label">{i18next.t('admin.memberships.statusLabel','Status')}</InputLabel>
+                    <Select {...field} labelId="member-status-label" label={i18next.t('admin.memberships.statusLabel','Status')}>
+                      <MenuItem value={TeamMemberStatus.Active}>{i18next.t('statuses.active','active')}</MenuItem>
+                      <MenuItem value={TeamMemberStatus.Invited}>{i18next.t('statuses.invited','invited')}</MenuItem>
+                      <MenuItem value={TeamMemberStatus.Left}>{i18next.t('statuses.left','left')}</MenuItem>
+                      <MenuItem value={TeamMemberStatus.Removed}>{i18next.t('statuses.removed','removed')}</MenuItem>
+                    </Select>
+                  </FormControl>
+                )} />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => { setMemberEditOpen(false); setSelectedMember(null); }}>{i18next.t('common.cancel','Cancel')}</Button>
+              <Button onClick={handleMemberSubmit(submitMemberEdit)} variant="contained">{i18next.t('common.save','Save')}</Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Member Delete Confirm Dialog */}
+          <Dialog open={memberDeleteOpen} onClose={() => { setMemberDeleteOpen(false); setSelectedMember(null); }}>
+            <DialogTitle>{i18next.t('admin.memberships.deleteTitle','Delete Membership')}</DialogTitle>
+            <DialogContent>
+              <Typography>{i18next.t('admin.memberships.deleteConfirm','Are you sure you want to remove this membership?')}</Typography>
+              {selectedMember && <Typography mt={2}>{i18next.t('admin.memberships.teamLabel','Team')}: {currentTeam?.id}</Typography>}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => { setMemberDeleteOpen(false); setSelectedMember(null); }}>{i18next.t('common.cancel','Cancel')}</Button>
+              <Button onClick={confirmDeleteMember} variant="contained" color="error">{i18next.t('common.delete','Delete')}</Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Create Invite Dialog */}
+          <Dialog open={inviteDialogOpen} onClose={() => setInviteDialogOpen(false)} fullWidth maxWidth="sm" className="create-invite-dialog">
+            <DialogTitle>{i18next.t('admin.team.invites.create','Create Invite')}</DialogTitle>
+            <DialogContent>
+              <Box className="invite-form">
+                <Controller name="email" control={inviteControl} rules={{ required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }} render={({ field, fieldState }) => (
+                  <TextField fullWidth margin="normal" label={i18next.t('invitePage.accept.email.label','Email')} {...field} error={!!fieldState.error} helperText={fieldState.error ? i18next.t('admin.invites.invalidEmail','Invalid email') : ''} />
+                )} />
+
+                <Controller name="role" control={inviteControl} render={({ field }) => (
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="invite-role-label">{i18next.t('invitePage.complete.details.roleLabel','Role')}</InputLabel>
+                    <Select {...field} labelId="invite-role-label" label={i18next.t('invitePage.complete.details.roleLabel','Role')}>
+                      <MenuItem value={RoleType.Member}>{i18next.t('roles.member','Member')}</MenuItem>
+                      <MenuItem value={RoleType.Trainer}>{i18next.t('roles.trainer','Trainer')}</MenuItem>
+                      <MenuItem value={RoleType.Admin}>{i18next.t('roles.admin','Admin')}</MenuItem>
+                    </Select>
+                  </FormControl>
+                )} />
+
+                <Controller name="message" control={inviteControl} render={({ field }) => (
+                  <TextField fullWidth margin="normal" label={i18next.t('invitePage.complete.details.messageLabel','Message')} multiline minRows={3} {...field} />
+                )} />
+
+                <Controller name="sendEmail" control={inviteControl} render={({ field }) => (
+                  <FormControlLabel control={<Switch checked={!!field.value} onChange={(e) => field.onChange(e.target.checked)} />} label={i18next.t('admin.invites.sendEmail','Send email')} />
+                )} />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setInviteDialogOpen(false)}>{i18next.t('common.cancel','Cancel')}</Button>
+              <Button onClick={handleInviteSubmit(submitCreateInvite)} variant="contained" disabled={actionLoading}>{i18next.t('common.create','Create')}</Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       )}
     </Box>

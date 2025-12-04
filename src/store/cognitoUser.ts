@@ -1,6 +1,6 @@
 import {create} from "zustand";
 import { fetchAuthSession, AuthSession, getCurrentUser, AuthUser, signOut } from 'aws-amplify/auth';
-import {ITeamAssignment, IUser, IUserUpdate, UserType} from "./types";
+import {ITeamAssignment, IUser, IProfileUpdate, UserType} from "./types";
 import VolleyGoalsAPI from "../services/backend.api";
 import {getSessionItem, setSessionItem} from "./util";
 import {SELECTED_TEAM_KEY} from "./consts";
@@ -21,7 +21,7 @@ type UserActions = {
   logout: () => void
   setSelectedTeam: (teamId: string) => void
   fetchSelf: () => Promise<void>
-  updateSelf: (userData: IUserUpdate) => Promise<void>
+  updateSelf: (userData: IProfileUpdate) => Promise<void>
   uploadSelfPicture: (file: File, onProgress?: (pct: number) => void) => Promise<string | undefined>
 }
 
@@ -126,7 +126,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
       const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
       set({ user, availableTeams: assignments, selectedTeam });
     },
-    updateSelf: async (userData: IUserUpdate) => {
+    updateSelf: async (userData: IProfileUpdate) => {
       const response = await VolleyGoalsAPI.updateSelf(userData);
       if (response.user) {
         set({ user: response.user });
