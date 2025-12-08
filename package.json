@@ -14,7 +14,7 @@
     "@sentry/esbuild-plugin": "^2.22.2",
     "@sentry/react": "^10.27.0",
     "@testing-library/react": "^16.3.0",
-    "@types/node": "^24.10.0",
+    "@types/node": "^24.10.1",
     "aws-amplify": "^6.15.7",
     "axios": "^1.13.2",
     "esbuild-plugin-copy": "^2.1.1",
