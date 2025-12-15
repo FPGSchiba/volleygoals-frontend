@@ -482,6 +482,11 @@
     "admin": "Admin",
     "logout": "Logout",
     "seasons": "Seasons",
-    "users": "Users"
+    "users": "Users",
+    "goals": "Goals",
+    "progress": "Progress",
+    "members": "Members",
+    "teamSettings": "Team Settings",
+    "invites": "Invites"
   }
 }

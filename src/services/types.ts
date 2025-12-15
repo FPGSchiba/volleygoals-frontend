@@ -34,3 +34,9 @@ export interface IUserFilterOption {
   userStatus?: string,
   status?: boolean
 }
+
+export interface ISeasonFilterOption extends IFilterOption {
+  name?: string,
+  status?: string,
+  teamId: string,
+}

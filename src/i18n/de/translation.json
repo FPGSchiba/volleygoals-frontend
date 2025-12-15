@@ -483,6 +483,10 @@
     "admin": "Admin",
     "logout": "Abmelden",
     "seasons": "Saisons",
-    "users": "Benutzer"
+    "users": "Benutzer",
+    "progress": "Fortschritt",
+    "members": "Mitglieder",
+    "teamSettings": "Team Einstellungen",
+    "invites": "Einladungen"
   }
 }

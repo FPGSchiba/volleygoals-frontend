@@ -30,6 +30,13 @@ export enum TeamMemberStatus {
   Left = "left",
 }
 
+export enum SeasonStatus {
+  Planned = "planned",
+  Active = "active",
+  Completed = "completed",
+  Archived = "archived",
+}
+
 export interface ITeamAssignment {
   team: ITeam
   role: RoleType;
@@ -124,4 +131,16 @@ export interface IInvite {
   updatedAt: string;
   acceptedAt?: string;
   declinedAt?: string;
+}
+
+// Seasons
+export interface ISeason {
+  id: string;
+  teamId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  status: SeasonStatus;
+  createdAt: string;
+  updatedAt: string;
 }

@@ -19,6 +19,10 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
+import TrackChangesIcon from '@mui/icons-material/TrackChanges';
+import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
+import SettingsIcon from '@mui/icons-material/Settings';
+import EmailIcon from '@mui/icons-material/Email';
 import { useThemeToggle } from "../index";
 import { useTranslation } from 'react-i18next';
 
@@ -36,9 +40,15 @@ const NAV_ITEMS: NavItem[] = [
   // Admin View
   { key: 'teams', labelKey: 'nav.teams', path: '/teams', icon: <GroupIcon />, userType: UserType.Admin },
   { key: 'users', labelKey: 'nav.users', path: '/users', icon: <PersonIcon />, userType: UserType.Admin },
-  // Trainer Only
+  // Users Only
   { key: 'dashboard', labelKey: 'nav.dashboard', path: '/dashboard', icon: <DashboardIcon />, userType: UserType.User },
   { key: 'seasons', labelKey: 'nav.seasons', path: '/seasons', icon: <DateRangeIcon />, userType: UserType.User },
+  { key: 'goals', labelKey: 'nav.goals', path: '/goals', icon: <TrackChangesIcon />, userType: UserType.User },
+  { key: 'progress', labelKey: 'nav.progress', path: '/progress', icon: <PublishedWithChangesIcon />, userType: UserType.User },
+  // Admin or Trainer Only
+  { key: 'members', labelKey: 'nav.members', path: '/members', icon: <GroupIcon />, userType: UserType.User, roles: [RoleType.Admin, RoleType.Trainer] },
+  { key: 'teamSettings', labelKey: 'nav.teamSettings', path: '/team-settings', icon: <SettingsIcon />, userType: UserType.User, roles: [RoleType.Admin, RoleType.Trainer] },
+  { key: 'invites', labelKey: 'nav.invites', path: '/invites', icon: <EmailIcon />, userType: UserType.User, roles: [RoleType.Admin, RoleType.Trainer] },
 ];
 
 type NavigationProps = {

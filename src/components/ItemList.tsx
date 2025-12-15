@@ -76,6 +76,10 @@ export interface GenericListProps<Item, FilterOptions extends IFilterOption> {
 
   items: Item[];
   count: number;
+  // If true, ItemList will not perform the initial fetch until this becomes false.
+  // While paused, the list will display the loading spinner so callers can fetch
+  // once prerequisites (like selectedTeam) are ready.
+  initialFetchPaused?: boolean;
 }
 
 export function ItemList<Item, FilterOptions extends IFilterOption>({
@@ -94,7 +98,8 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   sortableFields,
   renderActions,
   items,
-  count
+  count,
+  initialFetchPaused = false
 }: GenericListProps<Item, FilterOptions>) {
   const mergedInitialFilter = useMemo(() => {
     return { ...(DEFAULT_FILTER as FilterOptions), ...(initialFilter || ({} as FilterOptions)) } as FilterOptions;
@@ -125,9 +130,11 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   };
 
   useEffect(() => {
-    load(filter);
+    if (!initialFetchPaused) {
+      load(filter);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [filter, initialFetchPaused]);
 
   const handleApplyFilter = async () => {
     setPage(1);
@@ -282,7 +289,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
               {displayed.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="item-list-no-items">
-                    {loading ? (
+                    {(loading || initialFetchPaused) ? (
                       <Box display="flex" justifyContent="center" py={4}>
                         <CircularProgress />
                       </Box>

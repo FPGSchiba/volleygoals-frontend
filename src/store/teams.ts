@@ -9,8 +9,6 @@ import {
 import VolleyGoalsAPI from "../services/backend.api";
 import {useNotificationStore} from "./notification";
 import i18next from "i18next";
-import {setSessionItem, getSessionItem} from "./util";
-import {SELECTED_TEAM_KEY} from "./consts";
 
 type TeamState = {
   teamList: {

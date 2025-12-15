@@ -3,7 +3,7 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import Login from "./pages/auth/Login";
 import {AcceptInvite} from "./pages/auth/AcceptInvite";
 import {PrivateRoute} from "./components/PrivateRoute";
-import { Dashboard } from "./pages/Dashboard";
+import { Dashboard } from "./pages/user/Dashboard";
 import {Teams} from "./pages/admin/Teams";
 import {TeamDetails} from "./pages/admin/TeamDetails";
 import {NoAccess} from "./pages/help/NoAccess";
@@ -13,13 +13,22 @@ import {Notification} from "./components/Notification";
 import {ResetPassword} from "./pages/auth/ResetPassword";
 import {UserType} from "./store/types";
 import { Box } from "@mui/material";
-import {Profile} from "./pages/user/Profile";
+import {Profile} from "./pages/help/Profile";
 import {UserDetails} from "./pages/admin/UserDetails";
 import {Users} from "./pages/admin/Users";
 import {CompleteInvite} from "./pages/auth/CompleteInvite";
 import {InviteError} from "./pages/help/InviteError";
 import {useCognitoUserStore} from './store/cognitoUser';
 import {SelectTeam} from "./pages/help/SelectTeam";
+import {Seasons} from "./pages/user/Seasons";
+import {Goals} from "./pages/user/Goals";
+import {Progress} from "./pages/user/Progress";
+import {Members} from "./pages/trainer/Members";
+import {TeamSettings} from "./pages/trainer/TeamSettings";
+import {Invites} from "./pages/trainer/Invites";
+import {GoalDetails} from "./pages/user/GoalDetails";
+import {ProgressCreation} from "./pages/user/ProgressCreation";
+import {ProgressDetails} from "./pages/user/ProgressDetails";
 
 const PathsWithoutHeader = [
   "login",
@@ -37,6 +46,12 @@ const HeaderVisibleSegments = [
   'teams',
   'users',
   'profile',
+  'seasons',
+  'goals',
+  'progress',
+  'members',
+  'team-settings',
+  'invites',
   'no-access'
 ];
 
@@ -117,8 +132,19 @@ function App() {
             <Route path={"/complete-invite"} element={<CompleteInvite />} />
             <Route path={"/reset-password"} element={<ResetPassword />} />
             <Route path={"/"} element={<PrivateRoute userTypes={[UserType.User]} />} >
+              {/* Main Pages */}
               <Route path="" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path={"/seasons"} element={<Seasons />} />
+              <Route path={"/goals"} element={<Goals />} />
+              <Route path={"/goals/:goalId"} element={<GoalDetails />} />
+              <Route path={"/progress"} element={<Progress />} />
+              <Route path={"/progress/create"} element={<ProgressCreation />} />
+              <Route path={"/progress/:progressId"} element={<ProgressDetails />} />
+              <Route path={"/members"} element={<Members />} />
+              <Route path={"/team-settings"} element={<TeamSettings />} />
+              <Route path={"/invites"} element={<Invites />} />
+              {/* Helper Pages */}
               <Route path={"/select-team"} element={<SelectTeam />} />
             </ Route>
             <Route path={"/teams"} element={<PrivateRoute userTypes={[UserType.Admin]} />} >

@@ -23,6 +23,7 @@ body {
   @include meta.load-css("pages/select-team");
   @include meta.load-css("pages/profile");
   @include meta.load-css("pages/teams");
+  @include meta.load-css("pages/seasons");
 
   .app {
     &.app-container {

@@ -2,6 +2,7 @@
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
 import {
+  ISeasonFilterOption,
   ITeamFilterOption,
   ITeamInviteFilterOption,
   ITeamMemberFilterOption,
@@ -14,7 +15,7 @@ import {
   ITeamMember,
   ITeamSettings, ITeamUser,
   IUser,
-  IProfileUpdate, IUserUpdate, RoleType
+  IProfileUpdate, IUserUpdate, RoleType, ISeason, SeasonStatus
 } from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
@@ -571,6 +572,73 @@ class VolleyGoalsAPI {
         message: reason?.response?.data?.message || reason?.message || 'error.internalServerError',
         error: reason?.response?.data?.error,
       };
+    }
+  }
+
+  // Seasons
+  public async listSeasons(filter: ISeasonFilterOption): Promise<{ message: string, error?: string, count?: number, items?: ISeason[], nextToken?: string, hasMore?: boolean}> {
+    try {
+      await this.ensureEndpoints();
+      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as ISeasonFilterOption;
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons`, { params: normFilter });
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async getSeason(id: string): Promise<{message: string, error?: string, season?: ISeason}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async createSeason(data: {teamId: string, name: string, startDate: string, endDate: string}): Promise<{message: string, error?: string, season?: ISeason}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post('/seasons', data);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async updateSeason(id: string, data: Partial<{name: string, startDate: string, endDate: string, status: SeasonStatus}>): Promise<{ message: string, error?: string, season?: ISeason}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/seasons/${id}`, data);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async deleteSeason(id: string): Promise<{ message: string, error?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/seasons/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
     }
   }
 }
