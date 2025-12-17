@@ -2,6 +2,7 @@
 import axios, { AxiosInstance } from "axios";
 import https from 'https';
 import {
+  IGoalFilterOption,
   ISeasonFilterOption,
   ITeamFilterOption,
   ITeamInviteFilterOption,
@@ -15,7 +16,7 @@ import {
   ITeamMember,
   ITeamSettings, ITeamUser,
   IUser,
-  IProfileUpdate, IUserUpdate, RoleType, ISeason, SeasonStatus
+  IProfileUpdate, IUserUpdate, RoleType, ISeason, SeasonStatus, IGoal, GoalType, GoalStatus
 } from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
@@ -640,6 +641,98 @@ class VolleyGoalsAPI {
         error: reason.response?.data?.error,
       }
     }
+  }
+
+  // Goals
+  public async listGoals(seasonId: string, filter: IGoalFilterOption): Promise<{ message: string, error?: string, count?: number, items?: IGoal[], nextToken?: string, hasMore?: boolean}> {
+    try {
+      await this.ensureEndpoints();
+      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as IGoalFilterOption;
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/goals`, { params: normFilter });
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async getGoal(seasonId: string, id: string): Promise<{message: string, error?: string, goal?: IGoal}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/goals/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async createGoal(seasonId: string, data: {type: GoalType, title: string, description: string}): Promise<{message: string, error?: string, goal?: IGoal}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/seasons/${seasonId}/goals`, data);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async updateGoal(seasonId: string, id: string, data: Partial<{title: string, description: string, status: GoalStatus, ownerId: string}>): Promise<{ message: string, error?: string, goal?: IGoal}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/seasons/${seasonId}/goals/${id}`, data);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async deleteGoal(seasonId: string, id: string): Promise<{ message: string, error?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/seasons/${seasonId}/goals/${id}`);
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async getPresignedGoalAvatarUploadUrl(seasonId: string, goalId: string, filename: string, contentType: string): Promise<{ message: string, error?: string, uploadUrl?: string, key?: string, fileUrl?: string}> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/goals/${goalId}/picture/presign`, { params: { filename, contentType }});
+      return response.data;
+    } catch (reason: any) {
+      return {
+        message: reason.response?.data?.message || 'error.internalServerError',
+        error: reason.response?.data?.error,
+      }
+    }
+  }
+
+  public async uploadGoalAvatar(seasonId: string, goalId: string, file: File, onProgress?: (pct: number) => void): Promise<{message: string, error?: string, fileUrl?: string}> {
+    const presign = await this.getPresignedGoalAvatarUploadUrl(seasonId, goalId, file.name, file.type);
+    if (presign.error || !presign.uploadUrl) {
+      return presign;
+    }
+    const uploadResult = await this.uploadFileToPresignedUrl(file , presign.uploadUrl, onProgress);
+    if (uploadResult.error) {
+      return uploadResult;
+    }
+    return { message: 'success', fileUrl: presign.fileUrl };
   }
 }
 

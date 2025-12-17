@@ -37,6 +37,18 @@ export enum SeasonStatus {
   Archived = "archived",
 }
 
+export enum GoalType {
+  Team = "team",
+  Individual = "individual",
+}
+
+export enum GoalStatus {
+  Open = "open",
+  InProgress = "in_progress",
+  Completed = "completed",
+  Archived = "archived",
+}
+
 export interface ITeamAssignment {
   team: ITeam
   role: RoleType;
@@ -141,6 +153,20 @@ export interface ISeason {
   startDate: string;
   endDate: string;
   status: SeasonStatus;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Goals
+export interface IGoal {
+  id: string;
+  seasonId: string;
+  ownerId: string;
+  goalType: GoalType;
+  title: string;
+  description: string;
+  status: GoalStatus;
+  createdBy: string;
   createdAt: string;
   updatedAt: string;
 }

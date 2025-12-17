@@ -1,3 +1,5 @@
+import {GoalStatus, GoalType} from "../store/types";
+
 export interface IFilterOption {
   limit?: number,
   nextToken?: string,
@@ -39,4 +41,11 @@ export interface ISeasonFilterOption extends IFilterOption {
   name?: string,
   status?: string,
   teamId: string,
+}
+
+export interface IGoalFilterOption extends IFilterOption {
+  ownerId?: string;
+  goalType?: GoalType;
+  status?: GoalStatus;
+  title?: string;
 }

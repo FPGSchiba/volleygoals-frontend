@@ -9,8 +9,117 @@
   text-align: center;
 }
 .seasons-page.seasons-page-paper {
-  margin-top: 15px;
   border-radius: 15px;
   width: 100%;
+}
+
+/* src/resources/styles/pages/goals.scss */
+.goals-page.goals-page-paper {
+  display: flex;
+  flex-direction: column;
+}
+.goals-page .goals-field-full {
+  flex: 0 0 100%;
+}
+.goals-page .goals-field-half {
+  flex: 0 0 48%;
+}
+.goals-page .goals-list {
+}
+@media (max-width: 600px) {
+  .goals-page .goals-create-top {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+.goals-create-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0;
+  padding: 8px;
+}
+.goals-create-top {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+.goals-create-title {
+  width: 70%;
+  margin-right: 16px;
+}
+.goals-create-type {
+  width: 30%;
+}
+.goals-create-top-item {
+  display: flex;
+  width: 100%;
+  padding: 0 6px;
+}
+.goals-create-desc {
+  padding: 4px 6px;
+}
+.goals-create-desc .MuiInputBase-root .MuiInputBase-inputMultiline,
+.goals-create-desc .MuiInputBase-root textarea,
+.goals-create-desc textarea,
+.goals-create-desc .MuiOutlinedInput-inputMultiline,
+.goals-create-desc .MuiOutlinedInput-input {
+  max-height: 200px !important;
+  height: 200px !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  resize: none !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  pointer-events: auto !important;
+  touch-action: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+.goals-create-desc {
+}
+.goals-create-desc .MuiInputBase-root,
+.goals-create-desc .MuiOutlinedInput-root {
+  overflow: visible !important;
+}
+.goals-create-desc {
+}
+.goals-create-desc .MuiInputBase-root .MuiInputBase-inputMultiline,
+.goals-create-desc .MuiInputBase-root textarea,
+.goals-create-desc textarea {
+  scrollbar-width: thin !important;
+  scrollbar-color: red transparent !important;
+}
+.goals-create-desc {
+}
+.goals-create-desc .MuiInputBase-root .MuiInputBase-inputMultiline::-webkit-scrollbar,
+.goals-create-desc .MuiInputBase-root textarea::-webkit-scrollbar,
+.goals-create-desc textarea::-webkit-scrollbar,
+.goals-create-desc .MuiOutlinedInput-inputMultiline::-webkit-scrollbar,
+.goals-create-desc .MuiOutlinedInput-input::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.goals-create-desc .MuiInputBase-root .MuiInputBase-inputMultiline::-webkit-scrollbar-thumb,
+.goals-create-desc .MuiInputBase-root textarea::-webkit-scrollbar-thumb,
+.goals-create-desc textarea::-webkit-scrollbar-thumb,
+.goals-create-desc .MuiOutlinedInput-inputMultiline::-webkit-scrollbar-thumb,
+.goals-create-desc .MuiOutlinedInput-input::-webkit-scrollbar-thumb {
+  background: red !important;
+  border-radius: 6px !important;
+  border: 2px solid rgba(0, 0, 0, 0) !important;
+}
+.goals-create-desc .MuiInputBase-root .MuiInputBase-inputMultiline::-webkit-scrollbar-track,
+.goals-create-desc .MuiInputBase-root textarea::-webkit-scrollbar-track,
+.goals-create-desc textarea::-webkit-scrollbar-track,
+.goals-create-desc .MuiOutlinedInput-inputMultiline::-webkit-scrollbar-track,
+.goals-create-desc .MuiOutlinedInput-input::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+@media (max-width: 600px) {
+  .goals-create-top {
+    flex-direction: column;
+    gap: 8px;
+  }
 }
 /*# sourceMappingURL=index.css.map */

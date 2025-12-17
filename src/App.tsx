@@ -110,7 +110,7 @@ function App() {
     <BrowserRouter>
       <Notification />
       {React.useMemo(() => null, [])}
-      <Box sx={{ display: 'flex', minHeight: '100vh' }} className={"app app-container"}>
+      <Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'flex-start' }} className={"app app-container"}>
         <Navigation
           /* Navigation can accept these props to control width from App */
           collapsed={collapsed}
@@ -121,9 +121,10 @@ function App() {
           <Box
             component="main"
             sx={{
-              flexGrow: 1,
               transition: 'margin-left 200ms',
-              marginLeft: `${hidden ? 0 : (collapsed ? 72 : 256) + 20}px` // For margin of the nav container
+              marginLeft: `${hidden ? 0 : (collapsed ? 72 : 256) + 20}px`, // For margin of the nav container
+              overflow: 'auto',
+              width: `calc(100% - ${hidden ? 0 : (collapsed ? 72 : 256) + 20}px)`
             }}
           >
             <Routes>

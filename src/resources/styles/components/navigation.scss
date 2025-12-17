@@ -4,7 +4,7 @@
       transition: width 200ms;
       overflow: hidden;
       margin-top: 20px;
-      margin-left: 20px;
+      margin-left: 20px !important; // ensure the nav keeps its left gap
       margin-bottom: 20px;
       border-radius: 15px;
       max-height: 50rem;

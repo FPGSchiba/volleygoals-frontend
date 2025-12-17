@@ -1,4 +1,15 @@
 @use "sass:meta";
+
+/* Reset margins and ensure root fills the viewport */
+html, body, #root {
+  height: 100%;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
 html {
   height: 100%;
 }
@@ -6,6 +17,8 @@ html {
 body {
   height: 100%;
   background-color: var(--palette-background-default);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 
   // Components
   @include meta.load-css("components/navigation");
@@ -24,15 +37,71 @@ body {
   @include meta.load-css("pages/profile");
   @include meta.load-css("pages/teams");
   @include meta.load-css("pages/seasons");
+  @include meta.load-css("pages/goals");
 
   .app {
     &.app-container {
       display: flex;
       flex-direction: row;
+      min-height: 100vh; /* ensure app fills viewport but allow it to grow */
+      /* allow page-level scrolling when content exceeds viewport */
     }
 
     &.app-main {
 
     }
+  }
+
+  /* Make the main region size via flex; don't force height:100% (that made inner content stretch) */
+  .app.app-container main {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: visible;
+    padding: 20px;
+    max-height: 100%;
+  }
+
+  /* ItemList: make list a column flex container but let the table size to content up to a max
+     so small tables don't stretch to full viewport height. When it exceeds max-height the table
+     will scroll internally. */
+  .item-list {
+    display: flex;
+    flex-direction: column;
+    /* don't force height:100% so component grows with content */
+    min-height: 0;
+
+    .item-list-header {
+      flex: 0 0 auto;
+    }
+
+    .item-list-filter {
+      flex: 0 0 auto;
+    }
+
+    .item-list-table {
+      /* allow the table container to size to its content but cap its height */
+      flex: 0 1 auto; /* grow/shrink based on content; do not force to fill parent */
+      min-height: 0; /* allow internal overflow handling */
+      max-height: calc(100vh - 220px); /* cap height so it won't create a page scrollbar */
+      overflow: auto; /* scroll inside the table area when content exceeds max-height */
+    }
+
+    .item-list-pagination {
+      flex: 0 0 auto;
+    }
+  }
+
+  /* Ensure immediate page-level children don't get forced to fill viewport height. This lets pages grow
+     with their content, while the app root prevents page scrolling. */
+  main > * {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  /* Override generated MUI class to remove unwanted padding */
+  .css-19kzrtu {
+    padding: 0 !important;
   }
 }
