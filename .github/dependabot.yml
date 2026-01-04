@@ -1,23 +1,15 @@
 version: 2
 updates:
-  - package-ecosystem: "terraform"
+  - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
     groups:
-      infrastructure:
-        patterns:
-          - "*aws*" 
-  - package-ecosystem: "gomod"
-    directory: "files/src/"
-    schedule:
-      interval: "weekly"
-    groups:
-      go-dependencies:
+      npm-dependencies:
         patterns:
           - "*"
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directory: "/" 
     schedule:
       interval: "weekly"
     groups:
