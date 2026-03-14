@@ -7,7 +7,9 @@ import {
   ITeamFilterOption,
   ITeamInviteFilterOption,
   ITeamMemberFilterOption,
-  IUserFilterOption
+  IUserFilterOption,
+  IProgressReportFilterOption,
+  ICommentFilterOption
 } from "./types";
 import {
   IInvite,
@@ -16,7 +18,8 @@ import {
   ITeamMember,
   ITeamSettings, ITeamUser,
   IUser,
-  IProfileUpdate, IUserUpdate, RoleType, ISeason, SeasonStatus, IGoal, GoalType, GoalStatus
+  IProfileUpdate, IUserUpdate, RoleType, ISeason, SeasonStatus, IGoal, GoalType, GoalStatus,
+  IProgressReport, IComment, ICommentFile
 } from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
@@ -684,7 +687,7 @@ class VolleyGoalsAPI {
     }
   }
 
-  public async updateGoal(seasonId: string, id: string, data: Partial<{title: string, description: string, status: GoalStatus, ownerId: string}>): Promise<{ message: string, error?: string, goal?: IGoal}> {
+  public async updateGoal(seasonId: string, id: string, data: Partial<{title: string, description: string, status: GoalStatus, ownerId: string, picture: string}>): Promise<{ message: string, error?: string, goal?: IGoal}> {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/seasons/${seasonId}/goals/${id}`, data);
@@ -733,6 +736,121 @@ class VolleyGoalsAPI {
       return uploadResult;
     }
     return { message: 'success', fileUrl: presign.fileUrl };
+  }
+
+  // Progress Reports
+  public async listProgressReports(seasonId: string, filter: IProgressReportFilterOption): Promise<{ message: string, error?: string, count?: number, items?: IProgressReport[], nextToken?: string, hasMore?: boolean }> {
+    try {
+      await this.ensureEndpoints();
+      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc' };
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/progress-reports`, { params: normFilter });
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async getProgressReport(seasonId: string, reportId: string): Promise<{ message: string, error?: string, progressReport?: IProgressReport }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/progress-reports/${reportId}`);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async createProgressReport(seasonId: string, data: { summary: string, details: string, progress?: { goalId: string, rating: number }[] }): Promise<{ message: string, error?: string, progressReport?: IProgressReport }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/seasons/${seasonId}/progress-reports`, data);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async updateProgressReport(seasonId: string, reportId: string, data: Partial<{ summary: string, details: string, progress: { goalId: string, rating: number }[] }>): Promise<{ message: string, error?: string, progressReport?: IProgressReport }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/seasons/${seasonId}/progress-reports/${reportId}`, data);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async deleteProgressReport(seasonId: string, reportId: string): Promise<{ message: string, error?: string }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/seasons/${seasonId}/progress-reports/${reportId}`);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  // Comments
+  public async listComments(filter: ICommentFilterOption): Promise<{ message: string, error?: string, count?: number, items?: IComment[], nextToken?: string, hasMore?: boolean }> {
+    try {
+      await this.ensureEndpoints();
+      const normFilter = { ...(filter || {}), limit: filter?.limit ?? 20 };
+      const response = await VolleyGoalsAPI.endpoint.get(`/comments`, { params: normFilter });
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async createComment(data: { commentType: string, targetId: string, content: string }): Promise<{ message: string, error?: string, comment?: IComment }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/comments`, data);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async updateComment(commentId: string, content: string): Promise<{ message: string, error?: string, comment?: IComment }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/comments/${commentId}`, { content });
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async deleteComment(commentId: string): Promise<{ message: string, error?: string }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/comments/${commentId}`);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  public async getPresignedCommentFileUploadUrl(commentId: string, filename: string, contentType: string): Promise<{ message: string, error?: string, uploadUrl?: string, commentFile?: ICommentFile }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/comments/${commentId}/file/presign`, { params: { filename, contentType } });
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  // Leave current team
+  public async leaveTeam(teamId: string): Promise<{ message: string, error?: string }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members`);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
   }
 }
 

@@ -13,15 +13,16 @@ type GoalState = {
     hasMore: boolean;
     nextToken: string;
     filter: IGoalFilterOption;
-  }
+  };
+  currentGoal?: IGoal;
 }
 
 type GoalActions = {
   createGoal: (seasonId: string, type: GoalType, title: string, description: string) => Promise<void>;
-  updateGoal: (seasonId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string) => Promise<void>;
+  updateGoal: (seasonId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string, picture?: string) => Promise<void>;
   deleteGoal: (seasonId: string, id: string) => Promise<void>;
   fetchGoals: (seasonId: string, filter: IGoalFilterOption) => Promise<void>;
-  getGoal:    (seasonId: string, id: string) => Promise<IGoal | null>; // TODO: With Progress this needs to be updated
+  getGoal:    (seasonId: string, id: string) => Promise<IGoal | null>;
 }
 
 const useGoalStore = create<GoalState & GoalActions>((set) => ({
@@ -32,6 +33,7 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
     nextToken: '',
     filter: {}
   },
+  currentGoal: undefined,
   createGoal: async (seasonId: string, type: GoalType, title: string, description: string) => {
     const response = await VolleyGoalsAPI.createGoal(seasonId, {type, title, description});
     if (!response.goal) {
@@ -53,8 +55,8 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
       }));
     }
   },
-  updateGoal: async (seasonId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string) => {
-    const response = await VolleyGoalsAPI.updateGoal(seasonId, id, {title, description, status, ownerId});
+  updateGoal: async (seasonId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string, picture?: string) => {
+    const response = await VolleyGoalsAPI.updateGoal(seasonId, id, {title, description, status, ownerId, picture});
     if (!response.goal) {
       useNotificationStore.getState().notify({
         level: 'error',
@@ -70,7 +72,8 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
           hasMore: state.goalList.hasMore,
           nextToken: state.goalList.nextToken,
           filter: state.goalList.filter
-        }
+        },
+        currentGoal: state.currentGoal?.id === id ? response.goal! : state.currentGoal
       }));
     }
   },
@@ -119,6 +122,7 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
   getGoal: async (seasonId: string, id: string) => {
     const response = await VolleyGoalsAPI.getGoal(seasonId, id);
     if (response.goal) {
+      set(() => ({ currentGoal: response.goal }));
       return response.goal;
     } else {
       useNotificationStore.getState().notify({

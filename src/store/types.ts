@@ -143,6 +143,7 @@ export interface IInvite {
   updatedAt: string;
   acceptedAt?: string;
   declinedAt?: string;
+  status?: string; // "pending" | "accepted" | "declined" | "revoked"
 }
 
 // Seasons
@@ -169,4 +170,47 @@ export interface IGoal {
   createdBy: string;
   createdAt: string;
   updatedAt: string;
+  picture?: string;
+}
+
+// Progress Reports
+export interface IProgressReport {
+  id: string;
+  seasonId: string;
+  authorId: string;
+  summary: string;
+  details: string;
+  createdAt: string;
+  updatedAt: string;
+  progress?: IProgressEntry[]; // populated on single GET if backend embeds them
+}
+
+export interface IProgressEntry {
+  id: string;
+  progressReportId: string;
+  goalId: string;
+  rating: number; // 1–5
+}
+
+// Comments
+export enum CommentType {
+  Goal = 'Goal',
+  ProgressReport = 'ProgressReport',
+}
+
+export interface IComment {
+  id: string;
+  authorId: string;
+  commentType: CommentType;
+  targetId: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ICommentFile {
+  id: string;
+  commentId: string;
+  storageKey: string;
+  createdAt: string;
 }

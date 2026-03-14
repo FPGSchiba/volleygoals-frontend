@@ -49,3 +49,15 @@ export interface IGoalFilterOption extends IFilterOption {
   status?: GoalStatus;
   title?: string;
 }
+
+export interface IProgressReportFilterOption extends IFilterOption {
+  authorId?: string;
+  summary?: string;
+  seasonId?: string;
+}
+
+export interface ICommentFilterOption extends IFilterOption {
+  targetId: string;
+  commentType: string;
+  authorId?: string;
+}

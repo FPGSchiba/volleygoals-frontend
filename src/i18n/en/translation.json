@@ -246,6 +246,10 @@
         }
       }
     },
+    "cannot_leave_team": {
+      "title": "Cannot Leave Team",
+      "message": "You are the only admin or trainer. Please assign another admin or trainer before leaving."
+    },
     "invite": {
       "exists": {
         "title": "Invite Already Exists",
@@ -426,7 +430,96 @@
   "common": {
     "cancel": "Cancel",
     "active": "active",
-    "inactive": "inactive"
+    "inactive": "inactive",
+    "view": "View",
+    "edit": "Edit",
+    "save": "Save",
+    "create": "Create",
+    "delete": "Delete"
+  },
+  "comments": {
+    "title": "Comments",
+    "disabled": "Comments are disabled for this goal type.",
+    "addComment": "Add a comment...",
+    "submit": "Submit",
+    "edit": "Edit",
+    "save": "Save",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this comment?",
+    "attachFile": "Attach file"
+  },
+  "goalDetails": {
+    "title": "Goal Details",
+    "uploadPicture": "Upload Picture",
+    "editGoal": "Edit Goal",
+    "saveGoal": "Save",
+    "deleteGoal": "Delete Goal",
+    "deleteConfirm": "Are you sure you want to delete this goal?",
+    "owner": "Owner",
+    "type": "Type",
+    "status": "Status"
+  },
+  "progress": {
+    "title": "Progress Reports",
+    "createTitle": "Create Progress Report",
+    "detailsTitle": "Progress Report Details",
+    "summary": "Summary",
+    "details": "Details",
+    "author": "Author",
+    "goalRatings": "Goal Ratings",
+    "rating": "Rating",
+    "noGoals": "No goals available for this season.",
+    "edit": "Edit",
+    "delete": "Delete",
+    "deleteConfirm": "Are you sure you want to delete this progress report?"
+  },
+  "members": {
+    "title": "Team Members",
+    "role": "Role",
+    "status": "Status",
+    "joinedAt": "Joined",
+    "editMember": "Edit Member",
+    "remove": "Remove",
+    "removeConfirm": "Remove this member from the team?"
+  },
+  "teamSettings": {
+    "title": "Team Settings",
+    "teamName": "Team Name",
+    "teamStatus": "Status",
+    "uploadPicture": "Upload Picture",
+    "allowFileUploads": "Allow File Uploads",
+    "allowTeamGoalComments": "Allow Team Goal Comments",
+    "allowIndividualGoalComments": "Allow Individual Goal Comments",
+    "settingsAdminOnly": "Only admins can change these settings.",
+    "save": "Save",
+    "leaveTeam": "Leave Team",
+    "leaveTeamConfirm": "Are you sure you want to leave this team?",
+    "cannotLeave": "You cannot leave: you are the only admin or trainer. Assign another member first."
+  },
+  "invites": {
+    "title": "Invites",
+    "createTitle": "Create Invite",
+    "email": "Email",
+    "role": "Role",
+    "message": "Personal Message",
+    "sendEmail": "Send Invitation Email",
+    "resend": "Resend",
+    "revoke": "Revoke",
+    "revokeConfirm": "Revoke this invitation?",
+    "status": "Status",
+    "expiresAt": "Expires",
+    "create": "Send Invite"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "activeSeason": "Active Season",
+    "noActiveSeason": "No active season.",
+    "goalsSummary": "Goals",
+    "recentProgress": "Recent Progress Reports",
+    "noReports": "No progress reports yet.",
+    "createProgress": "Create Progress Report",
+    "viewGoals": "View Goals",
+    "viewAll": "View All"
   },
   "notFoundPage": {
     "title": "Page not found",

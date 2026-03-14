@@ -23,6 +23,7 @@ type UserActions = {
   fetchSelf: () => Promise<void>
   updateSelf: (userData: IProfileUpdate) => Promise<void>
   uploadSelfPicture: (file: File, onProgress?: (pct: number) => void) => Promise<string | undefined>
+  leaveTeam: (teamId: string) => Promise<boolean>
 }
 
 const loadSelf = async (): Promise<{user?: IUser, assignments: ITeamAssignment[]}> => {
@@ -147,6 +148,23 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
         useNotificationStore.getState().notify({ level: 'error', message: i18next.t(`${response.message}.message`, 'Something went wrong while uploading the profile picture.'), title: i18next.t(`${response.message}.title`, 'Something went wrong'), details: response.error });
         return undefined;
       }
+    },
+    leaveTeam: async (teamId: string): Promise<boolean> => {
+      const response = await VolleyGoalsAPI.leaveTeam(teamId);
+      if (response.error) {
+        useNotificationStore.getState().notify({
+          level: 'error',
+          message: i18next.t(`${response.message}.message`, 'Something went wrong while leaving the team.'),
+          title: i18next.t(`${response.message}.title`, 'Something went wrong'),
+          details: response.error
+        });
+        return false;
+      }
+      // Clear selected team from session and refresh assignments
+      sessionStorage.removeItem(SELECTED_TEAM_KEY);
+      const { user, assignments } = await loadSelf();
+      set({ user, availableTeams: assignments, selectedTeam: undefined });
+      return true;
     }
   };
 });
