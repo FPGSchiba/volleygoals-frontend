@@ -121,6 +121,8 @@ const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
          currentTeam: response.team,
          currentTeamSettings: response.teamSettings
        }))
+     } else if ((response as any).status === 403 || (response as any).statusCode === 403) {
+       // Silently ignore 403 — members don't have team read access yet
      } else {
        useNotificationStore.getState().notify({
          level: 'error',

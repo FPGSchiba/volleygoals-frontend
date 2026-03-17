@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, Grid, MenuItem, Paper, Switch, TableCell, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, Paper, TableCell, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
 import { Controller, useForm } from 'react-hook-form';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { IInvite, RoleType } from '../../store/types';
@@ -8,7 +8,7 @@ import { useTeamStore } from '../../store/teams';
 import { useCognitoUserStore } from '../../store/cognitoUser';
 import i18next from 'i18next';
 
-type InviteForm = { email: string; role: RoleType; message: string; sendEmail: boolean; };
+type InviteForm = { email: string; role: RoleType; message: string; };
 
 export function Invites() {
   const fetchTeamInvites = useTeamStore((s) => s.fetchTeamInvites);
@@ -26,7 +26,12 @@ export function Invites() {
   React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);
 
   const [inviteCount, setInviteCount] = React.useState(0);
-  const initialFilter: ITeamInviteFilterOption = useMemo(() => ({}), []);
+  const [statusTab, setStatusTab] = React.useState<string>('pending');
+
+  const currentInitialFilter: ITeamInviteFilterOption = useMemo(
+    () => (statusTab ? { status: statusTab } : {}),
+    [statusTab]
+  );
 
   const fetchAdapter = async (filter?: ITeamInviteFilterOption): Promise<FetchResult<IInvite>> => {
     if (!teamId) return { items: [], count: 0 };
@@ -41,14 +46,14 @@ export function Invites() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const { control, handleSubmit, reset } = useForm<InviteForm>({
-    defaultValues: { email: '', role: RoleType.Member, message: '', sendEmail: true }
+    defaultValues: { email: '', role: RoleType.Member, message: '' }
   });
 
   const onCreate = async (data: InviteForm) => {
     if (!teamId) return;
     setActionLoading(true);
     try {
-      await createInvite(teamId, data.email, data.role, data.message, data.sendEmail);
+      await createInvite(teamId, data.email, data.role, data.message, true);
       setCreateOpen(false);
       reset();
     } finally {
@@ -71,8 +76,8 @@ export function Invites() {
     <TableCell key="email">{inv.email}</TableCell>,
     <TableCell key="role"><Chip label={inv.role} size="small" /></TableCell>,
     <TableCell key="status"><Chip label={inv.status || 'pending'} size="small" /></TableCell>,
-    <TableCell key="expires">{new Date(inv.expiresAt).toLocaleDateString()}</TableCell>,
-    <TableCell key="created">{new Date(inv.createdAt).toLocaleDateString()}</TableCell>,
+    <TableCell key="expires">{new Intl.DateTimeFormat('de-CH', { dateStyle: 'short' }).format(new Date(inv.expiresAt))}</TableCell>,
+    <TableCell key="created">{new Intl.DateTimeFormat('de-CH', { dateStyle: 'short' }).format(new Date(inv.createdAt))}</TableCell>,
   ];
 
   const renderActions = (inv: IInvite): React.ReactElement[] => {
@@ -92,12 +97,34 @@ export function Invites() {
     ].filter((x): x is React.ReactElement => x !== null);
   };
 
+  const tabOptions = [
+    { value: '', label: i18next.t('invites.filterAll', 'All') },
+    { value: 'pending', label: i18next.t('invites.filterPending', 'Pending') },
+    { value: 'accepted', label: i18next.t('invites.filterAccepted', 'Accepted') },
+    { value: 'declined', label: i18next.t('invites.filterDeclined', 'Declined') },
+  ];
+
   return (
-    <Paper>
-      <Box p={2}>
+    <Paper sx={{ borderRadius: 3 }}>
+      <Box p={{ xs: 2, sm: 3 }}>
         <Typography variant="h5">{i18next.t('invites.title', 'Invites')}</Typography>
+        <Box mt={1.5}>
+          <ToggleButtonGroup
+            size="small"
+            value={statusTab}
+            exclusive
+            onChange={(_, v) => { if (v !== null) setStatusTab(v); }}
+            sx={{ '& .MuiToggleButton-root': { borderRadius: 1.5, px: 1.5, py: 0.5, fontSize: 12 } }}
+          >
+            {tabOptions.map(opt => (
+              <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
+            ))}
+          </ToggleButtonGroup>
+        </Box>
         <Box mt={2}>
+          {/* key={statusTab} forces ItemList to remount on tab change so it re-fetches with the new initialFilter */}
           <ItemList<IInvite, ITeamInviteFilterOption>
+            key={statusTab}
             title={i18next.t('invites.title', 'Invites')}
             columns={[
               i18next.t('invites.email', 'Email'),
@@ -106,7 +133,7 @@ export function Invites() {
               i18next.t('invites.expiresAt', 'Expires'),
               i18next.t('user.goals.columns.created', 'Created'),
             ]}
-            initialFilter={initialFilter}
+            initialFilter={currentInitialFilter}
             rowsPerPage={10}
             fetch={fetchAdapter}
             initialFetchPaused={!allowFetch}
@@ -114,15 +141,6 @@ export function Invites() {
             renderFilterFields={(f, setF) => [
               <Grid key="email">
                 <TextField fullWidth label={i18next.t('invites.email', 'Email')} value={f.email ?? ''} onChange={(e) => setF({ ...f, email: e.target.value })} />
-              </Grid>,
-              <Grid key="status">
-                <TextField select fullWidth label={i18next.t('invites.status', 'Status')} value={f.status ?? ''} onChange={(e) => setF({ ...f, status: e.target.value })}>
-                  <MenuItem value="">{i18next.t('admin.teams.filter.any', 'Any')}</MenuItem>
-                  <MenuItem value="pending">pending</MenuItem>
-                  <MenuItem value="accepted">accepted</MenuItem>
-                  <MenuItem value="declined">declined</MenuItem>
-                  <MenuItem value="revoked">revoked</MenuItem>
-                </TextField>
               </Grid>,
               <Grid key="role">
                 <TextField select fullWidth label={i18next.t('invites.role', 'Role')} value={f.role ?? ''} onChange={(e) => setF({ ...f, role: e.target.value })}>
@@ -153,19 +171,13 @@ export function Invites() {
               )} />
               <Controller name="role" control={control} render={({ field }) => (
                 <TextField select fullWidth label={i18next.t('invites.role', 'Role')} {...field}>
-                  <MenuItem value={RoleType.Admin}>admin</MenuItem>
+                  {userRole === 'admin' && <MenuItem value={RoleType.Admin}>admin</MenuItem>}
                   <MenuItem value={RoleType.Trainer}>trainer</MenuItem>
                   <MenuItem value={RoleType.Member}>member</MenuItem>
                 </TextField>
               )} />
               <Controller name="message" control={control} render={({ field }) => (
                 <TextField fullWidth multiline rows={3} label={i18next.t('invites.message', 'Personal Message')} {...field} />
-              )} />
-              <Controller name="sendEmail" control={control} render={({ field }) => (
-                <FormControlLabel
-                  control={<Switch checked={field.value} onChange={(e) => field.onChange(e.target.checked)} />}
-                  label={i18next.t('invites.sendEmail', 'Send Invitation Email')}
-                />
               )} />
             </Box>
           </form>

@@ -63,7 +63,7 @@ export function GoalDetails() {
   }, [goalId, seasonId]);
 
   React.useEffect(() => {
-    if (teamId) getTeam(teamId);
+    if (teamId) getTeam(teamId).catch(() => {});
   }, [teamId]);
 
   const isOwner = currentGoal?.ownerId === currentUser?.id;
@@ -132,8 +132,8 @@ export function GoalDetails() {
 
   const settings = currentTeamSettings;
   const commentsEnabled = currentGoal.goalType === GoalType.Team
-    ? settings?.allowTeamGoalComments
-    : settings?.allowIndividualGoalComments;
+    ? (settings?.allowTeamGoalComments ?? false)
+    : (settings?.allowIndividualGoalComments ?? false);
 
   return (
     <Paper>

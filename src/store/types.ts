@@ -163,6 +163,7 @@ export interface IGoal {
   id: string;
   seasonId: string;
   ownerId: string;
+  owner?: { id: string; name?: string; preferredUsername?: string; picture?: string };
   goalType: GoalType;
   title: string;
   description: string;
@@ -171,6 +172,7 @@ export interface IGoal {
   createdAt: string;
   updatedAt: string;
   picture?: string;
+  completionPercentage?: number; // API #17
 }
 
 // Progress Reports
@@ -180,9 +182,12 @@ export interface IProgressReport {
   authorId: string;
   summary: string;
   details: string;
+  overallDetails?: string; // optional overall summary/notes
   createdAt: string;
   updatedAt: string;
   progress?: IProgressEntry[]; // populated on single GET if backend embeds them
+  authorName?: string;       // API #18
+  authorPicture?: string | null;
 }
 
 export interface IProgressEntry {
@@ -190,12 +195,38 @@ export interface IProgressEntry {
   progressReportId: string;
   goalId: string;
   rating: number; // 1–5
+  details?: string; // per-goal notes
+}
+
+// Season Stats
+export interface ISeasonStats {
+  goalCount: number;
+  completedGoalCount: number;
+  openGoalCount?: number;       // US-001: extended stats (optional until backend deployed)
+  inProgressGoalCount?: number; // US-001: extended stats (optional until backend deployed)
+  reportCount: number;
+  memberCount: number;
+}
+
+// Activity Feed
+export interface IActivityEntry {
+  id: string;
+  teamId: string;
+  actorId: string;
+  actorName?: string;
+  actorPicture?: string;
+  action: string;
+  description: string;
+  targetType: string;
+  targetId?: string;
+  timestamp: string;
 }
 
 // Comments
 export enum CommentType {
   Goal = 'Goal',
   ProgressReport = 'ProgressReport',
+  ProgressEntry = 'ProgressEntry',
 }
 
 export interface IComment {
@@ -206,6 +237,9 @@ export interface IComment {
   content: string;
   createdAt: string;
   updatedAt: string;
+  authorName?: string;          // API #13
+  authorPicture?: string | null;
+  files?: ICommentFile[];       // API #14
 }
 
 export interface ICommentFile {
@@ -213,4 +247,5 @@ export interface ICommentFile {
   commentId: string;
   storageKey: string;
   createdAt: string;
+  fileUrl?: string; // API #14
 }

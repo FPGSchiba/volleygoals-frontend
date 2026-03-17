@@ -12,7 +12,7 @@ import {Navigation} from "./components/Navigation";
 import {Notification} from "./components/Notification";
 import {ResetPassword} from "./pages/auth/ResetPassword";
 import {UserType} from "./store/types";
-import { Box } from "@mui/material";
+import { Box, useTheme, useMediaQuery } from "@mui/material";
 import {Profile} from "./pages/help/Profile";
 import {UserDetails} from "./pages/admin/UserDetails";
 import {Users} from "./pages/admin/Users";
@@ -29,6 +29,7 @@ import {Invites} from "./pages/trainer/Invites";
 import {GoalDetails} from "./pages/user/GoalDetails";
 import {ProgressCreation} from "./pages/user/ProgressCreation";
 import {ProgressDetails} from "./pages/user/ProgressDetails";
+import {ProgressEntryDetails} from "./pages/user/ProgressEntryDetails";
 
 const PathsWithoutHeader = [
   "login",
@@ -55,7 +56,9 @@ const HeaderVisibleSegments = [
   'no-access'
 ];
 
-function App() {
+function AppContent() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [collapsed, setCollapsed] = React.useState(false);
   const [hidden, setHidden] = React.useState(false);
 
@@ -112,22 +115,24 @@ function App() {
       {React.useMemo(() => null, [])}
       <Box sx={{ display: 'flex', minHeight: '100vh', alignItems: 'flex-start' }} className={"app app-container"}>
         <Navigation
-          /* Navigation can accept these props to control width from App */
           collapsed={collapsed}
           setCollapsed={setCollapsed}
           drawerWidth={collapsed ? 72 : 256}
           hidden={hidden}
         />
-          <Box
-            component="main"
-            sx={{
-              transition: 'margin-left 200ms',
-              marginLeft: `${hidden ? 0 : (collapsed ? 72 : 256) + 20}px`, // For margin of the nav container
-              overflow: 'auto',
-              width: `calc(100% - ${hidden ? 0 : (collapsed ? 72 : 256) + 20}px)`
-            }}
-          >
-            <Routes>
+        <Box
+          component="main"
+          sx={{
+            transition: 'margin-left 200ms',
+            // On mobile: no left margin (sidebar hidden), add top/bottom padding for fixed bars
+            marginLeft: isMobile || hidden ? 0 : `${(collapsed ? 72 : 256) + 20}px`,
+            overflow: 'auto',
+            width: isMobile || hidden ? '100%' : `calc(100% - ${(collapsed ? 72 : 256) + 20}px)`,
+            paddingTop: isMobile && !hidden ? '52px' : 0,    // top bar height on mobile
+            paddingBottom: isMobile && !hidden ? '56px' : 0, // bottom nav height on mobile
+          }}
+        >
+          <Routes>
             <Route path={"/login"} element={<Login />} />
             <Route path={"/accept-invite"} element={<AcceptInvite />} />
             <Route path={"/complete-invite"} element={<CompleteInvite />} />
@@ -142,12 +147,13 @@ function App() {
               <Route path={"/progress"} element={<Progress />} />
               <Route path={"/progress/create"} element={<ProgressCreation />} />
               <Route path={"/progress/:progressId"} element={<ProgressDetails />} />
+              <Route path={"/progress/:progressId/entries/:entryId"} element={<ProgressEntryDetails />} />
               <Route path={"/members"} element={<Members />} />
               <Route path={"/team-settings"} element={<TeamSettings />} />
               <Route path={"/invites"} element={<Invites />} />
               {/* Helper Pages */}
               <Route path={"/select-team"} element={<SelectTeam />} />
-            </ Route>
+            </Route>
             <Route path={"/teams"} element={<PrivateRoute userTypes={[UserType.Admin]} />} >
               <Route path={""} element={<Teams />} />
               <Route path={":teamId"} element={<TeamDetails />} />
@@ -167,6 +173,10 @@ function App() {
       </Box>
     </BrowserRouter>
   );
+}
+
+function App() {
+  return <AppContent />;
 }
 
 export default App;

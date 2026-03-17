@@ -1,5 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, Paper, TableCell, TextField, Typography } from '@mui/material';
+import {
+  Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
+  Grid, MenuItem, Paper, TableCell, TextField, Typography,
+  InputAdornment, IconButton,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { Controller, useForm } from 'react-hook-form';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { ITeamUser } from '../../store/types';
@@ -15,6 +21,7 @@ export function Members() {
   const fetchTeamMembers = useTeamStore((s) => s.fetchTeamMembers);
   const teamMembers = useTeamStore((s) => s.teamMembers) || [];
   const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
+  const currentUser = useCognitoUserStore((s) => s.user);
   const teamId = selectedTeam?.team?.id || '';
   const userRole = selectedTeam?.role as string | undefined;
   const canManage = userRole === 'admin' || userRole === 'trainer';
@@ -23,7 +30,19 @@ export function Members() {
   React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);
 
   const [membersCount, setMembersCount] = React.useState(0);
+  const [memberSearch, setMemberSearch] = useState('');
   const initialFilter: ITeamMemberFilterOption = useMemo(() => ({}), []);
+
+  // Client-side filtered members
+  const filteredMembers = useMemo(() => {
+    if (!memberSearch.trim()) return teamMembers;
+    const lower = memberSearch.toLowerCase();
+    return teamMembers.filter(m =>
+      (m.name || '').toLowerCase().includes(lower) ||
+      (m.preferredUsername || '').toLowerCase().includes(lower) ||
+      m.email.toLowerCase().includes(lower)
+    );
+  }, [teamMembers, memberSearch]);
 
   const fetchAdapter = async (filter?: ITeamMemberFilterOption): Promise<FetchResult<ITeamUser>> => {
     if (!teamId) return { items: [], count: 0 };
@@ -74,13 +93,14 @@ export function Members() {
     <TableCell key="email">{m.email}</TableCell>,
     <TableCell key="role"><Chip label={m.role} size="small" /></TableCell>,
     <TableCell key="status"><Chip label={m.status} size="small" color={m.status === 'active' ? 'success' : 'default'} /></TableCell>,
-    <TableCell key="joined">{m.joinedAt ? new Date(m.joinedAt).toLocaleDateString() : '-'}</TableCell>,
+    <TableCell key="joined">{m.joinedAt ? new Intl.DateTimeFormat('de-CH', { dateStyle: 'short' }).format(new Date(m.joinedAt)) : '-'}</TableCell>,
   ];
 
   const renderActions = (m: ITeamUser): React.ReactElement[] => {
     if (!canManage) return [];
+    const isSelf = currentUser?.id === m.id;
     return [
-      <Button key="edit" size="small" variant="contained" onClick={() => openEdit(m)} style={{ marginRight: 8 }}>
+      <Button key="edit" size="small" variant="contained" onClick={() => openEdit(m)} style={{ marginRight: 8 }} disabled={isSelf || actionLoading}>
         {i18next.t('common.edit', 'Edit')}
       </Button>,
       m.status !== 'removed' ? (
@@ -92,9 +112,34 @@ export function Members() {
   };
 
   return (
-    <Paper>
-      <Box p={2}>
-        <Typography variant="h5">{i18next.t('members.title', 'Team Members')}</Typography>
+    <Paper sx={{ borderRadius: 3 }}>
+      <Box p={{ xs: 2, sm: 3 }}>
+        <Typography variant="h5" fontWeight={600}>{i18next.t('members.title', 'Team Members')}</Typography>
+
+        {/* Search bar */}
+        <Box mt={2}>
+          <TextField
+            size="small"
+            fullWidth
+            placeholder={i18next.t('members.search', 'Search by name or email...')}
+            value={memberSearch}
+            onChange={(e) => setMemberSearch(e.target.value)}
+            sx={{ maxWidth: 400, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" color="action" />
+                </InputAdornment>
+              ),
+              endAdornment: memberSearch ? (
+                <InputAdornment position="end">
+                  <IconButton size="small" onClick={() => setMemberSearch('')}><ClearIcon fontSize="small" /></IconButton>
+                </InputAdornment>
+              ) : null,
+            }}
+          />
+        </Box>
+
         <Box mt={2}>
           <ItemList<ITeamUser, ITeamMemberFilterOption>
             title={i18next.t('members.title', 'Team Members')}
@@ -129,8 +174,8 @@ export function Members() {
             renderRow={(item) => renderRow(item)}
             renderActions={(item) => renderActions(item as ITeamUser)}
             sortableFields={[]}
-            items={teamMembers}
-            count={membersCount}
+            items={filteredMembers}
+            count={filteredMembers.length}
           />
         </Box>
       </Box>
@@ -143,7 +188,7 @@ export function Members() {
             <Box mt={1} display="flex" flexDirection="column" gap={2}>
               <Controller name="role" control={control} render={({ field }) => (
                 <TextField select fullWidth label={i18next.t('members.role', 'Role')} {...field}>
-                  <MenuItem value="admin">admin</MenuItem>
+                  {userRole === 'admin' && <MenuItem value="admin">admin</MenuItem>}
                   <MenuItem value="trainer">trainer</MenuItem>
                   <MenuItem value="member">member</MenuItem>
                 </TextField>

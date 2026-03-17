@@ -19,8 +19,8 @@ type ProgressReportState = {
 type ProgressReportActions = {
   fetchReports: (seasonId: string, filter: IProgressReportFilterOption) => Promise<void>;
   getReport: (seasonId: string, reportId: string) => Promise<IProgressReport | null>;
-  createReport: (seasonId: string, summary: string, details: string, progress?: { goalId: string, rating: number }[]) => Promise<IProgressReport | null>;
-  updateReport: (seasonId: string, reportId: string, data: Partial<{ summary: string, details: string, progress: { goalId: string, rating: number }[] }>) => Promise<void>;
+  createReport: (seasonId: string, summary: string, details: string, progress?: { goalId: string, rating: number, details?: string }[]) => Promise<IProgressReport | null>;
+  updateReport: (seasonId: string, reportId: string, data: Partial<{ summary: string, details: string, progress: { goalId: string, rating: number, details?: string }[] }>) => Promise<void>;
   deleteReport: (seasonId: string, reportId: string) => Promise<void>;
 }
 
@@ -69,7 +69,7 @@ const useProgressReportStore = create<ProgressReportState & ProgressReportAction
       return null;
     }
   },
-  createReport: async (seasonId: string, summary: string, details: string, progress?: { goalId: string, rating: number }[]) => {
+  createReport: async (seasonId: string, summary: string, details: string, progress?: { goalId: string, rating: number, details?: string }[]) => {
     const response = await VolleyGoalsAPI.createProgressReport(seasonId, { summary, details, progress });
     if (response.progressReport) {
       set((state) => ({
@@ -93,7 +93,7 @@ const useProgressReportStore = create<ProgressReportState & ProgressReportAction
       return null;
     }
   },
-  updateReport: async (seasonId: string, reportId: string, data: Partial<{ summary: string, details: string, progress: { goalId: string, rating: number }[] }>) => {
+  updateReport: async (seasonId: string, reportId: string, data: Partial<{ summary: string, details: string, progress: { goalId: string, rating: number, details?: string }[] }>) => {
     const response = await VolleyGoalsAPI.updateProgressReport(seasonId, reportId, data);
     if (response.progressReport) {
       set((state) => ({

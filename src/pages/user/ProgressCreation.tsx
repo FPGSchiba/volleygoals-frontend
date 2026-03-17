@@ -23,6 +23,7 @@ export function ProgressCreation() {
 
   const [selectedSeasonId, setSelectedSeasonId] = React.useState<string | null>(null);
   const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [goalDetails, setGoalDetails] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
@@ -51,7 +52,7 @@ export function ProgressCreation() {
     try {
       const progress = Object.entries(ratings)
         .filter(([, rating]) => rating > 0)
-        .map(([goalId, rating]) => ({ goalId, rating }));
+        .map(([goalId, rating]) => ({ goalId, rating, details: goalDetails[goalId] || undefined }));
       const report = await createReport(selectedSeasonId, data.summary, data.details, progress);
       if (report) navigate('/progress');
     } finally {
@@ -85,12 +86,21 @@ export function ProgressCreation() {
               <Box>
                 <Typography variant="subtitle1">{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
                 {activeGoals.map((g) => (
-                  <Box key={g.id} display="flex" alignItems="center" gap={2} mt={1}>
-                    <Typography style={{ minWidth: 200 }}>{g.title}</Typography>
-                    <Rating
-                      max={5}
-                      value={ratings[g.id] || 0}
-                      onChange={(_, v) => setRatings(prev => ({ ...prev, [g.id]: v || 0 }))}
+                  <Box key={g.id} display="flex" flexDirection="column" gap={1} mt={1} p={1} border={1} borderColor="divider" borderRadius={1}>
+                    <Box display="flex" alignItems="center" gap={2}>
+                      <Typography style={{ minWidth: 200 }}>{g.title}</Typography>
+                      <Rating
+                        max={5}
+                        value={ratings[g.id] || 0}
+                        onChange={(_, v) => setRatings(prev => ({ ...prev, [g.id]: v || 0 }))}
+                      />
+                    </Box>
+                    <TextField
+                      size="small"
+                      fullWidth
+                      placeholder={i18next.t('progress.entryDetailsPlaceholder', 'Notes for this goal (optional)')}
+                      value={goalDetails[g.id] || ''}
+                      onChange={(e) => setGoalDetails(prev => ({ ...prev, [g.id]: e.target.value }))}
                     />
                   </Box>
                 ))}

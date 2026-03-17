@@ -19,7 +19,7 @@ import {
   ITeamSettings, ITeamUser,
   IUser,
   IProfileUpdate, IUserUpdate, RoleType, ISeason, SeasonStatus, IGoal, GoalType, GoalStatus,
-  IProgressReport, IComment, ICommentFile
+  IProgressReport, IComment, ICommentFile, IActivityEntry
 } from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
@@ -646,6 +646,19 @@ class VolleyGoalsAPI {
     }
   }
 
+  public async getSeasonStats(seasonId: string): Promise<{
+    message: string; error?: string;
+    stats?: { goalCount: number; completedGoalCount: number; reportCount: number; memberCount: number };
+  }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/stats`);
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
   // Goals
   public async listGoals(seasonId: string, filter: IGoalFilterOption): Promise<{ message: string, error?: string, count?: number, items?: IGoal[], nextToken?: string, hasMore?: boolean}> {
     try {
@@ -760,7 +773,7 @@ class VolleyGoalsAPI {
     }
   }
 
-  public async createProgressReport(seasonId: string, data: { summary: string, details: string, progress?: { goalId: string, rating: number }[] }): Promise<{ message: string, error?: string, progressReport?: IProgressReport }> {
+  public async createProgressReport(seasonId: string, data: { summary: string, details: string, progress?: { goalId: string, rating: number, details?: string }[] }): Promise<{ message: string, error?: string, progressReport?: IProgressReport }> {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.post(`/seasons/${seasonId}/progress-reports`, data);
@@ -770,7 +783,7 @@ class VolleyGoalsAPI {
     }
   }
 
-  public async updateProgressReport(seasonId: string, reportId: string, data: Partial<{ summary: string, details: string, progress: { goalId: string, rating: number }[] }>): Promise<{ message: string, error?: string, progressReport?: IProgressReport }> {
+  public async updateProgressReport(seasonId: string, reportId: string, data: Partial<{ summary: string, details: string, progress: { goalId: string, rating: number, details?: string }[] }>): Promise<{ message: string, error?: string, progressReport?: IProgressReport }> {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/seasons/${seasonId}/progress-reports/${reportId}`, data);
@@ -836,6 +849,17 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/comments/${commentId}/file/presign`, { params: { filename, contentType } });
+      return response.data;
+    } catch (reason: any) {
+      return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };
+    }
+  }
+
+  // Team Activity Feed
+  public async getTeamActivity(teamId: string, limit: number = 20): Promise<{ message: string, error?: string, items?: IActivityEntry[] }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/activity`, { params: { limit } });
       return response.data;
     } catch (reason: any) {
       return { message: reason.response?.data?.message || 'error.internalServerError', error: reason.response?.data?.error };

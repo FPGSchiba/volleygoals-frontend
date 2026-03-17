@@ -429,7 +429,12 @@
     "edit": "Bearbeiten",
     "save": "Speichern",
     "create": "Erstellen",
-    "delete": "Löschen"
+    "delete": "Löschen",
+    "loading": "Wird geladen...",
+    "back": "Zurück",
+    "all": "Alle",
+    "filters": "Filter",
+    "clearFilters": "Filter zurücksetzen"
   },
   "comments": {
     "title": "Kommentare",
@@ -440,7 +445,13 @@
     "save": "Speichern",
     "delete": "Löschen",
     "deleteConfirm": "Diesen Kommentar löschen?",
-    "attachFile": "Datei anhängen"
+    "attachFile": "Datei anhängen",
+    "attachingFile": "Anhängen: {{filename}}",
+    "viewMore": "Weitere Kommentare anzeigen ({{count}} gesamt)",
+    "sort": {
+      "newest": "Neueste zuerst",
+      "oldest": "Älteste zuerst"
+    }
   },
   "goalDetails": {
     "title": "Zieldetails",
@@ -465,7 +476,30 @@
     "noGoals": "Keine Ziele für diese Saison verfügbar.",
     "edit": "Bearbeiten",
     "delete": "Löschen",
-    "deleteConfirm": "Sind Sie sicher, dass Sie diesen Fortschrittsbericht löschen möchten?"
+    "deleteConfirm": "Sind Sie sicher, dass Sie diesen Fortschrittsbericht löschen möchten?",
+    "timeline": "Zeitachse",
+    "table": "Tabelle",
+    "goalDetails": "Zielnotizen",
+    "overallDetails": "Gesamtnotizen",
+    "entryDetails": "Details",
+    "entryDetailsPlaceholder": "Notizen zu diesem Ziel (optional)",
+    "reports": "Fortschrittsberichte",
+    "collapseDetails": "Berichtdetails",
+    "showComments": "Kommentare",
+    "hideComments": "Kommentare ausblenden",
+    "searchPlaceholder": "Nach Zusammenfassung suchen...",
+    "filterFrom": "Von Datum",
+    "filterTo": "Bis Datum",
+    "viewMoreReports": "Weitere Fortschrittsberichte anzeigen",
+    "goals": "Ziele:",
+    "minRating": "Min. Bewertung:",
+    "graph": {
+      "noData": "Keine Fortschrittsdaten für diese Saison verfügbar.",
+      "noDataWithReports": "Fortschrittsdaten werden geladen — falls der Graph leer bleibt, sind Einträge möglicherweise noch nicht mit Zielen verknüpft.",
+      "selectSeason": "Wählen Sie eine Saison, um den Fortschrittsgraphen anzuzeigen.",
+      "manageReports": "Berichte verwalten",
+      "rating": "Bewertung"
+    }
   },
   "members": {
     "title": "Teammitglieder",
@@ -474,21 +508,28 @@
     "joinedAt": "Beigetreten",
     "editMember": "Mitglied bearbeiten",
     "remove": "Entfernen",
-    "removeConfirm": "Dieses Mitglied aus dem Team entfernen?"
+    "removeConfirm": "Dieses Mitglied aus dem Team entfernen?",
+    "noMembers": "Keine Mitglieder gefunden.",
+    "search": "Nach Name oder E-Mail suchen..."
   },
   "teamSettings": {
     "title": "Team Einstellungen",
     "teamName": "Teamname",
     "teamStatus": "Status",
     "uploadPicture": "Bild hochladen",
+    "teamPicture": "Teambild",
+    "clickToUpload": "Avatar oder Button klicken zum Hochladen",
     "allowFileUploads": "Datei-Uploads erlauben",
     "allowTeamGoalComments": "Kommentare zu Teamzielen erlauben",
     "allowIndividualGoalComments": "Kommentare zu Einzelzielen erlauben",
     "settingsAdminOnly": "Nur Admins können diese Einstellungen ändern.",
     "save": "Speichern",
+    "saveAll": "Alles speichern",
     "leaveTeam": "Team verlassen",
     "leaveTeamConfirm": "Sind Sie sicher, dass Sie dieses Team verlassen möchten?",
-    "cannotLeave": "Sie können das Team nicht verlassen: Sie sind der einzige Admin oder Trainer. Bitte weisen Sie zuerst ein anderes Mitglied zu."
+    "cannotLeave": "Sie können das Team nicht verlassen: Sie sind der einzige Admin oder Trainer. Bitte weisen Sie zuerst ein anderes Mitglied zu.",
+    "members": "Teammitglieder",
+    "addMember": "Mitglied hinzufügen"
   },
   "invites": {
     "title": "Einladungen",
@@ -502,18 +543,43 @@
     "revokeConfirm": "Diese Einladung widerrufen?",
     "status": "Status",
     "expiresAt": "Läuft ab",
-    "create": "Einladung senden"
+    "create": "Einladung senden",
+    "filterAll": "Alle",
+    "filterPending": "Ausstehend",
+    "filterAccepted": "Akzeptiert",
+    "filterDeclined": "Abgelehnt"
   },
   "dashboard": {
     "title": "Dashboard",
     "activeSeason": "Aktive Saison",
     "noActiveSeason": "Keine aktive Saison.",
     "goalsSummary": "Ziele",
+    "myGoals": "Meine Ziele",
+    "myProgress": "Mein Fortschritt",
+    "noProgress": "Noch keine Fortschrittsdaten.",
     "recentProgress": "Aktuelle Fortschrittsberichte",
     "noReports": "Noch keine Fortschrittsberichte.",
     "createProgress": "Fortschrittsbericht erstellen",
     "viewGoals": "Ziele anzeigen",
-    "viewAll": "Alle anzeigen"
+    "viewAll": "Alle anzeigen",
+    "activityHistory": "Letzte Aktivitäten",
+    "noActivity": "Keine aktuellen Aktivitäten.",
+    "open": "Offen",
+    "inProgress": "In Bearbeitung",
+    "completed": "Abgeschlossen",
+    "completion": "Abschluss",
+    "season": {
+      "goals": "Ziele",
+      "reports": "Berichte",
+      "members": "Mitglieder"
+    },
+    "stats": {
+      "openGoals": "Offene Ziele",
+      "inProgressGoals": "In Bearbeitung",
+      "completedGoals": "Abgeschlossene Ziele",
+      "reports": "Fortschrittsberichte",
+      "members": "Teammitglieder"
+    }
   },
   "notFoundPage": {
     "title": "Seite nicht gefunden",
@@ -540,6 +606,9 @@
     "username": "Benutzername",
     "email": "E-Mail",
     "birthdate": "Geburtsdatum",
+    "language": "Sprache",
+    "language.en": "Englisch",
+    "language.de": "Deutsch",
     "save": "Speichern",
     "cancel": "Abbrechen",
     "editable": {
@@ -558,7 +627,9 @@
       "title": "Meine Teams",
       "empty": "Sie sind kein Mitglied eines Teams.",
       "join": "Einem Team beitreten",
-      "create": "Neues Team erstellen"
+      "create": "Neues Team erstellen",
+      "none": "Keine Teams verfügbar",
+      "leave": "Verlassen"
     },
     "notifications": {
       "title": "Benachrichtigungen",
@@ -599,6 +670,40 @@
     "progress": "Fortschritt",
     "members": "Mitglieder",
     "teamSettings": "Team Einstellungen",
-    "invites": "Einladungen"
+    "invites": "Einladungen",
+    "search": "Suchen...",
+    "searchGoal": "Ziel",
+    "searchReport": "Bericht",
+    "title": "Navigation"
+  },
+  "progressEntry": {
+    "title": "Fortschrittseintrag Details",
+    "goalTitle": "Ziel",
+    "rating": "Bewertung",
+    "details": "Notizen",
+    "back": "Zurück zum Bericht"
+  },
+  "goals": {
+    "status": {
+      "notStarted": "Nicht begonnen",
+      "inProgress": "In Bearbeitung",
+      "completed": "Abgeschlossen",
+      "archived": "Archiviert"
+    }
+  },
+  "user": {
+    "goals": {
+      "type": {
+        "team": "Team",
+        "individual": "Individuell"
+      },
+      "search": "Ziele suchen...",
+      "status": {
+        "open": "Offen",
+        "inProgress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "archived": "Archiviert"
+      }
+    }
   }
 }

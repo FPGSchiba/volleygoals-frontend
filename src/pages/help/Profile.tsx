@@ -3,10 +3,12 @@ import { useEffect, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useCognitoUserStore } from "../../store/cognitoUser";
 import { useTranslation } from "react-i18next";
+import i18next from "i18next";
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
+import MenuItem from '@mui/material/MenuItem';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -16,6 +18,7 @@ import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import { changeLanguage } from "../../utils/i18nHelpers";
 
 export function Profile() {
   const { t } = useTranslation();
@@ -29,14 +32,14 @@ export function Profile() {
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(user?.picture);
 
   const { control, handleSubmit, reset, formState } = useForm<{ name?: string; preferredUsername?: string; birthdate?: string }>({
-    defaultValues: { name: user?.name || '', preferredUsername: user?.preferredUsername || '', birthdate: user?.birthdate || '' }
+    defaultValues: { name: user?.name || '', preferredUsername: user?.preferredUsername || '', birthdate: user?.birthdate ? user.birthdate.slice(0, 10) : '' }
   });
 
   useEffect(() => {
     if (!user) {
       fetchSelf().catch((err) => console.error(err));
     } else {
-      reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate || '' });
+      reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate ? user.birthdate.slice(0, 10) : '' });
       setAvatarPreview(user.picture);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -44,6 +47,7 @@ export function Profile() {
 
   const onSubmit = async (data: any) => {
     await updateSelf(data);
+    reset(data);
   };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -138,10 +142,23 @@ export function Profile() {
                 />
               </Grid>
 
+              <Grid className="profile-field profile-field-half">
+                <TextField
+                  select
+                  fullWidth
+                  label={t('profile.language', 'Language')}
+                  value={i18next.language === 'de' ? 'de' : 'en'}
+                  onChange={(e) => changeLanguage(e.target.value as 'en' | 'de')}
+                >
+                  <MenuItem value="en">{t('profile.language.en', 'English')}</MenuItem>
+                  <MenuItem value="de">{t('profile.language.de', 'German (Deutsch)')}</MenuItem>
+                </TextField>
+              </Grid>
+
               <Grid className="profile-field profile-field-full">
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <Button type="submit" variant="contained" disabled={formState.isSubmitting}>{t('profile.save', 'Save')}</Button>
-                  <Button type="button" variant="outlined" onClick={() => { if (user) reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate || '' }); }}>{t('profile.cancel', 'Cancel')}</Button>
+                  <Button type="button" variant="outlined" onClick={() => { if (user) reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate ? user.birthdate.slice(0, 10) : '' }); }}>{t('profile.cancel', 'Cancel')}</Button>
                 </Box>
               </Grid>
             </Grid>
