@@ -53,7 +53,7 @@ const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
   teamInvites: { invites: [], count: 0, nextToken: undefined, hasMore: false, filter: {} },
   currentTeamSettings: undefined,
    createTeam: (async (name: string) => {
-     const response = await VolleyGoalsAPI.createTeam(name);
+     const response = await VolleyGoalsAPI.createTeam({ name });
      if (!response.team) {
        useNotificationStore.getState().notify({
          level: 'error',
