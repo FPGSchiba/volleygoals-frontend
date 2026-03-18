@@ -61,7 +61,6 @@ function Login() {
           setCurrentStep(LoginSteps.InitialPasswordSetup);
           break;
         default:
-          console.log(output.nextStep.signInStep);
           setCurrentStep(LoginSteps.EmailPassword);
           break;
       }

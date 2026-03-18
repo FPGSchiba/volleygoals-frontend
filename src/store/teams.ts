@@ -180,7 +180,6 @@ const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
       });
       return result.fileUrl;
     } else {
-      console.log('Upload team picture error:', result);
       useNotificationStore.getState().notify({
         level: 'error',
         message: i18next.t(`${result.message}.message`, "Something went wrong while uploading the team picture."),

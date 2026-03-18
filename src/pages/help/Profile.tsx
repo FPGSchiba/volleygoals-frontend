@@ -18,6 +18,11 @@ import ListItem from '@mui/material/ListItem';
 import ListItemAvatar from '@mui/material/ListItemAvatar';
 import ListItemText from '@mui/material/ListItemText';
 import Divider from '@mui/material/Divider';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogActions from '@mui/material/DialogActions';
 import { changeLanguage } from "../../utils/i18nHelpers";
 
 export function Profile() {
@@ -27,8 +32,12 @@ export function Profile() {
   const updateSelf = useCognitoUserStore((s) => s.updateSelf);
   const uploadSelfPicture = useCognitoUserStore((s) => s.uploadSelfPicture);
   const availableTeams = useCognitoUserStore((s) => s.availableTeams || []);
+  const leaveTeam = useCognitoUserStore((s) => s.leaveTeam);
 
   const [uploading, setUploading] = useState(false);
+  const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
+  const [teamToLeave, setTeamToLeave] = useState<{ id: string; name: string } | null>(null);
+  const [leaveLoading, setLeaveLoading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(user?.picture);
 
   const { control, handleSubmit, reset, formState } = useForm<{ name?: string; preferredUsername?: string; birthdate?: string }>({
@@ -48,6 +57,20 @@ export function Profile() {
   const onSubmit = async (data: any) => {
     await updateSelf(data);
     reset(data);
+  };
+
+  const handleLeaveTeam = async () => {
+    if (!teamToLeave) return;
+    setLeaveLoading(true);
+    try {
+      const success = await leaveTeam(teamToLeave.id);
+      if (success) {
+        setLeaveDialogOpen(false);
+        setTeamToLeave(null);
+      }
+    } finally {
+      setLeaveLoading(false);
+    }
   };
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -184,7 +207,7 @@ export function Profile() {
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => console.log('Leave team', ta.team?.id, ta.team?.name)}
+                    onClick={() => { setTeamToLeave({ id: ta.team?.id, name: ta.team?.name }); setLeaveDialogOpen(true); }}
                   >
                     {t('profile.teams.leave', 'Leave')}
                   </Button>
@@ -203,6 +226,21 @@ export function Profile() {
         )}
       </List>
     </Paper>
+
+    <Dialog open={leaveDialogOpen} onClose={() => setLeaveDialogOpen(false)} fullWidth maxWidth="xs">
+      <DialogTitle>{t('profile.teams.leaveDialog.title', 'Leave Team')}</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          {t('profile.teams.leaveDialog.message', { teamName: teamToLeave?.name, defaultValue: 'Are you sure you want to leave "{{teamName}}"?' })}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setLeaveDialogOpen(false)}>{t('common.cancel', 'Cancel')}</Button>
+        <Button onClick={handleLeaveTeam} variant="contained" color="error" disabled={leaveLoading}>
+          {t('profile.teams.leave', 'Leave')}
+        </Button>
+      </DialogActions>
+    </Dialog>
     </>
   );
 }
