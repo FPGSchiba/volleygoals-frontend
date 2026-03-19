@@ -4,11 +4,32 @@ import './i18n/config';
 import App from './App';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { GlobalStyles } from "@mui/material";
-import amplifyConfig from '../amplify_outputs.json';
 import {Amplify} from "aws-amplify";
 
-// Configure Amplify
-Amplify.configure(amplifyConfig);
+// Configure Amplify from environment variables
+Amplify.configure({
+  auth: {
+    user_pool_id: process.env.COGNITO_USER_POOL_ID!,
+    aws_region: process.env.COGNITO_REGION || 'eu-central-1',
+    user_pool_client_id: process.env.COGNITO_USER_POOL_CLIENT_ID!,
+    identity_pool_id: process.env.COGNITO_IDENTITY_POOL_ID!,
+    mfa_methods: [],
+    standard_required_attributes: ['email'],
+    username_attributes: ['email'],
+    user_verification_types: ['email'],
+    groups: [],
+    mfa_configuration: 'NONE',
+    password_policy: {
+      min_length: 8,
+      require_lowercase: true,
+      require_numbers: true,
+      require_symbols: true,
+      require_uppercase: true,
+    },
+    unauthenticated_identities_enabled: true,
+  },
+  version: '1.4',
+});
 
 // Create a context for theme toggling
 export const ThemeToggleContext = createContext({
