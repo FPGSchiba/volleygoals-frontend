@@ -24,6 +24,22 @@ Builds the app for production to the `public/assets` folder.
 
 It correctly bundles React in production mode and optimizes the build for the best performance.
 
+## Environment Variables
+
+All environment variables are injected at build time via esbuild. Configure them in a `.env` file for local development, or set them in your hosting environment (e.g. AWS Amplify console) for deployed builds.
+
+| Variable                      | Description                  | Required | Default          | Example                          |
+|-------------------------------|------------------------------|----------|------------------|----------------------------------|
+| `API_HOST`                    | Backend API host             | No       | `localhost:8000` | `api.volleygoals.com`            |
+| `API_PROTOCOL`                | Backend API protocol         | No       | `https`          | `http`                           |
+| `API_PATH_ROOT`               | Backend API base path        | No       | `/api/v1`        | `/api/v1`                        |
+| `COGNITO_USER_POOL_ID`        | AWS Cognito User Pool ID     | Yes      | —                | `eu-central-1_xxxxxxxx`          |
+| `COGNITO_USER_POOL_CLIENT_ID` | AWS Cognito App Client ID    | Yes      | —                | `abcdef1234567890`               |
+| `COGNITO_IDENTITY_POOL_ID`    | AWS Cognito Identity Pool ID | Yes      | —                | `eu-central-1:xxxxxxxx-xxxx-...` |
+| `COGNITO_REGION`              | AWS region for Cognito       | No       | `eu-central-1`   | `eu-central-1`                   |
+
+For local development, create a `.env` file in the project root (see `.env` for reference). For Amplify deployments, set these in each app's **Environment variables** settings (App settings > Environment variables) with the corresponding Cognito pool values for each environment.
+
 ## Deployment
 
 The production build is served at: [https://volleygoals.schiba-apps.net](volleygoals.schiba-apps.net)
