@@ -28,7 +28,7 @@ export const DEFAULT_FILTER: IFilterOption = {
   nextToken: undefined,
   sortBy: undefined,
   sortOrder: 'asc',
-};
+} as any;
 
 export interface FetchResult<Item> {
   items: Item[];
@@ -41,9 +41,12 @@ export interface GenericListProps<Item, FilterOptions extends IFilterOption> {
   initialFilter?: FilterOptions;
   rowsPerPage?: number;
 
-  fetch: (filter: FilterOptions) => Promise<FetchResult<Item>>;
+  // fetch may optionally accept a filter. Some callers (like memberships) don't require a filter.
+  fetch: (filter?: FilterOptions) => Promise<FetchResult<Item>>;
 
   create?: () => Promise<void> | void;
+  // allow callers to disable the create button
+  createDisabled?: boolean;
   onEdit?: (item: Item) => Promise<void> | void;
   onDelete?: (id: string) => Promise<void> | void;
 
@@ -73,6 +76,10 @@ export interface GenericListProps<Item, FilterOptions extends IFilterOption> {
 
   items: Item[];
   count: number;
+  // If true, ItemList will not perform the initial fetch until this becomes false.
+  // While paused, the list will display the loading spinner so callers can fetch
+  // once prerequisites (like selectedTeam) are ready.
+  initialFetchPaused?: boolean;
 }
 
 export function ItemList<Item, FilterOptions extends IFilterOption>({
@@ -82,6 +89,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   rowsPerPage = 10,
   fetch,
   create,
+  createDisabled = false,
   onEdit,
   onDelete,
   getId = (i: any) => (i && (i.id || i._id || String(i))) as string,
@@ -90,7 +98,8 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   sortableFields,
   renderActions,
   items,
-  count
+  count,
+  initialFetchPaused = false
 }: GenericListProps<Item, FilterOptions>) {
   const mergedInitialFilter = useMemo(() => {
     return { ...(DEFAULT_FILTER as FilterOptions), ...(initialFilter || ({} as FilterOptions)) } as FilterOptions;
@@ -107,11 +116,12 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
 
   const pageCount = Math.max(1, Math.ceil((count || items.length) / effectiveRows));
 
-  const load = async (f: FilterOptions) => {
+  const load = async (f?: FilterOptions) => {
     try {
       setLoading(true);
-      const withLimit = { ...(f as any), limit: f.limit ?? effectiveRows } as FilterOptions;
-      return await fetch(withLimit);
+      // If caller provided a filter object use it and ensure limit is set; if not, call fetch(undefined)
+      const withLimit = f ? ({ ...(f as any), limit: (f as any).limit ?? effectiveRows } as FilterOptions) : undefined;
+      return await fetch(withLimit as any);
     } catch (err) {
       console.error('ItemList fetch error', err);
     } finally {
@@ -120,9 +130,11 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   };
 
   useEffect(() => {
-    load(filter);
+    if (!initialFetchPaused) {
+      load(filter);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [filter, initialFetchPaused]);
 
   const handleApplyFilter = async () => {
     setPage(1);
@@ -174,6 +186,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
               color="primary"
               onClick={handleCreate}
               className="item-list-create-button"
+              disabled={createDisabled}
             >
               Create
             </Button>
@@ -194,7 +207,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                   select
                   fullWidth
                   label="Limit"
-                  value={draftFilter.limit ?? rowsPerPage}
+                  value={(draftFilter as any).limit ?? rowsPerPage}
                   onChange={(e) => setDraftFilter({ ...(draftFilter as any), limit: Number(e.target.value) } as FilterOptions)}
                   className="item-list-textfield"
                 >
@@ -212,7 +225,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                     select
                     fullWidth
                     label="Sort By"
-                    value={draftFilter.sortBy ?? ''}
+                    value={(draftFilter as any).sortBy ?? ''}
                     onChange={(e) =>
                       setDraftFilter({ ...(draftFilter as any), sortBy: e.target.value || undefined } as FilterOptions)
                     }
@@ -233,7 +246,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                     select
                     fullWidth
                     label="Sort Order"
-                    value={draftFilter.sortOrder ?? 'asc'}
+                    value={(draftFilter as any).sortOrder ?? 'asc'}
                     onChange={(e) =>
                       setDraftFilter({ ...(draftFilter as any), sortOrder: (e.target.value as 'asc' | 'desc') } as FilterOptions)
                     }
@@ -276,7 +289,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
               {displayed.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={columns.length + (onEdit || onDelete ? 1 : 0)} className="item-list-no-items">
-                    {loading ? (
+                    {(loading || initialFetchPaused) ? (
                       <Box display="flex" justifyContent="center" py={4}>
                         <CircularProgress />
                       </Box>

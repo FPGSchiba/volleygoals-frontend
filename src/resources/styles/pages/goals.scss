@@ -1,0 +1,126 @@
+.goals-page {
+  &.goals-page-paper {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .goals-field-full {
+    flex: 0 0 100%;
+  }
+
+  .goals-field-half {
+    flex: 0 0 48%;
+  }
+
+  .goals-list {
+    /* custom styles for the item list if needed */
+  }
+
+  @media (max-width: 600px) {
+    .goals-create-top {
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+}
+
+.goals-create-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 16px 0; /* add vertical margin around the whole create area */
+  padding: 8px; /* small padding so the boxed area has breathing room inside the dialog */
+}
+
+.goals-create-top {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 8px; /* ensure spacing to description */
+}
+
+.goals-create-title {
+  width: 70%;
+  margin-right: 16px;
+}
+
+.goals-create-type {
+  width: 30%;
+}
+
+.goals-create-top-item {
+  display: flex;
+  width: 100%;
+  padding: 0 6px; /* small inner padding for inputs */
+}
+
+.goals-create-desc {
+  /* description sits below with no border, but align with top box */
+  padding: 4px 6px; /* keep description aligned with top items */
+
+  /* Fix the height of the textarea inside MUI TextField and enable scrolling */
+  /* target the MUI multiline input and the actual textarea explicitly with high specificity */
+  .MuiInputBase-root .MuiInputBase-inputMultiline,
+  .MuiInputBase-root textarea,
+  textarea,
+  .MuiOutlinedInput-inputMultiline,
+  .MuiOutlinedInput-input {
+    max-height: 200px !important;
+    height: 200px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    resize: none !important; /* prevent manual resizing */
+    box-sizing: border-box !important;
+    display: block !important;
+    pointer-events: auto !important;
+    touch-action: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior: contain !important; /* prevent parent from stealing scroll */
+  }
+
+  /* Ensure the input container allows scrolling and doesn't hide overflow */
+  .MuiInputBase-root,
+  .MuiOutlinedInput-root {
+    overflow: visible !important;
+  }
+
+  /* Firefox scrollbar color */
+  .MuiInputBase-root .MuiInputBase-inputMultiline,
+  .MuiInputBase-root textarea,
+  textarea {
+    scrollbar-width: thin !important;
+    scrollbar-color: red transparent !important;
+  }
+
+  /* WebKit scrollbar styling */
+  .MuiInputBase-root .MuiInputBase-inputMultiline::-webkit-scrollbar,
+  .MuiInputBase-root textarea::-webkit-scrollbar,
+  textarea::-webkit-scrollbar,
+  .MuiOutlinedInput-inputMultiline::-webkit-scrollbar,
+  .MuiOutlinedInput-input::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  .MuiInputBase-root .MuiInputBase-inputMultiline::-webkit-scrollbar-thumb,
+  .MuiInputBase-root textarea::-webkit-scrollbar-thumb,
+  textarea::-webkit-scrollbar-thumb,
+  .MuiOutlinedInput-inputMultiline::-webkit-scrollbar-thumb,
+  .MuiOutlinedInput-input::-webkit-scrollbar-thumb {
+    background: red !important;
+    border-radius: 6px !important;
+    border: 2px solid rgba(0, 0, 0, 0) !important; /* space around thumb */
+  }
+  .MuiInputBase-root .MuiInputBase-inputMultiline::-webkit-scrollbar-track,
+  .MuiInputBase-root textarea::-webkit-scrollbar-track,
+  textarea::-webkit-scrollbar-track,
+  .MuiOutlinedInput-inputMultiline::-webkit-scrollbar-track,
+  .MuiOutlinedInput-input::-webkit-scrollbar-track {
+    background: transparent !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .goals-create-top {
+    flex-direction: column;
+    gap: 8px;
+  }
+}

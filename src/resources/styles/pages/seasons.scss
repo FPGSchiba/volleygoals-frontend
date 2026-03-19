@@ -1,0 +1,23 @@
+.seasons-page {
+  .item-list {
+    .item-list-title {
+      font-weight: 600;
+    }
+
+    .item-list-create-button {
+      margin-left: 8px;
+    }
+
+    .item-list-table {
+      .item-list-no-items {
+        text-align: center;
+      }
+    }
+  }
+
+  &.seasons-page-paper {
+    border-radius: 15px;
+    width: 100%;
+  }
+}
+

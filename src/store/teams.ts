@@ -1,4 +1,4 @@
-import {ITeam, ITeamSettings, ITeamMember, IInvite, ITeamUser} from "./types";
+import {ITeam, ITeamSettings, ITeamMember, IInvite, ITeamUser, RoleType} from "./types";
 import {create} from "zustand";
 import {
   ITeamFilterOption,
@@ -9,8 +9,6 @@ import {
 import VolleyGoalsAPI from "../services/backend.api";
 import {useNotificationStore} from "./notification";
 import i18next from "i18next";
-import {setSessionItem, getSessionItem} from "./util";
-import {SELECTED_TEAM_KEY} from "./consts";
 
 type TeamState = {
   teamList: {
@@ -37,9 +35,12 @@ type TeamActions = {
   fetchTeamInvites: (teamId: string, filter?: ITeamInviteFilterOption) => Promise<{ items: IInvite[]; count: number }>;
   // Mock upload - reads the file locally and sets the team's picture to a data URL
   uploadTeamPicture: (teamId: string, file: File, onProgress?: (pct: number) => void) => Promise<string | null>;
+  createInvite: (teamId: string, email: string, role: RoleType, message: string, sendEmail: boolean) => Promise<void>;
+  revokeInvite: (inviteId: string, teamId: string) => Promise<void>;
+  resendInvite: (inviteId: string) => Promise<void>;
 }
 
-const useTeamStore = create<TeamState & TeamActions>((set) => ({
+const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
   teamList: {
     teams: [],
     count: 0,
@@ -52,7 +53,7 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
   teamInvites: { invites: [], count: 0, nextToken: undefined, hasMore: false, filter: {} },
   currentTeamSettings: undefined,
    createTeam: (async (name: string) => {
-     const response = await VolleyGoalsAPI.createTeam(name);
+     const response = await VolleyGoalsAPI.createTeam({ name });
      if (!response.team) {
        useNotificationStore.getState().notify({
          level: 'error',
@@ -60,12 +61,15 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
          title: i18next.t(`${response.message}.title`, "Something went wrong"),
          details: response.error
        });
+     } else {
+       await get().fetchTeams(get().teamList.filter);
      }
    }),
    updateTeam: (async (id: string, name?: string, status?: string) => {
      const response = await VolleyGoalsAPI.updateTeam(id, {name, status});
      if (response.team) {
        set(() => ({currentTeam: response.team}));
+       await get().fetchTeams(get().teamList.filter);
      }
      else {
        useNotificationStore.getState().notify({
@@ -85,6 +89,8 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
          title: i18next.t(`${response.message}.title`, "Something went wrong"),
          details: response.error
        });
+     } else {
+       await get().fetchTeams(get().teamList.filter);
      }
    }),
    fetchTeams: (async (filter?: ITeamFilterOption) => {
@@ -115,6 +121,8 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
          currentTeam: response.team,
          currentTeamSettings: response.teamSettings
        }))
+     } else if ((response as any).status === 403 || (response as any).statusCode === 403) {
+       // Silently ignore 403 — members don't have team read access yet
      } else {
        useNotificationStore.getState().notify({
          level: 'error',
@@ -172,7 +180,6 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
       });
       return result.fileUrl;
     } else {
-      console.log('Upload team picture error:', result);
       useNotificationStore.getState().notify({
         level: 'error',
         message: i18next.t(`${result.message}.message`, "Something went wrong while uploading the team picture."),
@@ -180,6 +187,49 @@ const useTeamStore = create<TeamState & TeamActions>((set) => ({
         details: result.error
       });
       return null;
+    }
+  },
+  createInvite: async (teamId: string, email: string, role: RoleType, message: string, sendEmail: boolean) => {
+    const response = await VolleyGoalsAPI.createInvite(teamId, email, role, message, sendEmail);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, 'Something went wrong while creating the invite.'),
+        title: i18next.t(`${response.message}.title`, 'Something went wrong'),
+        details: response.error
+      });
+    } else {
+      await get().fetchTeamInvites(teamId);
+    }
+  },
+  revokeInvite: async (inviteId: string, teamId: string) => {
+    const response = await VolleyGoalsAPI.revokeInvite(inviteId);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, 'Something went wrong while revoking the invite.'),
+        title: i18next.t(`${response.message}.title`, 'Something went wrong'),
+        details: response.error
+      });
+    } else {
+      await get().fetchTeamInvites(teamId);
+    }
+  },
+  resendInvite: async (inviteId: string) => {
+    const response = await VolleyGoalsAPI.resendInvite(inviteId);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, 'Something went wrong while resending the invite.'),
+        title: i18next.t(`${response.message}.title`, 'Something went wrong'),
+        details: response.error
+      });
+    } else {
+      useNotificationStore.getState().notify({
+        level: 'success',
+        message: i18next.t('success.ok.message', 'The operation was completed successfully.'),
+        title: i18next.t('success.ok.title', 'Success')
+      });
     }
   },
  }))

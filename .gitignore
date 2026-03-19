@@ -36,3 +36,4 @@ public/assets/resources
 node_modules
 .amplify
 amplifyconfiguration*
+.claude

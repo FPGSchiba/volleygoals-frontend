@@ -3,13 +3,16 @@ import { initReactI18next } from 'react-i18next';
 import enTranslation from './en/translation.json';
 import deTranslation from './de/translation.json';
 
+const LANG_KEY = 'vg_lang';
+const savedLang = localStorage.getItem(LANG_KEY) as 'en' | 'de' | null;
 
 const browserLang = (typeof navigator !== 'undefined'
   ? (navigator.language || (navigator.languages && navigator.languages[0]))
   : undefined) as string | undefined;
 const langCode = browserLang ? browserLang.slice(0, 2).toLowerCase() : undefined;
 const supportedLangs = ['en', 'de'];
-const defaultLng = supportedLangs.includes(langCode || '') ? (langCode as 'en' | 'de') : 'en';
+const browserDefault = supportedLangs.includes(langCode || '') ? (langCode as 'en' | 'de') : 'en';
+const defaultLng = savedLang ?? browserDefault;
 
 i18next.use(initReactI18next).init({
   lng: defaultLng,

@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import i18next from 'i18next';
-import { Grid, TextField, MenuItem, TableCell, Chip, Button, Avatar } from '@mui/material';
+import { Grid, TextField, MenuItem, TableCell, Chip, Button, Avatar, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { ITeam } from '../../store/types';
 import { ITeamFilterOption } from '../../services/types';
 import { useTeamStore } from '../../store/teams';
 import {useNavigate} from "react-router-dom";
+import { useForm, Controller } from 'react-hook-form';
 
 export function Teams() {
   const fetchTeams = useTeamStore(state => state.fetchTeams);
@@ -35,16 +36,32 @@ export function Teams() {
     }
   ]
 
-  const fetchAdapter = async (filter: ITeamFilterOption): Promise<FetchResult<ITeam>> => {
+  const fetchAdapter = async (filter?: ITeamFilterOption): Promise<FetchResult<ITeam>> => {
     await fetchTeams(filter);
     return { items: teams, count };
   };
 
-  const handleCreate = async () => {
+  // actionLoading disables all actions while an operation is in progress
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const { control: createControl, handleSubmit: handleCreateSubmit, reset: resetCreate } = useForm<{ name: string }>({ defaultValues: { name: '' } });
+
+  const openCreate = () => {
+    resetCreate({ name: '' });
+    setCreateOpen(true);
+  };
+
+  const onCreate = async (data: { name: string }) => {
     if (!createTeam) return;
-    const name = window.prompt(i18next.t('admin.teams.prompt.newName', 'New team name'));
-    if (!name) return;
-    await createTeam(name);
+    setActionLoading(true);
+    try {
+      await createTeam(data.name);
+      setCreateOpen(false);
+      await fetchTeams(initialFilter);
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   const handleEdit = async (team: ITeam) => {
@@ -53,8 +70,36 @@ export function Teams() {
 
   const handleDelete = async (id: string) => {
     if (!deleteTeam) return;
-    await deleteTeam(id);
+    setActionLoading(true);
+    try {
+      await deleteTeam(id);
+      await fetchTeams(initialFilter);
+    } finally {
+      setActionLoading(false);
+    }
   };
+
+  const handleDeactivate = async (id: string) => {
+    if (!editTeam) return;
+    setActionLoading(true);
+    try {
+      await editTeam(id, undefined, 'inactive');
+      await fetchTeams(initialFilter);
+    } finally {
+      setActionLoading(false);
+    }
+  }
+
+  const handleActivate = async (id: string) => {
+    if (!editTeam) return;
+    setActionLoading(true);
+    try {
+      await editTeam(id, undefined, 'active');
+      await fetchTeams(initialFilter);
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   const renderFilterFields = (filter: ITeamFilterOption, setFilter: (f: ITeamFilterOption) => void) => {
     return [
@@ -95,45 +140,81 @@ export function Teams() {
   const renderActions = (team: ITeam) => {
     // Edit button - directly call local handler
     const editBtn = (
-      <Button key="edit" variant="contained" size="small" onClick={() => handleEdit(team)} style={{ marginRight: 8 }}>
+      <Button key="edit" variant="contained" size="small" onClick={() => handleEdit(team)} style={{ marginRight: 8 }} disabled={actionLoading}>
         Edit
       </Button>
     );
 
-    // If team is active, show a Deactivate button; otherwise show Delete
+    // If team is active, show a Deactivate button; otherwise show Activate + Delete
     if (team.status === 'active') {
       return [
         editBtn,
-        <Button key="deactivate" variant="contained" size="small" color="warning" onClick={async () => { await editTeam(team.id, team.name, 'inactive'); }}>
+        <Button key="deactivate" variant="contained" size="small" color="warning" onClick={async () => { await handleDeactivate(team.id); }} disabled={actionLoading}>
           {i18next.t('admin.actions.deactivate','Deactivate')}
         </Button>
       ];
     }
 
+    // team is inactive -> offer Activate + Delete
     return [
       editBtn,
-      <Button key="delete" variant="contained" size="small" color="error" onClick={() => handleDelete(team.id)}>
+      <Button key="activate" variant="contained" size="small" color="success" onClick={() => handleActivate(team.id)} style={{ marginRight: 8 }} disabled={actionLoading}>
+        {i18next.t('admin.actions.activate','Activate')}
+      </Button>,
+      <Button key="delete" variant="contained" size="small" color="error" onClick={() => handleDelete(team.id)} disabled={actionLoading}>
         {i18next.t('admin.actions.delete','Delete')}
       </Button>
     ];
   };
 
   return (
-    <ItemList<ITeam, ITeamFilterOption>
-      title={i18next.t('admin.teams.title','Teams')}
-      columns={[i18next.t('admin.teams.columns.picture','Picture'), i18next.t('admin.teams.columns.name','Name'), i18next.t('admin.teams.columns.status','Status'), i18next.t('admin.teams.columns.created','Created'), i18next.t('admin.teams.columns.updated','Updated')]}
-      initialFilter={initialFilter}
-      rowsPerPage={10}
-      fetch={fetchAdapter}
-      create={handleCreate}
-      onEdit={handleEdit}
-      onDelete={handleDelete}
-      renderFilterFields={renderFilterFields}
-      renderRow={(item) => renderRow(item)}
-      renderActions={(item) => renderActions(item as ITeam)}
-      sortableFields={sortableFields}
-      items={teams}
-      count={count}
-    />
+    <>
+      <ItemList<ITeam, ITeamFilterOption>
+        title={i18next.t('admin.teams.title','Teams')}
+        columns={[i18next.t('admin.teams.columns.picture','Picture'), i18next.t('admin.teams.columns.name','Name'), i18next.t('admin.teams.columns.status','Status'), i18next.t('admin.teams.columns.created','Created'), i18next.t('admin.teams.columns.updated','Updated')]}
+        initialFilter={initialFilter}
+        rowsPerPage={10}
+        fetch={fetchAdapter}
+        create={openCreate}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        renderFilterFields={renderFilterFields}
+        renderRow={(item) => renderRow(item)}
+        renderActions={(item) => renderActions(item as ITeam)}
+        sortableFields={sortableFields}
+        items={teams}
+        count={count}
+      />
+
+      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>{i18next.t('admin.teams.dialog.createTitle', 'Create Team')}</DialogTitle>
+        <DialogContent>
+          <form id="create-team-form" onSubmit={handleCreateSubmit(onCreate)}>
+            <Controller
+              name="name"
+              control={createControl}
+              rules={{ required: true }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  margin="normal"
+                  label={i18next.t('admin.teams.dialog.name', 'Team Name')}
+                  error={!!fieldState.error}
+                  helperText={fieldState.error ? i18next.t('admin.teams.dialog.nameRequired', 'Name is required') : ''}
+                  autoFocus
+                />
+              )}
+            />
+          </form>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCreateOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</Button>
+          <Button type="submit" form="create-team-form" variant="contained" disabled={actionLoading}>
+            {i18next.t('common.create', 'Create')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 }

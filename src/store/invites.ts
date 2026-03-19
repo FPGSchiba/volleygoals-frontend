@@ -2,7 +2,7 @@ import {create} from "zustand";
 import VolleyGoalsAPI from "../services/backend.api";
 import {useNotificationStore} from "./notification";
 import i18next from "i18next";
-import {IInvite, ITeamMember} from "./types";
+import {IInvite, ITeamMember, RoleType} from "./types";
 import {InviteErrorType} from "../pages/help/InviteError";
 
 type InvitesState = {
@@ -17,6 +17,9 @@ type InvitesState = {
 type InvitesActions = {
   completeInvite: (token: string, email: string, accepted: boolean) => Promise<{success: boolean, error?: InviteErrorType}>
   getInvite: (token: string) => Promise<void>
+  resendInvite: (id: string) => Promise<void>
+  revokeInvite: (id: string) => Promise<void>
+  createInvite: (teamId: string, email: string, role: RoleType, message: string, sendEmail: boolean) => Promise<void>
 }
 
 const useInvitesStore = create<InvitesState & InvitesActions>((set) => ({
@@ -68,6 +71,39 @@ const useInvitesStore = create<InvitesState & InvitesActions>((set) => ({
       useNotificationStore.getState().notify({
         level: 'error',
         message: i18next.t(`${response.message}.message`, "Something went wrong while retrieving the invite."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    }
+  },
+  createInvite: async (teamId: string, email: string, role: RoleType, message: string, sendEmail: boolean) => {
+    const response = await VolleyGoalsAPI.createInvite(teamId, email, role, message, sendEmail);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while creating the invite."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    }
+  },
+  resendInvite: async (id: string) => {
+    const response = await VolleyGoalsAPI.resendInvite(id);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while resending the invite."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    }
+  },
+  revokeInvite: async (id: string) => {
+    const response = await VolleyGoalsAPI.revokeInvite(id);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while revoking the invite."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });
