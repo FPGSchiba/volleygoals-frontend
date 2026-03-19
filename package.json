@@ -45,6 +45,7 @@
     "@babel/preset-react": "^7.28.5",
     "@babel/preset-typescript": "^7.28.5",
     "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/user-event": "^14.6.1",
     "@types/jest": "^30.0.0",
     "@types/js-cookie": "^3.0.6",
     "@types/react": "^19.2.10",
@@ -68,7 +69,8 @@
     "build": "node prod-esbuild.mjs",
     "dev": "node esbuild.mjs",
     "eject": "react-scripts eject",
-    "test": "jest"
+    "test": "jest",
+    "test:coverage": "jest --coverage"
   },
   "eslintConfig": {
     "extends": [
