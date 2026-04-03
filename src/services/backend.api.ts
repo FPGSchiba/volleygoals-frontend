@@ -250,7 +250,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get('/self');
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -260,7 +260,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch('/self', data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -270,7 +270,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get('/self/picture/presign', { params: { filename, contentType }});
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -293,7 +293,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get('/teams', { params: filter });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -303,7 +303,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/teams/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -313,7 +313,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.post('/teams', data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -323,7 +323,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${id}`, data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -333,7 +333,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -343,7 +343,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${teamId}/settings`, settings);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -353,7 +353,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/picture/presign`, { params: { filename, contentType }});
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -377,7 +377,7 @@ class VolleyGoalsAPI {
       const data = await this.requestDeduped<{ message: string; error?: string; count?: number; items?: IInvite[]; nextToken?: string; hasMore?: boolean }>('GET', `/teams/${teamId}/invites`, async () => {
         await this.ensureEndpoints();
         const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/invites`, { params: normFilter });
-        const unwrapped = { message: response.data.message, ...VolleyGoalsAPI.unwrap<{ error?: string; count?: number; items?: IInvite[]; nextToken?: string; hasMore?: boolean }>(response.data) };
+        const unwrapped = { ...VolleyGoalsAPI.unwrap<{ error?: string; count?: number; items?: IInvite[]; nextToken?: string; hasMore?: boolean }>(response.data), message: response.data.message };
         return { data: unwrapped };
       }, normFilter as unknown as Record<string, unknown>, 1000);
       return data;
@@ -391,7 +391,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get('/users', { params: filter });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -401,7 +401,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/users/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -411,7 +411,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/users/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -421,7 +421,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/users/${id}`, data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -431,7 +431,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -441,7 +441,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${teamId}/members/${id}`, { role, status });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -451,7 +451,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.post(`/teams/${teamId}/members`, { role, userId });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -462,7 +462,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints(false);
       const response = await VolleyGoalsAPI.endpoint.post('/invites/complete', { token, email, accepted });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -472,7 +472,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints(false);
       const response = await VolleyGoalsAPI.endpoint.get(`/invites/${token}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -482,7 +482,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.post(`/invites`, { teamId, email, role, message, sendEmail });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -492,7 +492,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/invites/${inviteId}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -502,7 +502,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/invites/${inviteId}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -515,7 +515,7 @@ class VolleyGoalsAPI {
       const data = await this.requestDeduped<{ message: string; error?: string; count?: number; items?: ITeamUser[] }>('GET', `/teams/${teamId}/members`, async () => {
         await this.ensureEndpoints();
         const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/members`, { params: normFilter });
-        const unwrapped = { message: response.data.message, ...VolleyGoalsAPI.unwrap<{ error?: string; count?: number; items?: ITeamUser[] }>(response.data) };
+        const unwrapped = { ...VolleyGoalsAPI.unwrap<{ error?: string; count?: number; items?: ITeamUser[] }>(response.data), message: response.data.message };
         return { data: unwrapped };
       }, normFilter as unknown as Record<string, unknown>, 1000);
       return data;
@@ -530,7 +530,7 @@ class VolleyGoalsAPI {
       await this.ensureEndpoints();
       const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as ISeasonFilterOption;
       const response = await VolleyGoalsAPI.endpoint.get(`/seasons`, { params: normFilter });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -540,7 +540,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -550,7 +550,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.post('/seasons', data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -560,7 +560,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/seasons/${id}`, data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -570,7 +570,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/seasons/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -583,7 +583,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/stats`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -721,7 +721,7 @@ class VolleyGoalsAPI {
       await this.ensureEndpoints();
       const normFilter = { ...(filter || {}), limit: filter?.limit ?? 20 };
       const response = await VolleyGoalsAPI.endpoint.get(`/comments`, { params: normFilter });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -731,7 +731,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.post(`/comments`, data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -741,7 +741,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.patch(`/comments/${commentId}`, { content });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -751,7 +751,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/comments/${commentId}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -761,7 +761,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.get(`/comments/${commentId}/file/presign`, { params: { filename, contentType } });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -776,7 +776,7 @@ class VolleyGoalsAPI {
       if (filter?.sortBy) params.sortBy = filter.sortBy;
       if (filter?.sortOrder) params.sortOrder = filter.sortOrder;
       const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/activity`, { params });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
@@ -787,7 +787,7 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members/leave`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
     }
