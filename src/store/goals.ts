@@ -1,7 +1,6 @@
-import {GoalStatus, GoalType, IGoal} from "./types";
+import {GoalStatus, GoalType, IGoal, IGoalSeasonTag} from "./types";
 import {create} from "zustand";
 import {IGoalFilterOption} from "../services/types";
-import {useCognitoUserStore} from "./cognitoUser";
 import VolleyGoalsAPI from "../services/backend.api";
 import {useNotificationStore} from "./notification";
 import i18next from "i18next";
@@ -15,14 +14,18 @@ type GoalState = {
     filter: IGoalFilterOption;
   };
   currentGoal?: IGoal;
+  goalSeasons: IGoalSeasonTag[];
 }
 
 type GoalActions = {
-  createGoal: (seasonId: string, type: GoalType, title: string, description: string) => Promise<void>;
-  updateGoal: (seasonId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string, picture?: string) => Promise<void>;
-  deleteGoal: (seasonId: string, id: string) => Promise<void>;
-  fetchGoals: (seasonId: string, filter: IGoalFilterOption) => Promise<void>;
-  getGoal:    (seasonId: string, id: string) => Promise<IGoal | null>;
+  createGoal: (teamId: string, type: GoalType, title: string, description: string) => Promise<void>;
+  updateGoal: (teamId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string) => Promise<void>;
+  deleteGoal: (teamId: string, id: string) => Promise<void>;
+  fetchGoals: (teamId: string, filter: IGoalFilterOption) => Promise<void>;
+  getGoal:    (teamId: string, id: string) => Promise<IGoal | null>;
+  tagGoalToSeason: (teamId: string, goalId: string, seasonId: string) => Promise<void>;
+  untagGoalFromSeason: (teamId: string, goalId: string, seasonId: string) => Promise<void>;
+  fetchGoalSeasons: (teamId: string, goalId: string) => Promise<void>;
 }
 
 const useGoalStore = create<GoalState & GoalActions>((set) => ({
@@ -34,16 +37,17 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
     filter: {}
   },
   currentGoal: undefined,
-  createGoal: async (seasonId: string, type: GoalType, title: string, description: string) => {
-    const response = await VolleyGoalsAPI.createGoal(seasonId, {type, title, description});
+  goalSeasons: [],
+  createGoal: async (teamId: string, type: GoalType, title: string, description: string) => {
+    const response = await VolleyGoalsAPI.createGoal(teamId, {type, title, description});
     if (!response.goal) {
       useNotificationStore.getState().notify({
         level: 'error',
-        message: i18next.t(`${response.message}.message`, "Something went wrong while creating the team."),
+        message: i18next.t(`${response.message}.message`, "Something went wrong while creating the goal."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });
-    } else{
+    } else {
       set((state) => ({
         goalList: {
           goals: [response.goal!, ...state.goalList.goals],
@@ -55,12 +59,12 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
       }));
     }
   },
-  updateGoal: async (seasonId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string, picture?: string) => {
-    const response = await VolleyGoalsAPI.updateGoal(seasonId, id, {title, description, status, ownerId, picture});
+  updateGoal: async (teamId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string) => {
+    const response = await VolleyGoalsAPI.updateGoal(teamId, id, {title, description, status, ownerId});
     if (!response.goal) {
       useNotificationStore.getState().notify({
         level: 'error',
-        message: i18next.t(`${response.message}.message`, "Something went wrong while updating the season."),
+        message: i18next.t(`${response.message}.message`, "Something went wrong while updating the goal."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });
@@ -77,12 +81,12 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
       }));
     }
   },
-  deleteGoal: async (seasonId: string, id: string) => {
-    const response = await VolleyGoalsAPI.deleteGoal(seasonId, id);
+  deleteGoal: async (teamId: string, id: string) => {
+    const response = await VolleyGoalsAPI.deleteGoal(teamId, id);
     if (response.error) {
       useNotificationStore.getState().notify({
         level: 'error',
-        message: i18next.t(`${response.message}.message`, "Something went wrong while deleting the season."),
+        message: i18next.t(`${response.message}.message`, "Something went wrong while deleting the goal."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });
@@ -98,8 +102,8 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
       }));
     }
   },
-  fetchGoals: async (seasonId: string, filter: IGoalFilterOption) => {
-    const response = await VolleyGoalsAPI.listGoals(seasonId, filter);
+  fetchGoals: async (teamId: string, filter: IGoalFilterOption) => {
+    const response = await VolleyGoalsAPI.listGoals(teamId, filter);
     if (response.items) {
       set(() => ({
         goalList: {
@@ -113,27 +117,70 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
     } else {
       useNotificationStore.getState().notify({
         level: 'error',
-        message: i18next.t(`${response.message}.message`, "Something went wrong while fetching the seasons."),
+        message: i18next.t(`${response.message}.message`, "Something went wrong while fetching goals."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });
     }
   },
-  getGoal: async (seasonId: string, id: string) => {
-    const response = await VolleyGoalsAPI.getGoal(seasonId, id);
+  getGoal: async (teamId: string, id: string) => {
+    const response = await VolleyGoalsAPI.getGoal(teamId, id);
     if (response.goal) {
       set(() => ({ currentGoal: response.goal }));
       return response.goal;
     } else {
       useNotificationStore.getState().notify({
         level: 'error',
-        message: i18next.t(`${response.message}.message`, "Something went wrong while fetching the season."),
+        message: i18next.t(`${response.message}.message`, "Something went wrong while fetching the goal."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });
       return null;
     }
-  }
+  },
+  tagGoalToSeason: async (teamId: string, goalId: string, seasonId: string) => {
+    const response = await VolleyGoalsAPI.tagGoalToSeason(teamId, goalId, seasonId);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while tagging the goal."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    } else {
+      set((state) => ({
+        goalSeasons: [...state.goalSeasons, { goalId, seasonId }]
+      }));
+    }
+  },
+  untagGoalFromSeason: async (teamId: string, goalId: string, seasonId: string) => {
+    const response = await VolleyGoalsAPI.untagGoalFromSeason(teamId, goalId, seasonId);
+    if (response.error) {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while untagging the goal."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    } else {
+      set((state) => ({
+        goalSeasons: state.goalSeasons.filter(t => !(t.goalId === goalId && t.seasonId === seasonId))
+      }));
+    }
+  },
+  fetchGoalSeasons: async (teamId: string, goalId: string) => {
+    const response = await VolleyGoalsAPI.listGoalSeasons(teamId, goalId);
+    if (response.items) {
+      set(() => ({ goalSeasons: response.items! }));
+    } else {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while fetching goal seasons."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    }
+  },
 }))
 
 export {useGoalStore};

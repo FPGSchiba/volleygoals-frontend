@@ -3,7 +3,6 @@ import { useNotificationStore } from '../../store/notification';
 import { buildGoal } from '../mocks/factories';
 import { GoalType, GoalStatus } from '../../store/types';
 
-// Mock API
 jest.mock('../../services/backend.api', () => ({
   __esModule: true,
   default: {
@@ -12,6 +11,9 @@ jest.mock('../../services/backend.api', () => ({
     updateGoal: jest.fn(),
     deleteGoal: jest.fn(),
     getGoal: jest.fn(),
+    tagGoalToSeason: jest.fn(),
+    untagGoalFromSeason: jest.fn(),
+    listGoalSeasons: jest.fn(),
     setToken: jest.fn(),
   },
 }));
@@ -23,6 +25,7 @@ beforeEach(() => {
   useGoalStore.setState({
     goalList: { goals: [], count: 0, hasMore: false, nextToken: '', filter: {} },
     currentGoal: undefined,
+    goalSeasons: [],
   });
   useNotificationStore.setState({ notifications: [] });
   jest.clearAllMocks();
@@ -32,9 +35,9 @@ describe('goal store', () => {
   describe('fetchGoals', () => {
     it('updates goalList from API response', async () => {
       const goals = [buildGoal(), buildGoal()];
-      api.listGoals.mockResolvedValue({ items: goals, count: 2 });
+      api.listGoals.mockResolvedValue({ message: 'ok', items: goals, count: 2 });
 
-      await useGoalStore.getState().fetchGoals('season-1', {});
+      await useGoalStore.getState().fetchGoals('team-1', {});
 
       const { goalList } = useGoalStore.getState();
       expect(goalList.goals).toHaveLength(2);
@@ -42,9 +45,9 @@ describe('goal store', () => {
     });
 
     it('triggers notification on error', async () => {
-      api.listGoals.mockResolvedValue({ error: 'fail', message: 'error.goals' });
+      api.listGoals.mockResolvedValue({ message: 'error.goals', error: 'fail' });
 
-      await useGoalStore.getState().fetchGoals('season-1', {});
+      await useGoalStore.getState().fetchGoals('team-1', {});
 
       const { notifications } = useNotificationStore.getState();
       expect(notifications).toHaveLength(1);
@@ -60,9 +63,9 @@ describe('goal store', () => {
       });
 
       const newGoal = buildGoal({ title: 'New Goal' });
-      api.createGoal.mockResolvedValue({ goal: newGoal });
+      api.createGoal.mockResolvedValue({ message: 'ok', goal: newGoal });
 
-      await useGoalStore.getState().createGoal('s1', GoalType.Team, 'New Goal', 'desc');
+      await useGoalStore.getState().createGoal('t1', GoalType.Team, 'New Goal', 'desc');
 
       const { goalList } = useGoalStore.getState();
       expect(goalList.goals).toHaveLength(2);
@@ -71,9 +74,9 @@ describe('goal store', () => {
     });
 
     it('triggers notification on error', async () => {
-      api.createGoal.mockResolvedValue({ error: 'fail', message: 'error.create' });
+      api.createGoal.mockResolvedValue({ message: 'error.create', error: 'fail' });
 
-      await useGoalStore.getState().createGoal('s1', GoalType.Team, 'title', 'desc');
+      await useGoalStore.getState().createGoal('t1', GoalType.Team, 'title', 'desc');
 
       expect(useNotificationStore.getState().notifications).toHaveLength(1);
     });
@@ -87,9 +90,9 @@ describe('goal store', () => {
       });
 
       const updated = { ...goal, title: 'New Title' };
-      api.updateGoal.mockResolvedValue({ goal: updated });
+      api.updateGoal.mockResolvedValue({ message: 'ok', goal: updated });
 
-      await useGoalStore.getState().updateGoal('s1', 'g1', 'New Title');
+      await useGoalStore.getState().updateGoal('t1', 'g1', 'New Title');
 
       expect(useGoalStore.getState().goalList.goals[0].title).toBe('New Title');
     });
@@ -102,9 +105,9 @@ describe('goal store', () => {
         goalList: { goals: [goal], count: 1, hasMore: false, nextToken: '', filter: {} },
       });
 
-      api.deleteGoal.mockResolvedValue({});
+      api.deleteGoal.mockResolvedValue({ message: 'ok' });
 
-      await useGoalStore.getState().deleteGoal('s1', 'g1');
+      await useGoalStore.getState().deleteGoal('t1', 'g1');
 
       const { goalList } = useGoalStore.getState();
       expect(goalList.goals).toHaveLength(0);
@@ -112,11 +115,40 @@ describe('goal store', () => {
     });
 
     it('triggers notification on error', async () => {
-      api.deleteGoal.mockResolvedValue({ error: 'fail', message: 'error.delete' });
+      api.deleteGoal.mockResolvedValue({ message: 'error.delete', error: 'fail' });
 
-      await useGoalStore.getState().deleteGoal('s1', 'g1');
+      await useGoalStore.getState().deleteGoal('t1', 'g1');
 
       expect(useNotificationStore.getState().notifications).toHaveLength(1);
+    });
+  });
+
+  describe('tagGoalToSeason', () => {
+    it('adds tag to goalSeasons on success', async () => {
+      api.tagGoalToSeason.mockResolvedValue({ message: 'ok' });
+
+      await useGoalStore.getState().tagGoalToSeason('t1', 'g1', 's1');
+
+      expect(useGoalStore.getState().goalSeasons).toEqual([{ goalId: 'g1', seasonId: 's1' }]);
+    });
+
+    it('triggers notification on error', async () => {
+      api.tagGoalToSeason.mockResolvedValue({ message: 'error.tag', error: 'fail' });
+
+      await useGoalStore.getState().tagGoalToSeason('t1', 'g1', 's1');
+
+      expect(useNotificationStore.getState().notifications).toHaveLength(1);
+    });
+  });
+
+  describe('untagGoalFromSeason', () => {
+    it('removes tag from goalSeasons on success', async () => {
+      useGoalStore.setState({ goalSeasons: [{ goalId: 'g1', seasonId: 's1' }] });
+      api.untagGoalFromSeason.mockResolvedValue({ message: 'ok' });
+
+      await useGoalStore.getState().untagGoalFromSeason('t1', 'g1', 's1');
+
+      expect(useGoalStore.getState().goalSeasons).toHaveLength(0);
     });
   });
 });
