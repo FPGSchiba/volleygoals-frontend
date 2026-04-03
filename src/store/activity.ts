@@ -19,7 +19,7 @@ const useActivityStore = create<ActivityState & ActivityActions>((set) => ({
   fetchActivity: async (teamId: string, limit: number = 20) => {
     set({ loading: true });
     try {
-      const response = await VolleyGoalsAPI.getTeamActivity(teamId, limit);
+      const response = await VolleyGoalsAPI.getTeamActivity(teamId, { limit });
       if (response.items) {
         set({ activities: response.items });
         return response.items;
