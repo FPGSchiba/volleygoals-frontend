@@ -144,6 +144,8 @@ export function mockCommentsState(overrides?: Record<string, any>) {
 export function mockActivityState(overrides?: Record<string, any>) {
   return {
     activities: [],
+    nextToken: null,
+    hasMore: false,
     loading: false,
     fetchActivity: jest.fn().mockResolvedValue([]),
     ...overrides,
