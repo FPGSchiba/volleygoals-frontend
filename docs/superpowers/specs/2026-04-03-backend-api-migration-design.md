@@ -197,8 +197,8 @@ export const ALL_PERMISSIONS = [
   'comments:read', 'comments:write', 'comments:delete',
   'members:read', 'members:write',
   'seasons:read', 'seasons:write',
-  'invites:write',
-  'team_settings:write',
+  'invites:read', 'invites:write',
+  'team_settings:read', 'team_settings:write',
 ] as const;
 
 export type Permission = typeof ALL_PERMISSIONS[number];
@@ -209,9 +209,10 @@ const DEFAULT_PERMISSIONS: Record<string, Permission[]> = {
     'goals:read', 'goals:write',
     'members:read',
     'seasons:read',
-    'invites:write',
+    'invites:read', 'invites:write',
     'comments:read', 'comments:write',
     'progress_reports:read', 'progress_reports:write',
+    'team_settings:read',
   ],
   member: [
     'goals:read',
@@ -270,9 +271,8 @@ Updated items — nav item visible when the user has the `readPermission`:
 { key: 'progress',     readPermission: 'progress_reports:read',  ... }
 { key: 'members',      readPermission: 'members:read',           ... }
 { key: 'seasons',      readPermission: 'seasons:read',           ... }
-// No read permission exists for these — gated on write permission instead:
-{ key: 'teamSettings', readPermission: 'team_settings:write',    ... }
-{ key: 'invites',      readPermission: 'invites:write',          ... }
+{ key: 'teamSettings', readPermission: 'team_settings:read',     ... }
+{ key: 'invites',      readPermission: 'invites:read',           ... }
 // Admin-only items keep userType gating, no readPermission needed:
 { key: 'teams',        userType: UserType.Admin, ... }
 { key: 'users',        userType: UserType.Admin, ... }
@@ -292,8 +292,8 @@ All inline role checks replaced with `usePermission`. Each page has two layers:
 | `Members.tsx` | `members:read` | Add/Remove/Edit → `members:write` |
 | `Seasons.tsx` | `seasons:read` | Create/Edit/Delete → `seasons:write` |
 | `CommentSection.tsx` | `comments:read` (renders at all) | Post/Edit → `comments:write`, Delete → `comments:delete` |
-| `TeamSettings.tsx` | `team_settings:write` | All controls always enabled (page is write-only) |
-| `Invites.tsx` | `invites:write` | All controls always enabled (page is write-only) |
+| `TeamSettings.tsx` | `team_settings:read` | Edit/Save controls → `team_settings:write` |
+| `Invites.tsx` | `invites:read` | Create/Revoke → `invites:write` |
 
 Role definitions are loaded from the tenant store (using `team.tenantId`) when a team is selected. If the user lacks tenant admin access the fetch fails gracefully, and `resolvePermissions` falls back to defaults.
 
