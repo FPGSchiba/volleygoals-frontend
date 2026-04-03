@@ -86,12 +86,17 @@ const loadUserStore = async (): Promise<{cognitoUser?: AuthUser, session?: AuthS
   }
 }
 
+function computePermissions(
+  team: ITeamAssignment | undefined,
+  roleDefinitions: IRoleDefinition[]
+): Permission[] {
+  return team ? resolvePermissions(team.role, roleDefinitions) : [];
+}
+
 const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
   loadUserStore().then(({ cognitoUser, session, userType, user, availableTeams, selectedTeam }) => {
     const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
-    const currentPermissions = selectedTeam
-      ? resolvePermissions(selectedTeam.role as string, roleDefinitions)
-      : [];
+    const currentPermissions = computePermissions(selectedTeam, roleDefinitions);
     set({ cognitoUser, session, userType, availableTeams, user, selectedTeam, currentPermissions });
   });
 
@@ -129,9 +134,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
       const selected = availableTeams?.find(t => t.team.id === teamId);
       setSessionItem(SELECTED_TEAM_KEY, teamId);
       const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
-      const currentPermissions = selected
-        ? resolvePermissions(selected.role as string, roleDefinitions)
-        : [];
+      const currentPermissions = computePermissions(selected, roleDefinitions);
       set({ selectedTeam: selected, currentPermissions });
     },
     fetchSelf: async () => {
@@ -139,9 +142,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
       const selectedTeamId = getSessionItem(SELECTED_TEAM_KEY);
       const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
       const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
-      const currentPermissions = selectedTeam
-        ? resolvePermissions(selectedTeam.role as string, roleDefinitions)
-        : [];
+      const currentPermissions = computePermissions(selectedTeam, roleDefinitions);
       set({ user, availableTeams: assignments, selectedTeam, currentPermissions });
     },
     updateSelf: async (userData: IProfileUpdate) => {

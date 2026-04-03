@@ -7,10 +7,11 @@ describe('cognitoUser store - currentPermissions', () => {
   it('populates currentPermissions when a team is selected with a known role', () => {
     useCognitoUserStore.setState({
       availableTeams: [
-        {
-          team: { id: 'team-1', name: 'Test Team' },
-          role: 'admin',
-        } as any,
+        buildTeamAssignment({
+          team: buildTeam({ id: 'team-1', name: 'Test Team' }),
+          role: RoleType.Admin,
+          status: TeamMemberStatus.Active,
+        }),
       ],
     });
 
