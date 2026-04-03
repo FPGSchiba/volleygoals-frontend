@@ -224,3 +224,17 @@ export function buildRoleDefinition(overrides?: Partial<IRoleDefinition>): IRole
     ...overrides,
   };
 }
+
+export function buildOwnershipPolicy(overrides?: Partial<IOwnershipPolicy>): IOwnershipPolicy {
+  const id = uid();
+  return {
+    id,
+    tenantId: uid(),
+    resourceType: 'goals',
+    ownerPermissions: ['goals:read', 'goals:write'],
+    parentOwnerPermissions: ['goals:read'],
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
