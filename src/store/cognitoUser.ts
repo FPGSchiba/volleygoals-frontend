@@ -1,11 +1,12 @@
 import {create} from "zustand";
 import { fetchAuthSession, AuthSession, getCurrentUser, AuthUser, signOut } from 'aws-amplify/auth';
-import {ITeamAssignment, IUser, IProfileUpdate, UserType} from "./types";
+import {ITeamAssignment, IUser, IProfileUpdate, IRoleDefinition, UserType} from "./types";
 import VolleyGoalsAPI from "../services/backend.api";
 import {getSessionItem, setSessionItem} from "./util";
 import {SELECTED_TEAM_KEY} from "./consts";
 import {useNotificationStore} from "./notification";
 import i18next from "i18next";
+import { Permission, resolvePermissions } from '../utils/permissions';
 
 type UserState = {
   cognitoUser: AuthUser | undefined;
@@ -14,6 +15,7 @@ type UserState = {
   userType: UserType | undefined;
   availableTeams: ITeamAssignment[];
   selectedTeam?: ITeamAssignment;
+  currentPermissions: Permission[];
 }
 
 type UserActions = {
@@ -85,7 +87,13 @@ const loadUserStore = async (): Promise<{cognitoUser?: AuthUser, session?: AuthS
 }
 
 const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
-  loadUserStore().then(({ cognitoUser, session, userType, user, availableTeams, selectedTeam }) => set({ cognitoUser, session, userType, availableTeams, user, selectedTeam }));
+  loadUserStore().then(({ cognitoUser, session, userType, user, availableTeams, selectedTeam }) => {
+    const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
+    const currentPermissions = selectedTeam
+      ? resolvePermissions(selectedTeam.role as string, roleDefinitions)
+      : [];
+    set({ cognitoUser, session, userType, availableTeams, user, selectedTeam, currentPermissions });
+  });
 
   return {
     cognitoUser: undefined,
@@ -93,6 +101,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
     userType: undefined,
     availableTeams: [],
     selectedTeam: undefined,
+    currentPermissions: [],
     setUser: async () => {
       try {
         const cognitoUser = await getCurrentUser();
@@ -119,13 +128,21 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
       const { availableTeams } = get();
       const selected = availableTeams?.find(t => t.team.id === teamId);
       setSessionItem(SELECTED_TEAM_KEY, teamId);
-      set({ selectedTeam: selected });
+      const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
+      const currentPermissions = selected
+        ? resolvePermissions(selected.role as string, roleDefinitions)
+        : [];
+      set({ selectedTeam: selected, currentPermissions });
     },
     fetchSelf: async () => {
       const { user, assignments } = await loadSelf();
       const selectedTeamId = getSessionItem(SELECTED_TEAM_KEY);
       const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
-      set({ user, availableTeams: assignments, selectedTeam });
+      const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
+      const currentPermissions = selectedTeam
+        ? resolvePermissions(selectedTeam.role as string, roleDefinitions)
+        : [];
+      set({ user, availableTeams: assignments, selectedTeam, currentPermissions });
     },
     updateSelf: async (userData: IProfileUpdate) => {
       const response = await VolleyGoalsAPI.updateSelf(userData);

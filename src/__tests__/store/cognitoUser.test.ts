@@ -3,6 +3,31 @@ import { signOut } from 'aws-amplify/auth';
 import { buildUser, buildTeamAssignment, buildTeam } from '../mocks/factories';
 import { RoleType, TeamMemberStatus } from '../../store/types';
 
+describe('cognitoUser store - currentPermissions', () => {
+  it('populates currentPermissions when a team is selected with a known role', () => {
+    useCognitoUserStore.setState({
+      availableTeams: [
+        {
+          team: { id: 'team-1', name: 'Test Team' },
+          role: 'admin',
+        } as any,
+      ],
+    });
+
+    useCognitoUserStore.getState().setSelectedTeam('team-1');
+
+    const { currentPermissions } = useCognitoUserStore.getState();
+    expect(currentPermissions).toContain('goals:read');
+    expect(currentPermissions).toContain('goals:write');
+  });
+
+  it('sets currentPermissions to [] when no team is selected', () => {
+    useCognitoUserStore.setState({ availableTeams: [] });
+    useCognitoUserStore.getState().setSelectedTeam('nonexistent');
+    expect(useCognitoUserStore.getState().currentPermissions).toEqual([]);
+  });
+});
+
 // The store auto-loads on import; set initial state for tests
 beforeEach(() => {
   sessionStorage.clear();
