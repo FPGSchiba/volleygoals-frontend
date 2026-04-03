@@ -2,6 +2,7 @@ import {
   IUser, ITeam, ITeamAssignment, ISeason, IGoal, IProgressReport,
   IProgressEntry, IComment, IInvite, IActivityEntry, ISeasonStats,
   ITeamSettings, ITeamUser, ICommentFile,
+  ITenant, ITenantMember, IRoleDefinition, IOwnershipPolicy,
   UserType, RoleType, TeamMemberStatus, SeasonStatus, GoalType, GoalStatus, CommentType,
 } from '../../store/types';
 
@@ -65,7 +66,7 @@ export function buildGoal(overrides?: Partial<IGoal>): IGoal {
   const id = uid();
   return {
     id,
-    seasonId: uid(),
+    teamId: uid(),
     ownerId: uid(),
     goalType: GoalType.Team,
     title: `Goal ${id}`,
@@ -194,6 +195,32 @@ export function buildCommentFile(overrides?: Partial<ICommentFile>): ICommentFil
     commentId: uid(),
     storageKey: `files/${id}.png`,
     createdAt: now,
+    ...overrides,
+  };
+}
+
+export function buildTenant(overrides?: Partial<ITenant>): ITenant {
+  const id = uid();
+  return {
+    id,
+    name: `Tenant ${id}`,
+    ownerId: uid(),
+    createdAt: now,
+    updatedAt: now,
+    ...overrides,
+  };
+}
+
+export function buildRoleDefinition(overrides?: Partial<IRoleDefinition>): IRoleDefinition {
+  const id = uid();
+  return {
+    id,
+    tenantId: uid(),
+    name: `Role ${id}`,
+    permissions: ['goals:read'],
+    isDefault: false,
+    createdAt: now,
+    updatedAt: now,
     ...overrides,
   };
 }

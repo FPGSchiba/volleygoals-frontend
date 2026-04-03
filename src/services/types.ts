@@ -48,6 +48,7 @@ export interface IGoalFilterOption extends IFilterOption {
   goalType?: GoalType;
   status?: GoalStatus;
   title?: string;
+  seasonId?: string;
 }
 
 export interface IProgressReportFilterOption extends IFilterOption {

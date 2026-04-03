@@ -72,9 +72,9 @@ export interface IUser {
 
 export interface IProfileUpdate {
   name?: string;
-  picture?: string;
   preferredUsername?: string;
   birthdate?: string;
+  language?: string;
 }
 
 export interface IUserUpdate {
@@ -91,6 +91,7 @@ export interface ITeam {
   createdAt: string;
   updatedAt: string;
   deletedAt?: string;
+  tenantId?: string;
 }
 
 export interface ITeamSettings {
@@ -105,7 +106,7 @@ export interface ITeamSettings {
 
 export interface ITeamMember {
   id: string;
-  cognitoSub: string;
+  userId: string;
   teamId: string;
   role: RoleType;
   status: TeamMemberStatus;
@@ -161,7 +162,7 @@ export interface ISeason {
 // Goals
 export interface IGoal {
   id: string;
-  seasonId: string;
+  teamId: string;
   ownerId: string;
   owner?: { id: string; name?: string; preferredUsername?: string; picture?: string };
   goalType: GoalType;
@@ -172,7 +173,12 @@ export interface IGoal {
   createdAt: string;
   updatedAt: string;
   picture?: string;
-  completionPercentage?: number; // API #17
+  completionPercentage?: number;
+}
+
+export interface IGoalSeasonTag {
+  goalId: string;
+  seasonId: string;
 }
 
 // Progress Reports
@@ -248,4 +254,43 @@ export interface ICommentFile {
   storageKey: string;
   createdAt: string;
   fileUrl?: string; // API #14
+}
+
+// Tenants
+export interface ITenant {
+  id: string;
+  name: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ITenantMember {
+  id: string;
+  tenantId: string;
+  userId: string;
+  role: 'admin' | 'member';
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IRoleDefinition {
+  id: string;
+  tenantId: string;
+  name: string;
+  permissions: string[];
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IOwnershipPolicy {
+  id: string;
+  tenantId: string;
+  resourceType: string;
+  ownerPermissions: string[];
+  parentOwnerPermissions: string[];
+  createdAt: string;
+  updatedAt: string;
 }
