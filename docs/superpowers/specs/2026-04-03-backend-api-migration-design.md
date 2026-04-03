@@ -297,6 +297,99 @@ All inline role checks replaced with `usePermission`. Each page has two layers:
 
 Role definitions are loaded from the tenant store (using `team.tenantId`) when a team is selected. If the user lacks tenant admin access the fetch fails gracefully, and `resolvePermissions` falls back to defaults.
 
+### 2g. Goals–Season Decoupling
+
+**Files:** `src/services/backend.api.ts`, `src/store/types.ts`, `src/store/goals.ts`, `src/pages/user/Goals.tsx`, `src/pages/user/GoalDetails.tsx`
+
+Goals are no longer nested under seasons. They are now owned by a **team** and can be *tagged* to zero or more seasons via a join relationship. This is confirmed by the Terraform route definitions in `routes_goals.tf`.
+
+#### Endpoint changes
+
+| Old | New |
+|-----|-----|
+| `POST /seasons/{seasonId}/goals` | `POST /teams/{teamId}/goals` |
+| `GET /seasons/{seasonId}/goals` | `GET /teams/{teamId}/goals` + optional `?seasonId=` query param |
+| `GET /seasons/{seasonId}/goals/{goalId}` | `GET /teams/{teamId}/goals/{goalId}` |
+| `PATCH /seasons/{seasonId}/goals/{goalId}` | `PUT /teams/{teamId}/goals/{goalId}` (**PUT, not PATCH**) |
+| `DELETE /seasons/{seasonId}/goals/{goalId}` | `DELETE /teams/{teamId}/goals/{goalId}` |
+| `GET /seasons/{seasonId}/goals/{goalId}/picture/presign` | `POST /teams/{teamId}/goals/{goalId}/picture` (**POST to endpoint, not GET presign**) |
+
+Three new season-tagging endpoints:
+
+| Method | Path | Purpose |
+|--------|------|---------|
+| `POST` | `/teams/{teamId}/goals/{goalId}/seasons/{seasonId}` | Tag goal to a season |
+| `DELETE` | `/teams/{teamId}/goals/{goalId}/seasons/{seasonId}` | Untag goal from a season |
+| `GET` | `/teams/{teamId}/goals/{goalId}/seasons` | List all seasons a goal is tagged to |
+
+#### Type changes (`src/store/types.ts`)
+
+`IGoal` is now team-scoped. `seasonId` is removed as a required top-level field:
+
+```ts
+interface IGoal {
+  id: string;
+  teamId: string;        // replaces seasonId at top level
+  ownerId: string;
+  owner?: { id: string; name?: string; preferredUsername?: string; picture?: string };
+  goalType: GoalType;
+  title: string;
+  description: string;
+  status: GoalStatus;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  picture?: string;
+  completionPercentage?: number;
+  // seasonId removed — use IGoalSeasonTag for the relationship
+}
+
+interface IGoalSeasonTag {
+  goalId: string;
+  seasonId: string;
+}
+```
+
+#### API method changes (`src/services/backend.api.ts`)
+
+```ts
+// Signatures change from (seasonId, ...) to (teamId, ...)
+listGoals(teamId: string, filter: IGoalFilterOption): Promise<...>
+getGoal(teamId: string, id: string): Promise<...>
+createGoal(teamId: string, data: {...}): Promise<...>
+updateGoal(teamId: string, id: string, data: Partial<{...}>): Promise<...>  // uses PUT internally
+deleteGoal(teamId: string, id: string): Promise<...>
+uploadGoalPicture(teamId: string, goalId: string, data: { filename: string; contentType: string }): Promise<...>
+
+// New tagging methods
+tagGoalToSeason(teamId: string, goalId: string, seasonId: string): Promise<...>
+untagGoalFromSeason(teamId: string, goalId: string, seasonId: string): Promise<...>
+listGoalSeasons(teamId: string, goalId: string): Promise<{ message: string; error?: string; items?: IGoalSeasonTag[] }>
+```
+
+`IGoalFilterOption` gains an optional `seasonId` field (now a query param, not a path param):
+```ts
+interface IGoalFilterOption extends IFilterOption {
+  ownerId?: string;
+  goalType?: GoalType;
+  status?: GoalStatus;
+  title?: string;
+  seasonId?: string;   // added — filters goals tagged to this season
+}
+```
+
+The old `getPresignedGoalAvatarUploadUrl` and `uploadGoalAvatar` pair is replaced by a single `uploadGoalPicture` method that POSTs to the endpoint (which handles S3 internally and returns the file URL directly).
+
+#### Store changes (`src/store/goals.ts`)
+
+Remove `seasonId` from all goal store actions that previously took it as a required param. The selected team's ID (from `cognitoUser` store) is used instead.
+
+#### UI changes
+
+**`Goals.tsx`:** Season is now an optional filter, not a routing prerequisite. The page loads goals for `selectedTeam.team.id` and passes `seasonId` as a query filter when the user selects a season from a dropdown.
+
+**`GoalDetails.tsx`:** Add a "Seasons" section showing which seasons this goal is tagged to, with add/remove controls (calls `tagGoalToSeason` / `untagGoalFromSeason`). Gated on `goals:write`.
+
 ---
 
 ## Phase 3: Tenant API Layer
@@ -448,18 +541,19 @@ Phase 1 (envelope fix)
       → Phase 4 (tenant UI)
 ```
 
-Within Phase 2, sub-items 2a–2e can be done in any order. Phase 2f (permissions) requires `IRoleDefinition` to exist. The resolution: add the four new tenant types (`ITenant`, `ITenantMember`, `IRoleDefinition`, `IOwnershipPolicy`) to `src/store/types.ts` at the start of Phase 2 (alongside 2a–2e), so that `permissions.ts` can import `IRoleDefinition` immediately. The tenant store and API methods that use these types come in Phase 3 as planned.
+Within Phase 2, sub-items 2a–2e and 2g can be done in any order. Phase 2f (permissions) requires `IRoleDefinition` to exist. The resolution: add the four new tenant types (`ITenant`, `ITenantMember`, `IRoleDefinition`, `IOwnershipPolicy`) to `src/store/types.ts` at the start of Phase 2 (alongside 2a–2e), so that `permissions.ts` can import `IRoleDefinition` immediately. The tenant store and API methods that use these types come in Phase 3 as planned.
 
 ## Files Added / Modified Summary
 
 | File | Change |
 |------|--------|
-| `src/services/backend.api.ts` | Envelope unwrap + 13 new tenant methods + activity pagination + leave team path |
-| `src/store/types.ts` | `ITeamMember.userId`, `ITeam.tenantId`, `IProfileUpdate.language`, 4 new tenant types |
+| `src/services/backend.api.ts` | Envelope unwrap + goal path/method changes + 3 new goal-season tagging methods + 13 new tenant methods + activity pagination + leave team path |
+| `src/store/types.ts` | `ITeamMember.userId`, `ITeam.tenantId`, `IProfileUpdate.language`, `IGoal.teamId`, new `IGoalSeasonTag`, 4 new tenant types |
 | `src/store/tenants.ts` | New store |
 | `src/utils/permissions.ts` | New — permission constants + resolver |
 | `src/hooks/usePermission.ts` | New — `usePermission` hook |
 | `src/store/cognitoUser.ts` | Add `currentPermissions`, integrate tenant role resolution |
+| `src/store/goals.ts` | Remove `seasonId` param from all actions; use `teamId` instead |
 | `src/store/activity.ts` | Pagination state |
 | `src/components/Navigation.tsx` | Permission-based nav items + Tenants item |
 | `src/pages/admin/Tenants.tsx` | New |
