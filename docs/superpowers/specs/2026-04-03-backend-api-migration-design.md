@@ -241,6 +241,15 @@ export function usePermission(permission: Permission): boolean {
 }
 ```
 
+#### Two-Tier Permission Model
+
+Permissions gate two distinct concerns:
+
+1. **Page access / nav visibility** — controlled by the `read` permission for that resource. If a user has `goals:read`, the Goals nav item is visible and the Goals page is accessible.
+2. **Action buttons** — create/update buttons gated on `resource:write`; delete buttons gated on `resource:delete` where it exists, otherwise `resource:write`.
+
+This means a user with only `goals:read` can visit the Goals page and see goals, but all create/edit/delete buttons are hidden or disabled.
+
 #### Navigation Update
 
 `NavItem` type changes:
@@ -251,29 +260,40 @@ type NavItem = {
   path: string;
   icon?: React.ReactNode;
   userType: UserType;
-  permission?: Permission;  // replaces roles?: RoleType[]
+  readPermission?: Permission;  // replaces roles?: RoleType[]; gates page access
 };
 ```
 
-Updated items:
+Updated items — nav item visible when the user has the `readPermission`:
 ```ts
-{ key: 'teamSettings', permission: 'team_settings:write', ... }
-{ key: 'invites',      permission: 'invites:write', ... }
+{ key: 'goals',        readPermission: 'goals:read',             ... }
+{ key: 'progress',     readPermission: 'progress_reports:read',  ... }
+{ key: 'members',      readPermission: 'members:read',           ... }
+{ key: 'seasons',      readPermission: 'seasons:read',           ... }
+// No read permission exists for these — gated on write permission instead:
+{ key: 'teamSettings', readPermission: 'team_settings:write',    ... }
+{ key: 'invites',      readPermission: 'invites:write',          ... }
+// Admin-only items keep userType gating, no readPermission needed:
+{ key: 'teams',        userType: UserType.Admin, ... }
+{ key: 'users',        userType: UserType.Admin, ... }
+{ key: 'tenants',      userType: UserType.Admin, ... }
 ```
 
 #### Pages Updated
 
-All inline role checks replaced with `usePermission`:
+All inline role checks replaced with `usePermission`. Each page has two layers:
 
-| File | Old check | New check |
-|------|-----------|-----------|
-| `CommentSection.tsx` | `userRole === 'admin' \|\| userRole === 'trainer'` | `usePermission('comments:write')` |
-| `Members.tsx` | role-based visibility | `usePermission('members:write')` |
-| `TeamSettings.tsx` | role-based visibility | `usePermission('team_settings:write')` |
-| `Goals.tsx` | role-based create/edit | `usePermission('goals:write')` |
-| `GoalDetails.tsx` | role-based edit/delete | `usePermission('goals:write')`, `usePermission('goals:delete')` |
-| `ProgressDetails.tsx` | role-based edit | `usePermission('progress_reports:write')` |
-| `Invites.tsx` | role-based visibility | `usePermission('invites:write')` |
+| File | Page access (nav + route) | Action buttons |
+|------|--------------------------|----------------|
+| `Goals.tsx` | `goals:read` | Create → `goals:write` |
+| `GoalDetails.tsx` | `goals:read` | Edit → `goals:write`, Delete → `goals:delete` |
+| `Progress.tsx` | `progress_reports:read` | Create → `progress_reports:write` |
+| `ProgressDetails.tsx` | `progress_reports:read` | Edit → `progress_reports:write`, Delete → `progress_reports:delete` |
+| `Members.tsx` | `members:read` | Add/Remove/Edit → `members:write` |
+| `Seasons.tsx` | `seasons:read` | Create/Edit/Delete → `seasons:write` |
+| `CommentSection.tsx` | `comments:read` (renders at all) | Post/Edit → `comments:write`, Delete → `comments:delete` |
+| `TeamSettings.tsx` | `team_settings:write` | All controls always enabled (page is write-only) |
+| `Invites.tsx` | `invites:write` | All controls always enabled (page is write-only) |
 
 Role definitions are loaded from the tenant store (using `team.tenantId`) when a team is selected. If the user lacks tenant admin access the fetch fails gracefully, and `resolvePermissions` falls back to defaults.
 
