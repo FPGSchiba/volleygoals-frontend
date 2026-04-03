@@ -38,5 +38,5 @@ export function resolvePermissions(role: string, roleDefinitions: IRoleDefinitio
       ALL_PERMISSIONS.includes(p as Permission)
     );
   }
-  return DEFAULT_PERMISSIONS[role] ?? [];
+  return DEFAULT_PERMISSIONS[role.toLowerCase()] ?? [];
 }
