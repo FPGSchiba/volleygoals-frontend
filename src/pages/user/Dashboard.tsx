@@ -126,7 +126,7 @@ export function Dashboard() {
   React.useEffect(() => {
     if (teamId) {
       fetchSeasons(teamId, { teamId });
-      fetchActivity(teamId, 7).catch(() => {});
+      fetchActivity(teamId, { limit: 7 }).catch(() => {});
     }
   }, [teamId]);
 

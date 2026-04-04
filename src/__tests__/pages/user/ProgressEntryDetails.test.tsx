@@ -47,7 +47,7 @@ describe('ProgressEntryDetails', () => {
   it('renders entry details page', () => {
     const entry = buildProgressEntry({ id: 'e1', goalId: 'g1', rating: 4, details: 'Great progress' });
     const report = buildProgressReport({ id: 'p1', seasonId: 's1', progress: [entry] });
-    const goal = buildGoal({ id: 'g1', title: 'Goal 1', seasonId: 's1' });
+    const goal = buildGoal({ id: 'g1', title: 'Goal 1', teamId: 't1' });
 
     setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
     setupMockStore(useProgressReportStore as any, mockProgressReportState({ currentReport: report }));

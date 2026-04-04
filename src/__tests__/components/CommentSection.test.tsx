@@ -28,7 +28,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   const state = mockCognitoUserState();
   setupMockStore(useCognitoUserStore as any, state);
-  api.listComments.mockResolvedValue({ items: [] });
+  api.listComments.mockResolvedValue({ message: '', items: [] });
 });
 
 describe('CommentSection', () => {
@@ -43,7 +43,7 @@ describe('CommentSection', () => {
       buildComment({ id: 'c1', content: 'First comment', authorId: user.id, authorName: 'Test User' }),
       buildComment({ id: 'c2', content: 'Second comment', authorName: 'Other User' }),
     ];
-    api.listComments.mockResolvedValue({ items: comments });
+    api.listComments.mockResolvedValue({ message: '', items: comments });
 
     render(<CommentSection targetId="t1" commentType={CommentType.Goal} />);
 
