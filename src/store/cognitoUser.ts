@@ -7,6 +7,7 @@ import {SELECTED_TEAM_KEY} from "./consts";
 import {useNotificationStore} from "./notification";
 import i18next from "i18next";
 import { Permission, resolvePermissions } from '../utils/permissions';
+import { useTenantStore } from './tenants';
 
 type UserState = {
   cognitoUser: AuthUser | undefined;
@@ -95,7 +96,7 @@ function computePermissions(
 
 const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
   loadUserStore().then(({ cognitoUser, session, userType, user, availableTeams, selectedTeam }) => {
-    const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
+    const roleDefinitions = useTenantStore.getState().roleDefinitions;
     const currentPermissions = computePermissions(selectedTeam, roleDefinitions);
     set({ cognitoUser, session, userType, availableTeams, user, selectedTeam, currentPermissions });
   });
@@ -133,15 +134,20 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
       const { availableTeams } = get();
       const selected = availableTeams?.find(t => t.team.id === teamId);
       setSessionItem(SELECTED_TEAM_KEY, teamId);
-      const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
+      const roleDefinitions = useTenantStore.getState().roleDefinitions;
       const currentPermissions = computePermissions(selected, roleDefinitions);
       set({ selectedTeam: selected, currentPermissions });
+
+      // If team belongs to a tenant, load role definitions so custom roles work
+      if (selected?.team?.tenantId) {
+        useTenantStore.getState().fetchRoleDefinitions(selected.team.tenantId).catch(() => {});
+      }
     },
     fetchSelf: async () => {
       const { user, assignments } = await loadSelf();
       const selectedTeamId = getSessionItem(SELECTED_TEAM_KEY);
       const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
-      const roleDefinitions: IRoleDefinition[] = [];  // Phase 3 will inject tenant role defs here
+      const roleDefinitions = useTenantStore.getState().roleDefinitions;
       const currentPermissions = computePermissions(selectedTeam, roleDefinitions);
       set({ user, availableTeams: assignments, selectedTeam, currentPermissions });
     },
@@ -188,3 +194,14 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
 });
 
 export {useCognitoUserStore};
+
+// Recompute currentPermissions whenever tenant role definitions change
+useTenantStore.subscribe((state, prev) => {
+  if (state.roleDefinitions !== prev.roleDefinitions) {
+    const { selectedTeam } = useCognitoUserStore.getState();
+    if (selectedTeam) {
+      const currentPermissions = computePermissions(selectedTeam, state.roleDefinitions);
+      useCognitoUserStore.setState({ currentPermissions });
+    }
+  }
+});
