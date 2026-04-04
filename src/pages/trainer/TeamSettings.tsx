@@ -5,6 +5,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useTeamStore } from '../../store/teams';
 import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
 import { ITeamUser, UserType } from '../../store/types';
 import VolleyGoalsAPI from '../../services/backend.api';
 import i18next from 'i18next';
@@ -28,7 +29,8 @@ export function TeamSettings() {
   const teamId = selectedTeam?.team?.id || '';
   const userRole = selectedTeam?.role as string | undefined;
   const isAdmin = userType === UserType.Admin || userRole === 'admin';
-  const canManageMembers = userRole === 'admin' || userRole === 'trainer';
+  const canWrite = usePermission('team_settings:write');
+  const canManageMembers = canWrite;
 
   const [teamName, setTeamName] = useState('');
   const [teamStatus, setTeamStatus] = useState<string>('active');

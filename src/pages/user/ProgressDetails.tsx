@@ -10,6 +10,7 @@ import { useProgressReportStore } from '../../store/progressReports';
 import { useGoalStore } from '../../store/goals';
 import { useSeasonStore } from '../../store/seasons';
 import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
 import { useTeamStore } from '../../store/teams';
 import { CommentType, GoalStatus } from '../../store/types';
 import { CommentSection } from '../../components/CommentSection';
@@ -38,8 +39,8 @@ export function ProgressDetails() {
   const fetchTeamMembers = useTeamStore((s) => s.fetchTeamMembers);
   const teamMembers = useTeamStore((s) => s.teamMembers) || [];
 
-  const userRole = selectedTeam?.role as string | undefined;
-  const canEdit = userRole === 'admin' || userRole === 'trainer';
+  const canEdit = usePermission('progress_reports:write');
+  const canDelete = usePermission('progress_reports:delete');
 
   const seasonId = currentReport?.seasonId
     || location.state?.seasonId

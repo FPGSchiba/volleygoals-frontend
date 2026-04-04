@@ -1,14 +1,15 @@
 import React, { useRef, useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, MenuItem, Paper, TextField, Typography } from '@mui/material';
+import ClearIcon from '@mui/icons-material/Clear';
 import { Controller, useForm } from 'react-hook-form';
 import { useGoalStore } from '../../store/goals';
 import { useSeasonStore } from '../../store/seasons';
 import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
 import { useTeamStore } from '../../store/teams';
 import { CommentType, GoalStatus, GoalType } from '../../store/types';
 import { CommentSection } from '../../components/CommentSection';
-import VolleyGoalsAPI from '../../services/backend.api';
 import i18next from 'i18next';
 
 type EditForm = { title: string; description: string; status: GoalStatus | ''; ownerId: string; };
@@ -22,6 +23,10 @@ export function GoalDetails() {
   const getGoal = useGoalStore((s) => s.getGoal);
   const updateGoal = useGoalStore((s) => s.updateGoal);
   const deleteGoal = useGoalStore((s) => s.deleteGoal);
+  const fetchGoalSeasons = useGoalStore((s) => s.fetchGoalSeasons);
+  const goalSeasons = useGoalStore((s) => s.goalSeasons);
+  const tagGoalToSeason = useGoalStore((s) => s.tagGoalToSeason);
+  const untagGoalFromSeason = useGoalStore((s) => s.untagGoalFromSeason);
 
   const seasons = useSeasonStore((s) => s.seasonList.seasons);
   const fetchSeasons = useSeasonStore((s) => s.fetchSeasons);
@@ -30,44 +35,27 @@ export function GoalDetails() {
   const getTeam = useTeamStore((s) => s.getTeam);
   const currentTeamSettings = useTeamStore((s) => s.currentTeamSettings);
 
-  const userRole = selectedTeam?.role as string | undefined;
-  const canEdit = userRole === 'admin' || userRole === 'trainer';
   const teamId = selectedTeam?.team?.id || '';
-
-  const [seasonId, setSeasonId] = React.useState<string | null>(
-    location.state?.seasonId || (currentGoal?.seasonId ?? null)
-  );
+  const canWrite = usePermission('goals:write');
+  const canDelete = usePermission('goals:delete');
 
   React.useEffect(() => {
     if (teamId) fetchSeasons(teamId, { teamId });
   }, [teamId]);
 
   React.useEffect(() => {
-    if (seasonId) return;
-    if (currentGoal?.seasonId) {
-      setSeasonId(currentGoal.seasonId);
-      return;
+    if (goalId && teamId) {
+      getGoal(teamId, goalId);
+      fetchGoalSeasons(teamId, goalId);
     }
-    if (seasons && seasons.length > 0) {
-      const sorted = [...seasons].sort((a, b) =>
-        new Date(b.startDate || b.createdAt).getTime() - new Date(a.startDate || a.createdAt).getTime()
-      );
-      setSeasonId(sorted[0]?.id || null);
-    }
-  }, [seasons, currentGoal]);
-
-  React.useEffect(() => {
-    if (goalId && seasonId) {
-      getGoal(seasonId, goalId);
-    }
-  }, [goalId, seasonId]);
+  }, [goalId, teamId]);
 
   React.useEffect(() => {
     if (teamId) getTeam(teamId).catch(() => {});
   }, [teamId]);
 
   const isOwner = currentGoal?.ownerId === currentUser?.id;
-  const canModify = isOwner || canEdit;
+  const canModify = isOwner || canWrite;
 
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -84,10 +72,10 @@ export function GoalDetails() {
   };
 
   const onEdit = async (data: EditForm) => {
-    if (!currentGoal || !seasonId) return;
+    if (!currentGoal || !teamId) return;
     setActionLoading(true);
     try {
-      await updateGoal(seasonId, currentGoal.id, data.title || undefined, data.description || undefined, (data.status as GoalStatus) || undefined, data.ownerId || undefined);
+      await updateGoal(teamId, currentGoal.id, data.title || undefined, data.description || undefined, (data.status as GoalStatus) || undefined, data.ownerId || undefined);
       setEditOpen(false);
     } finally {
       setActionLoading(false);
@@ -95,10 +83,10 @@ export function GoalDetails() {
   };
 
   const onDelete = async () => {
-    if (!currentGoal || !seasonId) return;
+    if (!currentGoal || !teamId) return;
     setActionLoading(true);
     try {
-      await deleteGoal(seasonId, currentGoal.id);
+      await deleteGoal(teamId, currentGoal.id);
       navigate('/goals');
     } finally {
       setActionLoading(false);
@@ -106,17 +94,9 @@ export function GoalDetails() {
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const handlePictureUpload = async (file: File) => {
-    if (!currentGoal || !seasonId) return;
-    setActionLoading(true);
-    try {
-      const result = await VolleyGoalsAPI.uploadGoalAvatar(seasonId, currentGoal.id, file);
-      if (result.fileUrl) {
-        await updateGoal(seasonId, currentGoal.id, undefined, undefined, undefined, undefined, result.fileUrl);
-      }
-    } finally {
-      setActionLoading(false);
-    }
+  const handlePictureUpload = async (_file: File) => {
+    // NOTE: uploadGoalAvatar API method not yet available; picture upload is a no-op
+    setActionLoading(false);
   };
 
   if (!currentGoal) {
@@ -177,6 +157,39 @@ export function GoalDetails() {
             </Button>
           </Box>
         )}
+
+        <Box mt={2}>
+          <Typography variant="subtitle1">Seasons</Typography>
+          {goalSeasons.map(tag => {
+            const season = seasons.find(s => s.id === tag.seasonId);
+            return (
+              <Box key={tag.seasonId} display="flex" alignItems="center" gap={1}>
+                <Typography variant="body2">{season?.name ?? tag.seasonId}</Typography>
+                {canWrite && (
+                  <IconButton size="small" onClick={() => untagGoalFromSeason(teamId, goalId!, tag.seasonId)}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                )}
+              </Box>
+            );
+          })}
+          {canWrite && (
+            <Box mt={1}>
+              <TextField
+                select
+                size="small"
+                label="Tag to season"
+                value=""
+                onChange={(e) => { if (e.target.value) tagGoalToSeason(teamId, goalId!, e.target.value); }}
+              >
+                {seasons
+                  .filter(s => !goalSeasons.some(t => t.seasonId === s.id))
+                  .map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)
+                }
+              </TextField>
+            </Box>
+          )}
+        </Box>
 
         <Box mt={4}>
           <CommentSection

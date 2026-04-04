@@ -23,6 +23,7 @@ export function mockCognitoUserState(overrides?: Record<string, any>) {
     userType: UserType.User,
     availableTeams: [buildTeamAssignment({ team, role: RoleType.Trainer, status: TeamMemberStatus.Active })],
     selectedTeam: buildTeamAssignment({ team, role: RoleType.Trainer, status: TeamMemberStatus.Active }),
+    currentPermissions: [] as string[],
     setUser: jest.fn(),
     logout: jest.fn(),
     setSelectedTeam: jest.fn(),
@@ -103,11 +104,15 @@ export function mockGoalState(overrides?: Record<string, any>) {
   return {
     goalList: { goals: [], count: 0, hasMore: false, nextToken: '', filter: {} },
     currentGoal: undefined,
+    goalSeasons: [] as any[],
     createGoal: jest.fn().mockResolvedValue(undefined),
     updateGoal: jest.fn().mockResolvedValue(undefined),
     deleteGoal: jest.fn().mockResolvedValue(undefined),
     fetchGoals: jest.fn().mockResolvedValue(undefined),
     getGoal: jest.fn().mockResolvedValue(null),
+    fetchGoalSeasons: jest.fn().mockResolvedValue(undefined),
+    tagGoalToSeason: jest.fn().mockResolvedValue(undefined),
+    untagGoalFromSeason: jest.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }

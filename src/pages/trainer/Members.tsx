@@ -12,6 +12,7 @@ import { ITeamUser } from '../../store/types';
 import { ITeamMemberFilterOption } from '../../services/types';
 import { useTeamStore } from '../../store/teams';
 import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
 import VolleyGoalsAPI from '../../services/backend.api';
 import i18next from 'i18next';
 
@@ -24,7 +25,8 @@ export function Members() {
   const currentUser = useCognitoUserStore((s) => s.user);
   const teamId = selectedTeam?.team?.id || '';
   const userRole = selectedTeam?.role as string | undefined;
-  const canManage = userRole === 'admin' || userRole === 'trainer';
+  const canWrite = usePermission('members:write');
+  const canManage = canWrite;
 
   const [allowFetch, setAllowFetch] = React.useState<boolean>(!!selectedTeam);
   React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);

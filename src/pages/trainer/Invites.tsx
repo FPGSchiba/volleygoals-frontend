@@ -6,6 +6,7 @@ import { IInvite, RoleType } from '../../store/types';
 import { ITeamInviteFilterOption } from '../../services/types';
 import { useTeamStore } from '../../store/teams';
 import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
 import i18next from 'i18next';
 
 type InviteForm = { email: string; role: RoleType; message: string; };
@@ -20,7 +21,8 @@ export function Invites() {
   const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
   const teamId = selectedTeam?.team?.id || '';
   const userRole = selectedTeam?.role as string | undefined;
-  const canManage = userRole === 'admin' || userRole === 'trainer';
+  const canWrite = usePermission('invites:write');
+  const canManage = canWrite;
 
   const [allowFetch, setAllowFetch] = React.useState<boolean>(!!selectedTeam);
   React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);

@@ -12,6 +12,7 @@ import { IGoalFilterOption } from '../../services/types';
 import { useGoalStore } from '../../store/goals';
 import { useSeasonStore } from '../../store/seasons';
 import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
 import i18next from 'i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { formatDateTime } from '../../utils/dateTime';
@@ -43,8 +44,9 @@ export function Goals() {
   React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);
 
   const userRole = selectedTeam?.role as string | undefined;
-  const canEdit = userRole === 'admin' || userRole === 'trainer';
-  const canCreate = canEdit || userRole === 'member';
+  const canCreate = usePermission('goals:write');
+  const canEdit = usePermission('goals:write');
+  const canDelete = usePermission('goals:delete');
 
   const initialFilter: IGoalFilterOption = useMemo(() => ({ }), []);
 
@@ -90,8 +92,8 @@ export function Goals() {
   const fetchAdapter = async (filter?: IGoalFilterOption): Promise<FetchResult<IGoal>> => {
     // Require a selected season to fetch goals
     if (!selectedSeasonId) return { items: [], count: 0 };
-    const usedFilter: IGoalFilterOption = { ...(filter || {}), } as IGoalFilterOption;
-    await fetchGoals(selectedSeasonId, usedFilter).catch(() => {});
+    const usedFilter: IGoalFilterOption = { ...(filter || {}), seasonId: selectedSeasonId || undefined } as IGoalFilterOption;
+    await fetchGoals(teamId, usedFilter).catch(() => {});
     return { items: goals, count };
   };
 
@@ -119,10 +121,10 @@ export function Goals() {
   };
 
   const onCreate = async (data: GoalForm) => {
-    if (!canCreate || !createGoal || !selectedSeasonId) return;
+    if (!canCreate || !createGoal || !teamId) return;
     setActionLoading(true);
     try {
-      await createGoal(selectedSeasonId, (data.goalType as GoalType) || GoalType.Team, data.title, data.description);
+      await createGoal(teamId, (data.goalType as GoalType) || GoalType.Team, data.title, data.description);
       setCreateOpen(false);
     } finally {
       setActionLoading(false);
@@ -142,7 +144,7 @@ export function Goals() {
     if (!currentGoal || !updateGoal || !canEdit) return;
     setActionLoading(true);
     try {
-      await updateGoal(currentGoal.seasonId, currentGoal.id, data.title || undefined, data.description || undefined, (data.status as GoalStatus) || undefined);
+      await updateGoal(teamId, currentGoal.id, data.title || undefined, data.description || undefined, (data.status as GoalStatus) || undefined);
       setEditOpen(false);
     } finally {
       setActionLoading(false);
@@ -150,16 +152,16 @@ export function Goals() {
   };
 
   const openDelete = (g: IGoal) => {
-    if (!canEdit) return;
+    if (!canDelete) return;
     setCurrentGoal(g);
     setDeleteOpen(true);
   };
 
   const onDelete = async () => {
-    if (!currentGoal || !deleteGoal || !canEdit) return;
+    if (!currentGoal || !deleteGoal || !canDelete) return;
     setActionLoading(true);
     try {
-      await deleteGoal(currentGoal.seasonId, currentGoal.id);
+      await deleteGoal(teamId, currentGoal.id);
       setDeleteOpen(false);
     } finally {
       setActionLoading(false);
@@ -222,7 +224,7 @@ export function Goals() {
     );
 
     const deleteBtn = (
-      <Button key="delete" variant="contained" size="small" color="error" onClick={() => openDelete(g)} disabled={actionLoading || !canEdit}>
+      <Button key="delete" variant="contained" size="small" color="error" onClick={() => openDelete(g)} disabled={actionLoading || !canDelete}>
         {i18next.t('admin.actions.delete','Delete')}
       </Button>
     );
@@ -440,7 +442,7 @@ export function Goals() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)}>{i18next.t('common.cancel','Cancel')}</Button>
-          <Button variant="contained" color="error" onClick={onDelete} disabled={actionLoading || !canEdit}>{i18next.t('common.delete','Delete')}</Button>
+          <Button variant="contained" color="error" onClick={onDelete} disabled={actionLoading || !canDelete}>{i18next.t('common.delete','Delete')}</Button>
         </DialogActions>
       </Dialog>
     </Paper>

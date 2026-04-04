@@ -15,6 +15,7 @@ import {
 import { useProgressReportStore } from '../../store/progressReports';
 import { useSeasonStore } from '../../store/seasons';
 import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
 import { useGoalStore } from '../../store/goals';
 import { useTeamStore } from '../../store/teams';
 import { IProgressReport, ISeason } from '../../store/types';
@@ -67,8 +68,9 @@ export function Progress() {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const teamId = selectedTeam?.team?.id || '';
-  const userRole = selectedTeam?.role as string | undefined;
-  const canEdit = userRole === 'admin' || userRole === 'trainer';
+  const canCreate = usePermission('progress_reports:write');
+  const canEdit = usePermission('progress_reports:write');
+  const canDelete = usePermission('progress_reports:delete');
 
   const [allowFetch, setAllowFetch] = useState<boolean>(!!selectedTeam);
   React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);
@@ -371,7 +373,7 @@ export function Progress() {
             <Box display="flex" flexDirection="column" gap={1}>
               {displayedReports.map(r => {
                 const isAuthor = currentUser?.id === r.authorId;
-                const canDelete = isAuthor || canEdit;
+                const canDeleteThis = isAuthor || canDelete;
                 const authorName = r.authorName || resolveAuthor(r.authorId);
                 const authorPicture = r.authorPicture;
                 return (
@@ -410,7 +412,7 @@ export function Progress() {
                       >
                         {i18next.t('common.view', 'View')}
                       </Button>
-                      {canDelete && (
+                      {canDeleteThis && (
                         <Button
                           size="small"
                           variant="contained"

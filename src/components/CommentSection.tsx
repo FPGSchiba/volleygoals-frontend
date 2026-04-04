@@ -3,6 +3,7 @@ import { Alert, Avatar, Box, Button, Chip, CircularProgress, Dialog, DialogActio
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 import { useCognitoUserStore } from '../store/cognitoUser';
+import { usePermission } from '../hooks/usePermission';
 import { CommentType, IComment } from '../store/types';
 import VolleyGoalsAPI from '../services/backend.api';
 import axios from 'axios';
@@ -21,9 +22,8 @@ export function CommentSection({ targetId, commentType, enabled = true, allowFil
   const [comments, setComments] = useState<IComment[]>([]);
   const [loading, setLoading] = useState(false);
   const currentUser = useCognitoUserStore((s) => s.user);
-  const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
-  const userRole = selectedTeam?.role as string | undefined;
-  const canEdit = userRole === 'admin' || userRole === 'trainer';
+  const canWriteComments = usePermission('comments:write');
+  const canDeleteComments = usePermission('comments:delete');
 
   const [newContent, setNewContent] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -132,7 +132,7 @@ export function CommentSection({ targetId, commentType, enabled = true, allowFil
 
       {displayedComments.map((c) => {
         const isOwn = c.authorId === currentUser?.id;
-        const canModify = isOwn || canEdit;
+        const canModify = isOwn || canWriteComments || canDeleteComments;
         const author = resolveCommentAuthor(c);
         const files = c.files || [];
         return (
