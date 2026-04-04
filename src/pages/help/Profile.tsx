@@ -3,7 +3,6 @@ import { useEffect, useState, useRef } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useCognitoUserStore } from "../../store/cognitoUser";
 import { useTranslation } from "react-i18next";
-import i18next from "i18next";
 import Box from '@mui/material/Box';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
@@ -23,7 +22,6 @@ import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
-import { changeLanguage } from "../../utils/i18nHelpers";
 
 export function Profile() {
   const { t } = useTranslation();
@@ -40,15 +38,15 @@ export function Profile() {
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | undefined>(user?.picture);
 
-  const { control, handleSubmit, reset, formState } = useForm<{ name?: string; preferredUsername?: string; birthdate?: string }>({
-    defaultValues: { name: user?.name || '', preferredUsername: user?.preferredUsername || '', birthdate: user?.birthdate ? user.birthdate.slice(0, 10) : '' }
+  const { control, handleSubmit, reset, formState } = useForm<{ name?: string; preferredUsername?: string; birthdate?: string; language?: string }>({
+    defaultValues: { name: user?.name || '', preferredUsername: user?.preferredUsername || '', birthdate: user?.birthdate ? user.birthdate.slice(0, 10) : '', language: '' }
   });
 
   useEffect(() => {
     if (!user) {
       fetchSelf().catch((err) => console.error(err));
     } else {
-      reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate ? user.birthdate.slice(0, 10) : '' });
+      reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate ? user.birthdate.slice(0, 10) : '', language: '' });
       setAvatarPreview(user.picture);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -166,22 +164,29 @@ export function Profile() {
               </Grid>
 
               <Grid className="profile-field profile-field-half">
-                <TextField
-                  select
-                  fullWidth
-                  label={t('profile.language', 'Language')}
-                  value={i18next.language === 'de' ? 'de' : 'en'}
-                  onChange={(e) => changeLanguage(e.target.value as 'en' | 'de')}
-                >
-                  <MenuItem value="en">{t('profile.language.en', 'English')}</MenuItem>
-                  <MenuItem value="de">{t('profile.language.de', 'German (Deutsch)')}</MenuItem>
-                </TextField>
+                <Controller
+                  name="language"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      select
+                      fullWidth
+                      label={t('profile.language', 'Language')}
+                      size="small"
+                    >
+                      <MenuItem value="">{t('profile.languageDefault', 'Default')}</MenuItem>
+                      <MenuItem value="en">English</MenuItem>
+                      <MenuItem value="de">Deutsch</MenuItem>
+                    </TextField>
+                  )}
+                />
               </Grid>
 
               <Grid className="profile-field profile-field-full">
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <Button type="submit" variant="contained" disabled={formState.isSubmitting}>{t('profile.save', 'Save')}</Button>
-                  <Button type="button" variant="outlined" onClick={() => { if (user) reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate ? user.birthdate.slice(0, 10) : '' }); }}>{t('profile.cancel', 'Cancel')}</Button>
+                  <Button type="button" variant="outlined" onClick={() => { if (user) reset({ name: user.name || '', preferredUsername: user.preferredUsername || '', birthdate: user.birthdate ? user.birthdate.slice(0, 10) : '', language: '' }); }}>{t('profile.cancel', 'Cancel')}</Button>
                 </Box>
               </Grid>
             </Grid>
