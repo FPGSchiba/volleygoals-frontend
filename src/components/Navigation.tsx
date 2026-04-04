@@ -10,8 +10,9 @@ import GroupIcon from '@mui/icons-material/Group';
 import PersonIcon from '@mui/icons-material/Person';
 import DateRangeIcon from '@mui/icons-material/DateRange';
 import {
-  RoleType, UserType, IGoal, IProgressReport,
+  UserType, IGoal, IProgressReport,
 } from '../store/types';
+import { Permission } from '../utils/permissions';
 import { useCognitoUserStore } from '../store/cognitoUser';
 import {
   Box, IconButton, Typography, Avatar, Tooltip, useTheme, useMediaQuery,
@@ -29,6 +30,7 @@ import TrackChangesIcon from '@mui/icons-material/TrackChanges';
 import PublishedWithChangesIcon from '@mui/icons-material/PublishedWithChanges';
 import SettingsIcon from '@mui/icons-material/Settings';
 import EmailIcon from '@mui/icons-material/Email';
+import BusinessIcon from '@mui/icons-material/Business';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { useThemeToggle } from '../index';
@@ -43,21 +45,22 @@ type NavItem = {
   path: string;
   icon?: React.ReactNode;
   userType: UserType;
-  roles?: RoleType[];
+  readPermission?: Permission;
 };
 
 const NAV_ITEMS: NavItem[] = [
   // Admin View
-  { key: 'teams', labelKey: 'nav.teams', path: '/teams', icon: <GroupIcon />, userType: UserType.Admin },
-  { key: 'users', labelKey: 'nav.users', path: '/users', icon: <PersonIcon />, userType: UserType.Admin },
+  { key: 'teams',        labelKey: 'nav.teams',        path: '/teams',         icon: <GroupIcon />,              userType: UserType.Admin },
+  { key: 'users',        labelKey: 'nav.users',        path: '/users',         icon: <PersonIcon />,             userType: UserType.Admin },
+  { key: 'tenants',      labelKey: 'nav.tenants',      path: '/tenants',       icon: <BusinessIcon />,           userType: UserType.Admin },
   // Users Only
-  { key: 'dashboard', labelKey: 'nav.dashboard', path: '/dashboard', icon: <DashboardIcon />, userType: UserType.User },
-  { key: 'seasons', labelKey: 'nav.seasons', path: '/seasons', icon: <DateRangeIcon />, userType: UserType.User },
-  { key: 'goals', labelKey: 'nav.goals', path: '/goals', icon: <TrackChangesIcon />, userType: UserType.User },
-  { key: 'progress', labelKey: 'nav.progress', path: '/progress', icon: <PublishedWithChangesIcon />, userType: UserType.User },
-  // Admin or Trainer Only
-  { key: 'teamSettings', labelKey: 'nav.teamSettings', path: '/team-settings', icon: <SettingsIcon />, userType: UserType.User, roles: [RoleType.Admin] },
-  { key: 'invites', labelKey: 'nav.invites', path: '/invites', icon: <EmailIcon />, userType: UserType.User, roles: [RoleType.Admin, RoleType.Trainer] },
+  { key: 'dashboard',    labelKey: 'nav.dashboard',    path: '/dashboard',     icon: <DashboardIcon />,          userType: UserType.User },
+  { key: 'seasons',      labelKey: 'nav.seasons',      path: '/seasons',       icon: <DateRangeIcon />,          userType: UserType.User, readPermission: 'seasons:read' },
+  { key: 'goals',        labelKey: 'nav.goals',        path: '/goals',         icon: <TrackChangesIcon />,       userType: UserType.User, readPermission: 'goals:read' },
+  { key: 'progress',     labelKey: 'nav.progress',     path: '/progress',      icon: <PublishedWithChangesIcon />, userType: UserType.User, readPermission: 'progress_reports:read' },
+  { key: 'members',      labelKey: 'nav.members',      path: '/members',       icon: <GroupIcon />,              userType: UserType.User, readPermission: 'members:read' },
+  { key: 'teamSettings', labelKey: 'nav.teamSettings', path: '/team-settings', icon: <SettingsIcon />,           userType: UserType.User, readPermission: 'team_settings:read' },
+  { key: 'invites',      labelKey: 'nav.invites',      path: '/invites',       icon: <EmailIcon />,              userType: UserType.User, readPermission: 'invites:read' },
 ];
 
 // Mobile bottom nav items (subset of main nav for users)
@@ -267,11 +270,11 @@ export function Navigation(props: NavigationProps) {
   const initials = getInitials(displayName);
 
   useEffect(() => {
+    const currentPermissions = useCognitoUserStore.getState().currentPermissions;
     const items = NAV_ITEMS.filter(item => {
       if (item.userType !== userType) return false;
-      if (!item.roles) return true;
-      const teamRole = selectedTeam?.role;
-      return teamRole ? item.roles.includes(teamRole as RoleType) : false;
+      if (!item.readPermission) return true;
+      return currentPermissions.includes(item.readPermission);
     });
     setVisibleItems(items);
   }, [userType, selectedTeam]);
