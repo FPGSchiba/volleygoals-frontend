@@ -45,12 +45,12 @@ export function TenantRoles() {
   };
 
   const openEdit = (roleId: string) => {
-    const role = roleDefinitions.find(r => r.id === roleId);
-    if (!role) return;
+    const roleResult = roleDefinitions.find(r => r.id === roleId);
+    if (!roleResult) return;
     setEditingId(roleId);
-    const perms = role.permissions.filter((p): p is Permission => ALL_PERMISSIONS.includes(p as Permission));
+    const perms = roleResult.permissions.filter((p): p is Permission => ALL_PERMISSIONS.includes(p as Permission));
     setSelectedPermissions(perms);
-    reset({ name: role.name, permissions: perms });
+    reset({ name: roleResult.name, permissions: perms });
     setDialogOpen(true);
   };
 
@@ -101,28 +101,28 @@ export function TenantRoles() {
         <Button variant="contained" onClick={openCreate}>Add Role</Button>
       </Box>
 
-      {roleDefinitions.map(role => (
-        <Paper key={role.id} variant="outlined" sx={{ p: 2, mb: 1 }}>
+      {roleDefinitions.map(roleResult => (
+        <Paper key={roleResult.id} variant="outlined" sx={{ p: 2, mb: 1 }}>
           <Box display="flex" alignItems="flex-start" justifyContent="space-between">
             <Box>
               <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                <Typography variant="subtitle1">{role.name}</Typography>
-                {role.isDefault && <Chip label="default" size="small" color="primary" />}
+                <Typography variant="subtitle1">{roleResult.name}</Typography>
+                {roleResult.isDefault && <Chip label="default" size="small" color="primary" />}
               </Box>
               <Box display="flex" flexWrap="wrap" gap={0.5}>
-                {role.permissions.map(p => (
+                {roleResult.permissions.map(p => (
                   <Chip key={p} label={p} size="small" variant="outlined" />
                 ))}
-                {role.permissions.length === 0 && (
+                {roleResult.permissions.length === 0 && (
                   <Typography variant="caption" color="text.secondary">No permissions</Typography>
                 )}
               </Box>
             </Box>
             <Box display="flex" gap={0.5}>
-              <IconButton size="small" onClick={() => openEdit(role.id)} disabled={role.isDefault}>
+              <IconButton size="small" onClick={() => openEdit(roleResult.id)} disabled={roleResult.isDefault}>
                 <EditIcon fontSize="small" />
               </IconButton>
-              <IconButton size="small" color="error" onClick={() => setDeleteId(role.id)} disabled={role.isDefault}>
+              <IconButton size="small" color="error" onClick={() => setDeleteId(roleResult.id)} disabled={roleResult.isDefault}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>

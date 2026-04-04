@@ -73,14 +73,14 @@ private static unwrap<T>(axiosData: { message: string; data: T }): T {
 
 Each method is updated from:
 ```ts
-const response = await VolleyGoalsAPI.endpoint.get('/self');
+const response = await VolleyGoalsAPIV1.endpoint.get('/self');
 return response.data;
 // was: { message, user, assignments }
 ```
 to:
 ```ts
-const response = await VolleyGoalsAPI.endpoint.get('/self');
-return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+const response = await VolleyGoalsAPIV1.endpoint.get('/self');
+return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
 ```
 
 The public method signatures remain unchanged — callers (stores) are unaffected.
@@ -89,7 +89,7 @@ The `extractError` helper and `requestDeduped` are unchanged since errors don't 
 
 ### Scope
 
-All ~25 public methods in `VolleyGoalsAPI`: `getSelf`, `updateSelf`, `getPresignedSelfAvatarUploadUrl`, `listTeams`, `getTeam`, `createTeam`, `updateTeam`, `deleteTeam`, `updateTeamSettings`, `getPresignedTeamAvatarUploadUrl`, `listTeamInvites`, `fetchUsers`, `getUser`, `deleteUser`, `updateUser`, `listTeamMembers`, `deleteMembership`, `updateMembership`, `createMembership`, `completeInvite`, `getInvite`, `createInvite`, `resendInvite`, `revokeInvite`, `listSeasons`, `getSeason`, `createSeason`, `updateSeason`, `deleteSeason`, `getSeasonStats`, `listGoals`, `getGoal`, `createGoal`, `updateGoal`, `deleteGoal`, `getPresignedGoalAvatarUploadUrl`, `listProgressReports`, `getProgressReport`, `createProgressReport`, `updateProgressReport`, `deleteProgressReport`, `listComments`, `createComment`, `updateComment`, `deleteComment`, `getPresignedCommentFileUploadUrl`, `getTeamActivity`, `leaveTeam`.
+All ~25 public methods in `VolleyGoalsAPIV1`: `getSelf`, `updateSelf`, `getPresignedSelfAvatarUploadUrl`, `listTeams`, `getTeam`, `createTeam`, `updateTeam`, `deleteTeam`, `updateTeamSettings`, `getPresignedTeamAvatarUploadUrl`, `listTeamInvites`, `fetchUsers`, `getUser`, `deleteUser`, `updateUser`, `listTeamMembers`, `deleteMembership`, `updateMembership`, `createMembership`, `completeInvite`, `getInvite`, `createInvite`, `resendInvite`, `revokeInvite`, `listSeasons`, `getSeason`, `createSeason`, `updateSeason`, `deleteSeason`, `getSeasonStats`, `listGoals`, `getGoal`, `createGoal`, `updateGoal`, `deleteGoal`, `getPresignedGoalAvatarUploadUrl`, `listProgressReports`, `getProgressReport`, `createProgressReport`, `updateProgressReport`, `deleteProgressReport`, `listComments`, `createComment`, `updateComment`, `deleteComment`, `getPresignedCommentFileUploadUrl`, `getTeamActivity`, `leaveTeam`.
 
 ---
 

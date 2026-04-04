@@ -642,6 +642,7 @@
     "home": "Home",
     "dashboard": "Dashboard",
     "teams": "Teams",
+    "tenants": "Tenants",
     "profile": "Profile",
     "admin": "Admin",
     "logout": "Logout",

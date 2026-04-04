@@ -55,40 +55,40 @@ import {
   public async createTenant(name: string): Promise<{ message: string; error?: string; tenant?: ITenant }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.post('/v1/tenants', { name });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.post('/v1/tenants', { name });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async getTenant(id: string): Promise<{ message: string; error?: string; tenant?: ITenant }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.get(`/v1/tenants/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.get(`/v1/tenants/${id}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async updateTenant(id: string, name: string): Promise<{ message: string; error?: string; tenant?: ITenant }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.patch(`/v1/tenants/${id}`, { name });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.patch(`/v1/tenants/${id}`, { name });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async deleteTenant(id: string): Promise<{ message: string; error?: string }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.delete(`/v1/tenants/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.delete(`/v1/tenants/${id}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -99,20 +99,20 @@ import {
   public async addTenantMember(tenantId: string, userId: string, role: 'admin' | 'member'): Promise<{ message: string; error?: string; member?: ITenantMember }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.post(`/v1/tenants/${tenantId}/members`, { userId, role });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.post(`/v1/tenants/${tenantId}/members`, { userId, role });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async removeTenantMember(tenantId: string, memberId: string): Promise<{ message: string; error?: string }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.delete(`/v1/tenants/${tenantId}/members/${memberId}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.delete(`/v1/tenants/${tenantId}/members/${memberId}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -123,40 +123,40 @@ import {
   public async listRoleDefinitions(tenantId: string): Promise<{ message: string; error?: string; items?: IRoleDefinition[] }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.get(`/v1/tenants/${tenantId}/roles`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.get(`/v1/tenants/${tenantId}/roles`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async createRoleDefinition(tenantId: string, name: string, permissions: string[]): Promise<{ message: string; error?: string; roleDefinition?: IRoleDefinition }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.post(`/v1/tenants/${tenantId}/roles`, { name, permissions });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.post(`/v1/tenants/${tenantId}/roles`, { name, permissions });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async updateRoleDefinition(tenantId: string, roleId: string, permissions: string[]): Promise<{ message: string; error?: string; roleDefinition?: IRoleDefinition }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.patch(`/v1/tenants/${tenantId}/roles/${roleId}`, { permissions });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.patch(`/v1/tenants/${tenantId}/roles/${roleId}`, { permissions });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async deleteRoleDefinition(tenantId: string, roleId: string): Promise<{ message: string; error?: string }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.delete(`/v1/tenants/${tenantId}/roles/${roleId}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.delete(`/v1/tenants/${tenantId}/roles/${roleId}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -167,20 +167,20 @@ import {
   public async listOwnershipPolicies(tenantId: string): Promise<{ message: string; error?: string; items?: IOwnershipPolicy[] }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.get(`/v1/tenants/${tenantId}/ownership-policies`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.get(`/v1/tenants/${tenantId}/ownership-policies`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async updateOwnershipPolicy(tenantId: string, resourceType: string, ownerPermissions: string[], parentOwnerPermissions: string[]): Promise<{ message: string; error?: string; policy?: IOwnershipPolicy }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.patch(`/v1/tenants/${tenantId}/ownership-policies/${resourceType}`, { ownerPermissions, parentOwnerPermissions });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.patch(`/v1/tenants/${tenantId}/ownership-policies/${resourceType}`, { ownerPermissions, parentOwnerPermissions });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -191,10 +191,10 @@ import {
   public async createTenantedTeam(tenantId: string, name: string): Promise<{ message: string; error?: string; team?: ITeam }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.post(`/v1/tenants/${tenantId}/teams`, { name });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.post(`/v1/tenants/${tenantId}/teams`, { name });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -249,8 +249,8 @@ import {
     },
   }));
 
-  import VolleyGoalsAPI from '../../services/backend.api';
-  const api = jest.mocked(VolleyGoalsAPI);
+  import VolleyGoalsAPIV1 from '../../services/backend.api';
+  const api = jest.mocked(VolleyGoalsAPIV1);
 
   beforeEach(() => {
     useTenantStore.setState({
@@ -356,7 +356,7 @@ import {
   ```ts
   import { create } from 'zustand';
   import { ITenant, ITenantMember, IRoleDefinition, IOwnershipPolicy } from './types';
-  import VolleyGoalsAPI from '../services/backend.api';
+  import VolleyGoalsAPIV1 from '../services/backend.api';
   import { useNotificationStore } from './notification';
   import i18next from 'i18next';
 
@@ -408,7 +408,7 @@ import {
     },
 
     createTenant: async (name: string) => {
-      const response = await VolleyGoalsAPI.createTenant(name);
+      const response = await VolleyGoalsAPIV1.createTenant(name);
       if (!response.tenant) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -424,7 +424,7 @@ import {
     getTenant: async (id: string) => {
       set({ loading: true });
       try {
-        const response = await VolleyGoalsAPI.getTenant(id);
+        const response = await VolleyGoalsAPIV1.getTenant(id);
         if (response.tenant) {
           set({ currentTenant: response.tenant });
         } else {
@@ -441,7 +441,7 @@ import {
     },
 
     updateTenant: async (id: string, name: string) => {
-      const response = await VolleyGoalsAPI.updateTenant(id, name);
+      const response = await VolleyGoalsAPIV1.updateTenant(id, name);
       if (!response.tenant) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -458,7 +458,7 @@ import {
     },
 
     deleteTenant: async (id: string) => {
-      const response = await VolleyGoalsAPI.deleteTenant(id);
+      const response = await VolleyGoalsAPIV1.deleteTenant(id);
       if (response.error) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -472,7 +472,7 @@ import {
     },
 
     addTenantMember: async (tenantId: string, userId: string, role: 'admin' | 'member') => {
-      const response = await VolleyGoalsAPI.addTenantMember(tenantId, userId, role);
+      const response = await VolleyGoalsAPIV1.addTenantMember(tenantId, userId, role);
       if (!response.member) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -486,7 +486,7 @@ import {
     },
 
     removeTenantMember: async (tenantId: string, memberId: string) => {
-      const response = await VolleyGoalsAPI.removeTenantMember(tenantId, memberId);
+      const response = await VolleyGoalsAPIV1.removeTenantMember(tenantId, memberId);
       if (response.error) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -500,7 +500,7 @@ import {
     },
 
     fetchRoleDefinitions: async (tenantId: string) => {
-      const response = await VolleyGoalsAPI.listRoleDefinitions(tenantId);
+      const response = await VolleyGoalsAPIV1.listRoleDefinitions(tenantId);
       if (response.items) {
         set({ roleDefinitions: response.items });
       } else {
@@ -514,7 +514,7 @@ import {
     },
 
     createRoleDefinition: async (tenantId: string, name: string, permissions: string[]) => {
-      const response = await VolleyGoalsAPI.createRoleDefinition(tenantId, name, permissions);
+      const response = await VolleyGoalsAPIV1.createRoleDefinition(tenantId, name, permissions);
       if (!response.roleDefinition) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -528,7 +528,7 @@ import {
     },
 
     updateRoleDefinition: async (tenantId: string, roleId: string, permissions: string[]) => {
-      const response = await VolleyGoalsAPI.updateRoleDefinition(tenantId, roleId, permissions);
+      const response = await VolleyGoalsAPIV1.updateRoleDefinition(tenantId, roleId, permissions);
       if (!response.roleDefinition) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -544,7 +544,7 @@ import {
     },
 
     deleteRoleDefinition: async (tenantId: string, roleId: string) => {
-      const response = await VolleyGoalsAPI.deleteRoleDefinition(tenantId, roleId);
+      const response = await VolleyGoalsAPIV1.deleteRoleDefinition(tenantId, roleId);
       if (response.error) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -558,7 +558,7 @@ import {
     },
 
     fetchOwnershipPolicies: async (tenantId: string) => {
-      const response = await VolleyGoalsAPI.listOwnershipPolicies(tenantId);
+      const response = await VolleyGoalsAPIV1.listOwnershipPolicies(tenantId);
       if (response.items) {
         set({ ownershipPolicies: response.items });
       } else {
@@ -572,7 +572,7 @@ import {
     },
 
     updateOwnershipPolicy: async (tenantId: string, resourceType: string, ownerPermissions: string[], parentOwnerPermissions: string[]) => {
-      const response = await VolleyGoalsAPI.updateOwnershipPolicy(tenantId, resourceType, ownerPermissions, parentOwnerPermissions);
+      const response = await VolleyGoalsAPIV1.updateOwnershipPolicy(tenantId, resourceType, ownerPermissions, parentOwnerPermissions);
       if (!response.policy) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -590,7 +590,7 @@ import {
     },
 
     createTenantedTeam: async (tenantId: string, name: string) => {
-      const response = await VolleyGoalsAPI.createTenantedTeam(tenantId, name);
+      const response = await VolleyGoalsAPIV1.createTenantedTeam(tenantId, name);
       if (!response.team) {
         useNotificationStore.getState().notify({
           level: 'error',

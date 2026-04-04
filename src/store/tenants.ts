@@ -1,6 +1,12 @@
 import { create } from 'zustand';
-import { ITenant, ITenantMember, IRoleDefinition, IOwnershipPolicy } from './types';
+import {
+  ITenant,
+  ITenantMember,
+  IOwnershipPolicy,
+  IRoleDefinition
+} from './types';
 import VolleyGoalsAPI from '../services/backend.api';
+import { ResourceDefinition } from '../types/api-types';
 import { useNotificationStore } from './notification';
 import i18next from 'i18next';
 
@@ -9,6 +15,7 @@ type TenantState = {
   currentTenant: ITenant | null;
   tenantMembers: ITenantMember[];
   roleDefinitions: IRoleDefinition[];
+  resourceDefinitions: ResourceDefinition[];
   ownershipPolicies: IOwnershipPolicy[];
   loading: boolean;
   error: string | null;
@@ -16,6 +23,9 @@ type TenantState = {
 
 type TenantActions = {
   fetchTenants: () => Promise<void>;
+  fetchResourceDefinitions: () => Promise<void>;
+  fetchResourceModel: (tenantId: string) => Promise<void>;
+  fetchTenantMembers: (tenantId: string) => Promise<void>;
   createTenant: (name: string) => Promise<void>;
   getTenant: (id: string) => Promise<void>;
   updateTenant: (id: string, name: string) => Promise<void>;
@@ -28,6 +38,7 @@ type TenantActions = {
   deleteRoleDefinition: (tenantId: string, roleId: string) => Promise<void>;
   fetchOwnershipPolicies: (tenantId: string) => Promise<void>;
   updateOwnershipPolicy: (tenantId: string, resourceType: string, ownerPermissions: string[], parentOwnerPermissions: string[]) => Promise<void>;
+  previewOwnershipPermissions: (tenantId: string, resourceType: string, instanceId?: string) => Promise<any>;
   createTenantedTeam: (tenantId: string, name: string) => Promise<void>;
 };
 
@@ -36,16 +47,55 @@ const useTenantStore = create<TenantState & TenantActions>((set) => ({
   currentTenant: null,
   tenantMembers: [],
   roleDefinitions: [],
+  resourceDefinitions: [],
   ownershipPolicies: [],
   loading: false,
   error: null,
 
+  fetchResourceDefinitions: async () => {
+    try {
+      const response = await VolleyGoalsAPI.getResourceDefinitions();
+      if (response.items) {
+        set({ resourceDefinitions: response.items.map((i: any) => ({ id: i.id, name: i.name, description: i.description, actions: i.actions ?? [], allowedChildResources: i.allowedChildResources ?? [] })) });
+      } else {
+        useNotificationStore.getState().notify({ level: 'error', message: i18next.t(`${response.message}.message`, 'Something went wrong while loading resource definitions.'), title: i18next.t(`${response.message}.title`, 'Something went wrong'), details: response.error });
+      }
+    } catch (e) {
+      useNotificationStore.getState().notify({ level: 'error', message: i18next.t('resource_definitions.load_failed', 'Failed loading resource definitions'), title: i18next.t('Something went wrong') });
+    }
+  },
+
+  fetchResourceModel: async (tenantId: string) => {
+    try {
+      // Prefer combined endpoint if backend supports it
+      const combined = await VolleyGoalsAPI.getTenantResourceModel(tenantId);
+      if (combined && combined.resourceDefinitions && combined.policies) {
+        set({ resourceDefinitions: combined.resourceDefinitions.map((i: any) => ({ id: i.id, name: i.name, description: i.description, actions: i.actions ?? [], allowedChildResources: i.allowedChildResources ?? [] })), ownershipPolicies: combined.policies });
+        return;
+      }
+
+      // Fallback: fetch definitions and policies separately
+      const defsResp = await VolleyGoalsAPI.getResourceDefinitions();
+      if (defsResp.items) set({ resourceDefinitions: defsResp.items.map((i: any) => ({ id: i.id, name: i.name, description: i.description, actions: i.actions ?? [], allowedChildResources: i.allowedChildResources ?? [] })) });
+      const policiesResp = await VolleyGoalsAPI.listOwnershipPolicies(tenantId);
+      if (policiesResp.items) set({ ownershipPolicies: policiesResp.items });
+    } catch (e) {
+      useNotificationStore.getState().notify({ level: 'error', message: i18next.t('resource_model.load_failed', 'Failed loading resource model'), title: i18next.t('Something went wrong') });
+    }
+  },
+
   fetchTenants: async () => {
     set({ loading: true });
     try {
-      // No list-all-tenants endpoint yet; placeholder.
-      set({ loading: false });
-    } catch {
+      const response = await VolleyGoalsAPI.listTenants({ limit: 100 });
+      if (response.items) {
+        set({ tenants: response.items });
+      } else {
+        useNotificationStore.getState().notify({ level: 'error', message: 'tenants.load_failed', title: i18next.t('Something went wrong') });
+      }
+    } catch (e) {
+      useNotificationStore.getState().notify({ level: 'error', message: 'tenants.load_failed', title: i18next.t('Something went wrong') });
+    } finally {
       set({ loading: false });
     }
   },
@@ -70,6 +120,14 @@ const useTenantStore = create<TenantState & TenantActions>((set) => ({
       const response = await VolleyGoalsAPI.getTenant(id);
       if (response.tenant) {
         set({ currentTenant: response.tenant });
+        // load tenant members using new list endpoint (flattened response)
+        try {
+          const membersResp = await VolleyGoalsAPI.listTenantMembers(id, { limit: 100 });
+          if (membersResp.items) set({ tenantMembers: membersResp.items });
+          else set({ tenantMembers: [] });
+        } catch {
+          set({ tenantMembers: [] });
+        }
       } else {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -80,6 +138,19 @@ const useTenantStore = create<TenantState & TenantActions>((set) => ({
       }
     } finally {
       set({ loading: false });
+    }
+  },
+
+  fetchTenantMembers: async (tenantId: string) => {
+    try {
+      const response = await VolleyGoalsAPI.listTenantMembers(tenantId, { limit: 100 });
+      if (response.items) {
+        set({ tenantMembers: response.items });
+      } else {
+        useNotificationStore.getState().notify({ level: 'error', message: i18next.t('tenants.members.load_failed', 'Failed loading tenant members'), title: i18next.t('Something went wrong') });
+      }
+    } catch {
+      useNotificationStore.getState().notify({ level: 'error', message: i18next.t('tenants.members.load_failed', 'Failed loading tenant members'), title: i18next.t('Something went wrong') });
     }
   },
 
@@ -166,7 +237,8 @@ const useTenantStore = create<TenantState & TenantActions>((set) => ({
         details: response.error,
       });
     } else {
-      set((state) => ({ roleDefinitions: [...state.roleDefinitions, response.roleDefinition!] }));
+      const roleDefinition = response.roleDefinition!;
+      set((state) => ({ roleDefinitions: [...state.roleDefinitions, roleDefinition] }));
     }
   },
 
@@ -180,8 +252,9 @@ const useTenantStore = create<TenantState & TenantActions>((set) => ({
         details: response.error,
       });
     } else {
+      const roleDefinition = response.roleDefinition!;
       set((state) => ({
-        roleDefinitions: state.roleDefinitions.map(r => r.id === roleId ? response.roleDefinition! : r),
+        roleDefinitions: state.roleDefinitions.map(r => r.id === roleId ? roleDefinition : r),
       }));
     }
   },
@@ -229,6 +302,16 @@ const useTenantStore = create<TenantState & TenantActions>((set) => ({
           ? state.ownershipPolicies.map(p => p.resourceType === resourceType ? response.policy! : p)
           : [...state.ownershipPolicies, response.policy!],
       }));
+    }
+  },
+
+  previewOwnershipPermissions: async (tenantId: string, resourceType: string, instanceId?: string) => {
+    try {
+      const response = await VolleyGoalsAPI.previewOwnershipPermissions(tenantId, { resourceType, instanceId });
+      return response;
+    } catch (e) {
+      useNotificationStore.getState().notify({ level: 'error', message: i18next.t('ownership.preview_failed', 'Failed to preview effective permissions'), title: i18next.t('Something went wrong') });
+      return { message: 'error', error: 'preview_failed' };
     }
   },
 

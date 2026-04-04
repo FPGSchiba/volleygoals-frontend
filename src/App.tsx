@@ -30,6 +30,10 @@ import {GoalDetails} from "./pages/user/GoalDetails";
 import {ProgressCreation} from "./pages/user/ProgressCreation";
 import {ProgressDetails} from "./pages/user/ProgressDetails";
 import {ProgressEntryDetails} from "./pages/user/ProgressEntryDetails";
+import {Tenants} from "./pages/admin/Tenants";
+import {TenantDetails} from "./pages/admin/TenantDetails";
+import {TenantRoles} from "./pages/admin/TenantRoles";
+import {TenantPolicies} from "./pages/admin/TenantPolicies";
 
 const PathsWithoutHeader = [
   "login",
@@ -53,6 +57,7 @@ const HeaderVisibleSegments = [
   'members',
   'team-settings',
   'invites',
+  'tenants',
   'no-access'
 ];
 
@@ -161,6 +166,12 @@ function AppContent() {
             <Route path={"/users"} element={<PrivateRoute userTypes={[UserType.Admin]} />} >
               <Route path={""} element={<Users />} />
               <Route path={":userId"} element={<UserDetails />} />
+            </Route>
+            <Route path={"/tenants"} element={<PrivateRoute userTypes={[UserType.Admin]} />} >
+              <Route path={""} element={<Tenants />} />
+              <Route path={":tenantId"} element={<TenantDetails />} />
+              <Route path={":tenantId/roles"} element={<TenantRoles />} />
+              <Route path={":tenantId/policies"} element={<TenantPolicies />} />
             </Route>
             <Route path={"/profile"} element={<PrivateRoute userTypes={[UserType.User, UserType.Admin]} />} >
               <Route path={""} element={<Profile />} />

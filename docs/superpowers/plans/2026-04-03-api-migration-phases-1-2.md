@@ -4,7 +4,7 @@
 
 **Goal:** Migrate the frontend to match the new backend API contract — response envelope unwrapping, goal/season decoupling, field renames, and a dynamic permission model replacing hardcoded role checks.
 
-**Architecture:** All data flows through the singleton `VolleyGoalsAPI` class; a new `unwrap<T>()` helper handles the envelope in one place. Goal state moves from season-scoped to team-scoped throughout the store and pages. A new `src/utils/permissions.ts` module provides permission resolution, consumed by a `usePermission` hook used across all pages and navigation.
+**Architecture:** All data flows through the singleton `VolleyGoalsAPIV1` class; a new `unwrap<T>()` helper handles the envelope in one place. Goal state moves from season-scoped to team-scoped throughout the store and pages. A new `src/utils/permissions.ts` module provides permission resolution, consumed by a `usePermission` hook used across all pages and navigation.
 
 **Tech Stack:** TypeScript, React, Zustand, MUI, Jest/jsdom, react-hook-form
 
@@ -265,219 +265,219 @@ We add one private helper and update every public method's success path.
 
 - [ ] **Step 2: Update all non-deduped methods to use `unwrap`**
 
-  The pattern is: replace `return response.data;` with `return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };`
+  The pattern is: replace `return response.data;` with `return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };`
 
   Apply this to every method that currently does `return response.data`. The methods are:
 
   - `getSelf` — returns `{ message, user?, assignments? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get('/self');
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get('/self');
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `updateSelf` — returns `{ message, user? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch('/self', data);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch('/self', data);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getPresignedSelfAvatarUploadUrl` — returns `{ message, uploadUrl?, key?, fileUrl? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get('/self/picture/presign', { params: { filename, contentType }});
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get('/self/picture/presign', { params: { filename, contentType }});
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `listTeams` — returns `{ message, count?, hasMore?, items?, nextToken? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get('/teams', { params: filter });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get('/teams', { params: filter });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getTeam` — returns `{ message, team?, teamSettings? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get(`/teams/${id}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${id}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `createTeam` — returns `{ message, team? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.post('/teams', data);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.post('/teams', data);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `updateTeam` — returns `{ message, team? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${id}`, data);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch(`/teams/${id}`, data);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `deleteTeam` — returns `{ message }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${id}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/teams/${id}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `updateTeamSettings` — returns `{ message, teamSettings? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${teamId}/settings`, settings);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch(`/teams/${teamId}/settings`, settings);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getPresignedTeamAvatarUploadUrl` — returns `{ message, uploadUrl?, key?, fileUrl? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/picture/presign`, { params: { filename, contentType }});
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${teamId}/picture/presign`, { params: { filename, contentType }});
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `fetchUsers` — returns `{ message, paginationToken?, users? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get('/users', { params: filter });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get('/users', { params: filter });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getUser` — returns `{ message, user?, memberships? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get(`/users/${id}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get(`/users/${id}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `deleteUser` — returns `{ message }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/users/${id}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/users/${id}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `updateUser` — returns `{ message, user? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch(`/users/${id}`, data);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch(`/users/${id}`, data);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `deleteMembership` — returns `{ message }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members/${id}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/teams/${teamId}/members/${id}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `updateMembership` — returns `{ message, teamMember? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch(`/teams/${teamId}/members/${id}`, { role, status });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch(`/teams/${teamId}/members/${id}`, { role, status });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `createMembership` — returns `{ message, teamMember? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.post(`/teams/${teamId}/members`, { role, userId });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.post(`/teams/${teamId}/members`, { role, userId });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `completeInvite` — returns `{ message, member?, invite?, userCreated?, temporaryPassword? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.post('/invites/complete', { token, email, accepted });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.post('/invites/complete', { token, email, accepted });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getInvite` — returns `{ message, invite? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get(`/invites/${token}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get(`/invites/${token}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `createInvite` — returns `{ message, invite? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.post(`/invites`, { teamId, email, role, message, sendEmail });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.post(`/invites`, { teamId, email, role, message, sendEmail });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `resendInvite` — returns `{ message }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch(`/invites/${inviteId}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch(`/invites/${inviteId}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `revokeInvite` — returns `{ message }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/invites/${inviteId}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/invites/${inviteId}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getSeason` — returns `{ message, season? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${id}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get(`/seasons/${id}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `createSeason` — returns `{ message, season? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.post('/seasons', data);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.post('/seasons', data);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `updateSeason` — returns `{ message, season? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch(`/seasons/${id}`, data);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch(`/seasons/${id}`, data);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `deleteSeason` — returns `{ message }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/seasons/${id}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/seasons/${id}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getSeasonStats` — returns `{ message, stats? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get(`/seasons/${seasonId}/stats`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get(`/seasons/${seasonId}/stats`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `createComment` — returns `{ message, comment? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.post(`/comments`, data);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.post(`/comments`, data);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `updateComment` — returns `{ message, comment? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.patch(`/comments/${commentId}`, { content });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.patch(`/comments/${commentId}`, { content });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `deleteComment` — returns `{ message }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/comments/${commentId}`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/comments/${commentId}`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `getPresignedCommentFileUploadUrl` — returns `{ message, uploadUrl?, commentFile? }`:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.get(`/comments/${commentId}/file/presign`, { params: { filename, contentType } });
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.get(`/comments/${commentId}/file/presign`, { params: { filename, contentType } });
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
   - `leaveTeam` — fix path AND apply unwrap. Change from:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members`);
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/teams/${teamId}/members`);
     return response.data;
     ```
     to:
     ```ts
-    const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members/leave`);
-    return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+    const response = await VolleyGoalsAPIV1.endpoint.delete(`/teams/${teamId}/members/leave`);
+    return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     ```
 
 - [ ] **Step 3: Update `listSeasons` — apply unwrap**
 
   ```ts
-  const response = await VolleyGoalsAPI.endpoint.get(`/seasons`, { params: normFilter });
-  return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+  const response = await VolleyGoalsAPIV1.endpoint.get(`/seasons`, { params: normFilter });
+  return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
   ```
 
 - [ ] **Step 4: Update `listComments` — apply unwrap**
 
   ```ts
-  const response = await VolleyGoalsAPI.endpoint.get(`/comments`, { params: normFilter });
-  return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+  const response = await VolleyGoalsAPIV1.endpoint.get(`/comments`, { params: normFilter });
+  return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
   ```
 
 - [ ] **Step 5: Update `listTeamMembers` (uses `requestDeduped`) — the axiosFn must pre-unwrap**
@@ -490,13 +490,13 @@ We add one private helper and update every public method's success path.
       const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy };
       const data = await this.requestDeduped<{ message: string; error?: string; count?: number; items?: ITeamUser[] }>('GET', `/teams/${teamId}/members`, async () => {
         await this.ensureEndpoints();
-        const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/members`, { params: normFilter });
-        const unwrapped = { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+        const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${teamId}/members`, { params: normFilter });
+        const unwrapped = { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
         return { data: unwrapped };
       }, normFilter as unknown as Record<string, unknown>, 1000);
       return data;
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -509,13 +509,13 @@ We add one private helper and update every public method's success path.
       const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as ITeamInviteFilterOption;
       const data = await this.requestDeduped<{ message: string; error?: string; count?: number; items?: IInvite[]; nextToken?: string; hasMore?: boolean }>('GET', `/teams/${teamId}/invites`, async () => {
         await this.ensureEndpoints();
-        const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/invites`, { params: normFilter });
-        const unwrapped = { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+        const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${teamId}/invites`, { params: normFilter });
+        const unwrapped = { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
         return { data: unwrapped };
       }, normFilter as unknown as Record<string, unknown>, 1000);
       return data;
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -529,10 +529,10 @@ We add one private helper and update every public method's success path.
     try {
       await this.ensureEndpoints();
       const params = { limit: filter?.limit ?? 20, ...(filter?.nextToken ? { nextToken: filter.nextToken } : {}), ...(filter?.sortBy ? { sortBy: filter.sortBy } : {}), ...(filter?.sortOrder ? { sortOrder: filter.sortOrder } : {}) };
-      const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/activity`, { params });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${teamId}/activity`, { params });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -566,10 +566,10 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
     try {
       await this.ensureEndpoints();
       const normFilter = { ...(filter || {}), limit: filter?.limit ?? 10, sortOrder: filter?.sortOrder ?? 'asc', sortBy: filter?.sortBy } as IGoalFilterOption;
-      const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/goals`, { params: normFilter });
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${teamId}/goals`, { params: normFilter });
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -580,10 +580,10 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   public async getGoal(teamId: string, id: string): Promise<{message: string, error?: string, goal?: IGoal}> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/goals/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${teamId}/goals/${id}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -594,10 +594,10 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   public async createGoal(teamId: string, data: {type: GoalType, title: string, description: string}): Promise<{message: string, error?: string, goal?: IGoal}> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.post(`/teams/${teamId}/goals`, data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.post(`/teams/${teamId}/goals`, data);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -608,10 +608,10 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   public async updateGoal(teamId: string, id: string, data: Partial<{title: string, description: string, status: GoalStatus, ownerId: string}>): Promise<{ message: string, error?: string, goal?: IGoal}> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.put(`/teams/${teamId}/goals/${id}`, data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.put(`/teams/${teamId}/goals/${id}`, data);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -622,10 +622,10 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   public async deleteGoal(teamId: string, id: string): Promise<{ message: string, error?: string}> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/goals/${id}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.delete(`/teams/${teamId}/goals/${id}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -637,10 +637,10 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   public async uploadGoalPicture(teamId: string, goalId: string, data: { filename: string; contentType: string }): Promise<{ message: string, error?: string, fileUrl?: string }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.post(`/teams/${teamId}/goals/${goalId}/picture`, data);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.post(`/teams/${teamId}/goals/${goalId}/picture`, data);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -651,30 +651,30 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   public async tagGoalToSeason(teamId: string, goalId: string, seasonId: string): Promise<{ message: string, error?: string }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.post(`/teams/${teamId}/goals/${goalId}/seasons/${seasonId}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.post(`/teams/${teamId}/goals/${goalId}/seasons/${seasonId}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async untagGoalFromSeason(teamId: string, goalId: string, seasonId: string): Promise<{ message: string, error?: string }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/goals/${goalId}/seasons/${seasonId}`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.delete(`/teams/${teamId}/goals/${goalId}/seasons/${seasonId}`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
 
   public async listGoalSeasons(teamId: string, goalId: string): Promise<{ message: string, error?: string, items?: IGoalSeasonTag[] }> {
     try {
       await this.ensureEndpoints();
-      const response = await VolleyGoalsAPI.endpoint.get(`/teams/${teamId}/goals/${goalId}/seasons`);
-      return { message: response.data.message, ...VolleyGoalsAPI.unwrap(response.data) };
+      const response = await VolleyGoalsAPIV1.endpoint.get(`/teams/${teamId}/goals/${goalId}/seasons`);
+      return { message: response.data.message, ...VolleyGoalsAPIV1.unwrap(response.data) };
     } catch (reason: unknown) {
-      return VolleyGoalsAPI.extractError(reason);
+      return VolleyGoalsAPIV1.extractError(reason);
     }
   }
   ```
@@ -734,8 +734,8 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
     },
   }));
 
-  import VolleyGoalsAPI from '../../services/backend.api';
-  const api = jest.mocked(VolleyGoalsAPI);
+  import VolleyGoalsAPIV1 from '../../services/backend.api';
+  const api = jest.mocked(VolleyGoalsAPIV1);
 
   beforeEach(() => {
     useGoalStore.setState({
@@ -855,7 +855,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   import {create} from "zustand";
   import {IGoalFilterOption} from "../services/types";
   import {useCognitoUserStore} from "./cognitoUser";
-  import VolleyGoalsAPI from "../services/backend.api";
+  import VolleyGoalsAPIV1 from "../services/backend.api";
   import {useNotificationStore} from "./notification";
   import i18next from "i18next";
 
@@ -893,7 +893,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
     currentGoal: undefined,
     goalSeasons: [],
     createGoal: async (teamId: string, type: GoalType, title: string, description: string) => {
-      const response = await VolleyGoalsAPI.createGoal(teamId, {type, title, description});
+      const response = await VolleyGoalsAPIV1.createGoal(teamId, {type, title, description});
       if (!response.goal) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -914,7 +914,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
       }
     },
     updateGoal: async (teamId: string, id: string, title?: string, description?: string, status?: GoalStatus, ownerId?: string) => {
-      const response = await VolleyGoalsAPI.updateGoal(teamId, id, {title, description, status, ownerId});
+      const response = await VolleyGoalsAPIV1.updateGoal(teamId, id, {title, description, status, ownerId});
       if (!response.goal) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -936,7 +936,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
       }
     },
     deleteGoal: async (teamId: string, id: string) => {
-      const response = await VolleyGoalsAPI.deleteGoal(teamId, id);
+      const response = await VolleyGoalsAPIV1.deleteGoal(teamId, id);
       if (response.error) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -957,7 +957,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
       }
     },
     fetchGoals: async (teamId: string, filter: IGoalFilterOption) => {
-      const response = await VolleyGoalsAPI.listGoals(teamId, filter);
+      const response = await VolleyGoalsAPIV1.listGoals(teamId, filter);
       if (response.items) {
         set(() => ({
           goalList: {
@@ -978,7 +978,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
       }
     },
     getGoal: async (teamId: string, id: string) => {
-      const response = await VolleyGoalsAPI.getGoal(teamId, id);
+      const response = await VolleyGoalsAPIV1.getGoal(teamId, id);
       if (response.goal) {
         set(() => ({ currentGoal: response.goal }));
         return response.goal;
@@ -993,7 +993,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
       }
     },
     tagGoalToSeason: async (teamId: string, goalId: string, seasonId: string) => {
-      const response = await VolleyGoalsAPI.tagGoalToSeason(teamId, goalId, seasonId);
+      const response = await VolleyGoalsAPIV1.tagGoalToSeason(teamId, goalId, seasonId);
       if (response.error) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -1008,7 +1008,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
       }
     },
     untagGoalFromSeason: async (teamId: string, goalId: string, seasonId: string) => {
-      const response = await VolleyGoalsAPI.untagGoalFromSeason(teamId, goalId, seasonId);
+      const response = await VolleyGoalsAPIV1.untagGoalFromSeason(teamId, goalId, seasonId);
       if (response.error) {
         useNotificationStore.getState().notify({
           level: 'error',
@@ -1023,7 +1023,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
       }
     },
     fetchGoalSeasons: async (teamId: string, goalId: string) => {
-      const response = await VolleyGoalsAPI.listGoalSeasons(teamId, goalId);
+      const response = await VolleyGoalsAPIV1.listGoalSeasons(teamId, goalId);
       if (response.items) {
         set(() => ({ goalSeasons: response.items! }));
       } else {
@@ -1065,7 +1065,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
   ```ts
   import { IActivityEntry } from './types';
   import { create } from 'zustand';
-  import VolleyGoalsAPI from '../services/backend.api';
+  import VolleyGoalsAPIV1 from '../services/backend.api';
   import { useNotificationStore } from './notification';
   import i18next from 'i18next';
 
@@ -1088,7 +1088,7 @@ Goals now live at `/teams/{teamId}/goals`, use `PUT` for updates, and the pictur
     fetchActivity: async (teamId: string, filter?) => {
       set({ loading: true });
       try {
-        const response = await VolleyGoalsAPI.getTeamActivity(teamId, filter);
+        const response = await VolleyGoalsAPIV1.getTeamActivity(teamId, filter);
         if (response.items) {
           set({ activities: response.items, nextToken: response.nextToken ?? null, hasMore: !!response.hasMore });
           return response.items;
