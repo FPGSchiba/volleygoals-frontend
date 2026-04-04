@@ -18,7 +18,8 @@ import {
   ITeamSettings, ITeamUser,
   IUser,
   IProfileUpdate, IUserUpdate, RoleType, ISeason, SeasonStatus, IGoal, GoalType, GoalStatus,
-  IProgressReport, IComment, ICommentFile, IActivityEntry, IGoalSeasonTag
+  IProgressReport, IComment, ICommentFile, IActivityEntry, IGoalSeasonTag,
+  ITenant, ITenantMember, IRoleDefinition, IOwnershipPolicy
 } from "../store/types";
 import {JWT} from "@aws-amplify/auth";
 
@@ -805,6 +806,138 @@ class VolleyGoalsAPI {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPI.endpoint.delete(`/teams/${teamId}/members/leave`);
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  // ─── Tenants ─────────────────────────────────────────────────────────────────
+
+  public async createTenant(name: string): Promise<{ message: string; error?: string; tenant?: ITenant }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post('/v1/tenants', { name });
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async getTenant(id: string): Promise<{ message: string; error?: string; tenant?: ITenant }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/v1/tenants/${id}`);
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async updateTenant(id: string, name: string): Promise<{ message: string; error?: string; tenant?: ITenant }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/v1/tenants/${id}`, { name });
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async deleteTenant(id: string): Promise<{ message: string; error?: string }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/v1/tenants/${id}`);
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async addTenantMember(tenantId: string, userId: string, role: 'admin' | 'member'): Promise<{ message: string; error?: string; member?: ITenantMember }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/v1/tenants/${tenantId}/members`, { userId, role });
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async removeTenantMember(tenantId: string, memberId: string): Promise<{ message: string; error?: string }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/v1/tenants/${tenantId}/members/${memberId}`);
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async listRoleDefinitions(tenantId: string): Promise<{ message: string; error?: string; items?: IRoleDefinition[] }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/v1/tenants/${tenantId}/roles`);
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async createRoleDefinition(tenantId: string, name: string, permissions: string[]): Promise<{ message: string; error?: string; roleDefinition?: IRoleDefinition }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/v1/tenants/${tenantId}/roles`, { name, permissions });
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async updateRoleDefinition(tenantId: string, roleId: string, permissions: string[]): Promise<{ message: string; error?: string; roleDefinition?: IRoleDefinition }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/v1/tenants/${tenantId}/roles/${roleId}`, { permissions });
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async deleteRoleDefinition(tenantId: string, roleId: string): Promise<{ message: string; error?: string }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.delete(`/v1/tenants/${tenantId}/roles/${roleId}`);
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async listOwnershipPolicies(tenantId: string): Promise<{ message: string; error?: string; items?: IOwnershipPolicy[] }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.get(`/v1/tenants/${tenantId}/ownership-policies`);
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async updateOwnershipPolicy(tenantId: string, resourceType: string, ownerPermissions: string[], parentOwnerPermissions: string[]): Promise<{ message: string; error?: string; policy?: IOwnershipPolicy }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.patch(`/v1/tenants/${tenantId}/ownership-policies/${resourceType}`, { ownerPermissions, parentOwnerPermissions });
+      return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
+    } catch (reason: unknown) {
+      return VolleyGoalsAPI.extractError(reason);
+    }
+  }
+
+  public async createTenantedTeam(tenantId: string, name: string): Promise<{ message: string; error?: string; team?: ITeam }> {
+    try {
+      await this.ensureEndpoints();
+      const response = await VolleyGoalsAPI.endpoint.post(`/v1/tenants/${tenantId}/teams`, { name });
       return { ...VolleyGoalsAPI.unwrap(response.data), message: response.data.message };
     } catch (reason: unknown) {
       return VolleyGoalsAPI.extractError(reason);
