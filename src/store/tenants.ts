@@ -118,17 +118,22 @@ const useTenantStore = create<TenantState & TenantActions>((set) => ({
     set({ loading: true });
     try {
       const response = await VolleyGoalsAPI.getTenant(id);
-      if (response.tenant) {
-        set({ currentTenant: response.tenant });
-        // load tenant members using new list endpoint (flattened response)
-        try {
+        if (response.tenant) {
+          set({ currentTenant: response.tenant });
+          // load tenant members using new list endpoint (flattened response)
           const membersResp = await VolleyGoalsAPI.listTenantMembers(id, { limit: 100 });
-          if (membersResp.items) set({ tenantMembers: membersResp.items });
-          else set({ tenantMembers: [] });
-        } catch {
-          set({ tenantMembers: [] });
-        }
-      } else {
+          if (membersResp.items) {
+            set({ tenantMembers: membersResp.items });
+          } else {
+            useNotificationStore.getState().notify({
+              level: 'error',
+              message: membersResp.message || i18next.t('tenants.members.load_failed', 'Failed loading tenant members'),
+              title: i18next.t('Something went wrong'),
+              details: membersResp.error,
+            });
+            set({ tenantMembers: [] });
+          }
+        } else {
         useNotificationStore.getState().notify({
           level: 'error',
           message: i18next.t(`${response.message}.message`, 'Something went wrong while loading the tenant.'),

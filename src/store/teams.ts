@@ -26,7 +26,7 @@ type TeamState = {
 
 type TeamActions = {
   createTeam: (name: string) => Promise<void>;
-  updateTeam: (id: string, name?: string, status?: string) => Promise<void>;
+  updateTeam: (id: string, name?: string, status?: string, tenantId?: string) => Promise<void>;
   deleteTeam: (id: string) => Promise<void>;
   fetchTeams: (filter?: ITeamFilterOption) => Promise<void>;
   getTeam: (id: string) => Promise<void>;
@@ -65,8 +65,8 @@ const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
        await get().fetchTeams(get().teamList.filter);
      }
    }),
-   updateTeam: (async (id: string, name?: string, status?: string) => {
-     const response = await VolleyGoalsAPI.updateTeam(id, {name, status});
+   updateTeam: (async (id: string, name?: string, status?: string, tenantId?: string) => {
+     const response = await VolleyGoalsAPI.updateTeam(id, {name, status, tenantId});
      if (response.team) {
        set(() => ({currentTeam: response.team}));
        await get().fetchTeams(get().teamList.filter);
@@ -94,7 +94,9 @@ const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
      }
    }),
    fetchTeams: (async (filter?: ITeamFilterOption) => {
-     const response = await VolleyGoalsAPI.listTeams(filter || {});
+     const response = filter?.tenantId
+       ? await VolleyGoalsAPI.listTenantedTeams(filter.tenantId, filter)
+       : await VolleyGoalsAPI.listTeams(filter || {});
      if (response.items) {
        set(() => ({
          teamList: {

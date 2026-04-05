@@ -273,6 +273,7 @@ export interface ITenantMember {
   status: string;
   createdAt: string;
   updatedAt: string;
+  user?: { name?: string, email?: string, picture?: string }; // API Change upcoming
 }
 
 export interface IRoleDefinition {

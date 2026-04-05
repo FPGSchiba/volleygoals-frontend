@@ -1,19 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Box, Typography, Tabs, Tab,
-  List, ListItemButton, ListItemText, Paper
+  Box, Typography, List, ListItemButton, ListItemText, Paper
 } from '@mui/material';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useTenantStore } from '../../store/tenants';
 import PermissionEditor from '../../components/PermissionEditor/PermissionEditor';
-// ...existing imports...
+import { TenantLayout } from './TenantLayout';
 
 // Default resource types to show. We'll merge these with any discovered resourceTypes from the API items.
 const DEFAULT_RESOURCE_TYPES = ['goals', 'progress', 'comments'];
 
 export function TenantPolicies() {
   const { tenantId } = useParams<{ tenantId: string }>();
-  const navigate = useNavigate();
 
   const ownershipPolicies = useTenantStore(s => s.ownershipPolicies);
   const fetchOwnershipPolicies = useTenantStore(s => s.fetchOwnershipPolicies);
@@ -33,17 +31,13 @@ export function TenantPolicies() {
     }
   }, [tenantId]);
 
-  // moved below resources declaration
-
   // Normalize ownership policies into a flat array of policy objects.
   const normalizedPolicies = useMemo(() => {
     if (!ownershipPolicies) return [] as any[];
     const items = Array.isArray(ownershipPolicies) ? ownershipPolicies as any[] : (ownershipPolicies as any).items ?? [];
     return items.map((it: any) => {
       if (!it) return null;
-      // Already a policy object
       if (it.resourceType) return it;
-      // Wrapped shape: { "goals": { ...policy... } }
       if (typeof it === 'object') {
         const keys = Object.keys(it);
         if (keys.length === 1) {
@@ -57,7 +51,6 @@ export function TenantPolicies() {
     }).filter(Boolean) as any[];
   }, [ownershipPolicies]);
 
-  // Determine the set of resources to render (merge discovered and default) and map available permissions
   const resources = useMemo(() => {
     const discovered = new Set<string>();
     normalizedPolicies.forEach((p: any) => {
@@ -71,11 +64,9 @@ export function TenantPolicies() {
     if (!selectedResource && resources.length > 0) setSelectedResource(resources[0]);
   }, [resources]);
 
-  // helper: get actions for a resource (from resourceDefinitions when available, otherwise infer from ownership items)
   const getActionsForResource = (resId: string) => {
     const def = resourceDefinitions?.find(d => d.id === resId);
     if (def && def.actions && def.actions.length > 0) return def.actions;
-    // infer from ownershipItems: collect action parts of permissions that start with `${resId}:`
     const set = new Set<string>();
     normalizedPolicies.forEach((val: any) => {
       if (!val) return;
@@ -90,18 +81,9 @@ export function TenantPolicies() {
     return Array.from(set);
   };
 
-  // saving handled by PermissionEditor via updateOwnershipPolicy
-
   return (
-    <Box p={3}>
-      <Tabs value={2} sx={{ mb: 2 }}>
-        <Tab label="Members & Teams" onClick={() => navigate(`/tenants/${tenantId}`)} />
-        <Tab label="Role Definitions" onClick={() => navigate(`/tenants/${tenantId}/roles`)} />
-        <Tab label="Ownership Policies" />
-      </Tabs>
-
+    <TenantLayout currentTab={2}>
       <Typography variant="h6" mb={2}>Ownership Policies</Typography>
-      {/* no graph view - use list editor only */}
 
       {normalizedPolicies.length === 0 && (
         <Typography variant="body2" color="text.secondary" mb={2}>
@@ -118,7 +100,7 @@ export function TenantPolicies() {
                 const count = p ? (p.ownerPermissions?.length ?? 0) : 0;
                 return (
                   <ListItemButton key={rt} selected={rt === selectedResource} onClick={() => setSelectedResource(rt)}>
-                    <ListItemText primary={(resourceDefinitions.find(d => d.id === rt)?.name ?? rt).replace('_', ' ')} secondary={`${count} explicit`} />
+                    <ListItemText primary={((resourceDefinitions || []).find(d => d.id === rt)?.name ?? rt).replace('_', ' ')} secondary={`${count} explicit`} />
                   </ListItemButton>
                 );
               })}
@@ -143,6 +125,6 @@ export function TenantPolicies() {
           )}
         </Box>
       </Box>
-    </Box>
+    </TenantLayout>
   );
 }

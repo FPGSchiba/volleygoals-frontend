@@ -316,7 +316,7 @@ class VolleyGoalsAPIV1 {
     }
   }
 
-  public async updateTeam(id: string, data: { name?: string; status?: string }): Promise<{ message: string, error?: string, team?: ITeam}> {
+  public async updateTeam(id: string, data: { name?: string; status?: string; tenantId?: string }): Promise<{ message: string, error?: string, team?: ITeam}> {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPIV1.endpoint.patch<{ message: string; error?: string; team?: ITeam }>(`/teams/${id}`, data);
@@ -892,6 +892,22 @@ class VolleyGoalsAPIV1 {
     try {
       await this.ensureEndpoints();
       const response = await VolleyGoalsAPIV1.endpoint.delete<{ message: string; error?: string }>(`/tenants/${tenantId}/members/${memberId}`);
+      return response.data;
+    } catch (reason: unknown) {
+      return VolleyGoalsAPIV1.extractError(reason);
+    }
+  }
+
+  public async listTenantedTeams(tenantId: string, filter?: { limit?: number; nextToken?: string; sortBy?: string; sortOrder?: 'asc' | 'desc'; name?: string; status?: string }): Promise<{ message: string; error?: string; items?: ITeam[]; count?: number; nextToken?: string; hasMore?: boolean }> {
+    try {
+      await this.ensureEndpoints();
+      const params: Record<string, unknown> = { limit: filter?.limit ?? 50 };
+      if (filter?.nextToken) params.nextToken = filter.nextToken;
+      if (filter?.sortBy) params.sortBy = filter.sortBy;
+      if (filter?.sortOrder) params.sortOrder = filter.sortOrder;
+      if (filter?.name) params.name = filter.name;
+      if (filter?.status) params.status = filter.status;
+      const response = await VolleyGoalsAPIV1.endpoint.get<{ message: string; error?: string; items?: ITeam[]; count?: number; nextToken?: string; hasMore?: boolean }>(`/tenants/${tenantId}/teams`, { params });
       return response.data;
     } catch (reason: unknown) {
       return VolleyGoalsAPIV1.extractError(reason);

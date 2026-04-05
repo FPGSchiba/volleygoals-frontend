@@ -10,6 +10,7 @@ export interface IFilterOption {
 export interface ITeamFilterOption extends IFilterOption {
   name?: string,
   status?: string,
+  tenantId?: string,
 }
 
 export interface ITeamInviteFilterOption extends IFilterOption {
@@ -34,7 +35,8 @@ export interface IUserFilterOption {
   id?: string
   preferredUsername?: string,
   userStatus?: string,
-  status?: boolean
+  status?: boolean,
+  filter?: string
 }
 
 export interface ISeasonFilterOption extends IFilterOption {
@@ -61,4 +63,10 @@ export interface ICommentFilterOption extends IFilterOption {
   targetId: string;
   commentType: string;
   authorId?: string;
+}
+
+export interface ITenantFilterOption {
+  name?: string;
+  limit?: number;
+  nextToken?: string;
 }

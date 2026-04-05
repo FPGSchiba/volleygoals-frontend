@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   Box, Typography, Button, Paper, Chip, Dialog, DialogTitle,
-  DialogContent, DialogActions, TextField, IconButton, Tabs, Tab,
+  DialogContent, DialogActions, TextField, IconButton,
   FormGroup, FormControlLabel, Checkbox, CircularProgress,
+  Table, TableBody, TableRow, TableCell,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import { useParams, useNavigate } from 'react-router-dom';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import AddIcon from '@mui/icons-material/Add';
+import { useParams } from 'react-router-dom';
 import { useTenantStore } from '../../store/tenants';
-import { ALL_PERMISSIONS, Permission } from '../../utils/permissions';
 import { useForm, Controller } from 'react-hook-form';
+import { TenantLayout } from './TenantLayout';
 
-type RoleForm = { name: string; permissions: Permission[] };
+type RoleForm = { name: string; permissions: string[] };
 
 export function TenantRoles() {
   const { tenantId } = useParams<{ tenantId: string }>();
-  const navigate = useNavigate();
 
   const roleDefinitions = useTenantStore(s => s.roleDefinitions);
   const fetchRoleDefinitions = useTenantStore(s => s.fetchRoleDefinitions);
@@ -23,38 +25,51 @@ export function TenantRoles() {
   const updateRoleDefinition = useTenantStore(s => s.updateRoleDefinition);
   const deleteRoleDefinition = useTenantStore(s => s.deleteRoleDefinition);
 
+  const resourceDefinitions = useTenantStore(s => s.resourceDefinitions);
+  const fetchResourceModel = useTenantStore(s => s.fetchResourceModel);
+  const fetchResourceDefinitions = useTenantStore(s => s.fetchResourceDefinitions);
+
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [isReadonly, setIsReadonly] = useState<boolean>(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const [selectedPermissions, setSelectedPermissions] = useState<Permission[]>([]);
+  const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
 
   const { control, handleSubmit, reset, setValue } = useForm<RoleForm>({
     defaultValues: { name: '', permissions: [] },
   });
 
   useEffect(() => {
-    if (tenantId) fetchRoleDefinitions(tenantId);
+    if (tenantId) {
+      fetchRoleDefinitions(tenantId);
+      // Fetch dynamic resource model if possible, otherwise definitions
+      fetchResourceModel(tenantId).catch(() => fetchResourceDefinitions());
+    }
   }, [tenantId]);
 
   const openCreate = () => {
     setEditingId(null);
+    setIsReadonly(false);
     setSelectedPermissions([]);
     reset({ name: '', permissions: [] });
     setDialogOpen(true);
   };
 
-  const openEdit = (roleId: string) => {
+  const openEdit = (roleId: string, readonly: boolean) => {
     const roleResult = roleDefinitions.find(r => r.id === roleId);
     if (!roleResult) return;
     setEditingId(roleId);
-    const perms = roleResult.permissions.filter((p): p is Permission => ALL_PERMISSIONS.includes(p as Permission));
+    setIsReadonly(readonly);
+    // Directly use the string array of permissions from backend
+    const perms = roleResult.permissions || [];
     setSelectedPermissions(perms);
     reset({ name: roleResult.name, permissions: perms });
     setDialogOpen(true);
   };
 
-  const togglePermission = (p: Permission) => {
+  const togglePermission = (p: string) => {
+    if (isReadonly) return;
     const next = selectedPermissions.includes(p)
       ? selectedPermissions.filter(x => x !== p)
       : [...selectedPermissions, p];
@@ -63,7 +78,7 @@ export function TenantRoles() {
   };
 
   const onSubmit = async (data: RoleForm) => {
-    if (!tenantId) return;
+    if (!tenantId || isReadonly) return;
     setActionLoading(true);
     try {
       if (editingId) {
@@ -89,55 +104,40 @@ export function TenantRoles() {
   };
 
   return (
-    <Box p={3}>
-      <Tabs value={1} sx={{ mb: 2 }}>
-        <Tab label="Members & Teams" onClick={() => navigate(`/tenants/${tenantId}`)} />
-        <Tab label="Role Definitions" />
-        <Tab label="Ownership Policies" onClick={() => navigate(`/tenants/${tenantId}/policies`)} />
-      </Tabs>
-
-      <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-        <Typography variant="h6">Role Definitions</Typography>
-        <Button variant="contained" onClick={openCreate}>Add Role</Button>
+    <TenantLayout currentTab={1}>
+      <Box display="flex" alignItems="center" justifyContent="flex-end" mb={2}>
+        <Button variant="contained" color="primary" onClick={openCreate} startIcon={<AddIcon />}>Add Role</Button>
       </Box>
 
-      {roleDefinitions.map(roleResult => (
-        <Paper key={roleResult.id} variant="outlined" sx={{ p: 2, mb: 1 }}>
-          <Box display="flex" alignItems="flex-start" justifyContent="space-between">
-            <Box>
-              <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                <Typography variant="subtitle1">{roleResult.name}</Typography>
-                {roleResult.isDefault && <Chip label="default" size="small" color="primary" />}
-              </Box>
-              <Box display="flex" flexWrap="wrap" gap={0.5}>
-                {roleResult.permissions.map(p => (
-                  <Chip key={p} label={p} size="small" variant="outlined" />
-                ))}
-                {roleResult.permissions.length === 0 && (
-                  <Typography variant="caption" color="text.secondary">No permissions</Typography>
-                )}
-              </Box>
+      <Box display="flex" flexDirection="column" gap={1}>
+        {(roleDefinitions || []).map(roleResult => (
+          <Paper key={roleResult.id} variant="outlined" sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Typography variant="subtitle1">{roleResult.name}</Typography>
+              {roleResult.isDefault && <Chip label="default" size="small" color="primary" variant="outlined" />}
             </Box>
-            <Box display="flex" gap={0.5}>
-              <IconButton size="small" onClick={() => openEdit(roleResult.id)} disabled={roleResult.isDefault}>
-                <EditIcon fontSize="small" />
-              </IconButton>
+            <Box display="flex" gap={1}>
+              <Button size="small" variant="outlined" startIcon={roleResult.isDefault ? <VisibilityIcon /> : <EditIcon />} onClick={() => openEdit(roleResult.id, roleResult.isDefault)}>
+                {roleResult.isDefault ? 'View' : 'Edit'}
+              </Button>
               <IconButton size="small" color="error" onClick={() => setDeleteId(roleResult.id)} disabled={roleResult.isDefault}>
                 <DeleteIcon fontSize="small" />
               </IconButton>
             </Box>
-          </Box>
-        </Paper>
-      ))}
+          </Paper>
+        ))}
+      </Box>
 
-      {roleDefinitions.length === 0 && (
+      {(!roleDefinitions || roleDefinitions.length === 0) && (
         <Typography variant="body2" color="text.secondary">No custom roles defined.</Typography>
       )}
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <DialogTitle>{editingId ? 'Edit Role' : 'Add Role'}</DialogTitle>
-          <DialogContent>
+          <DialogTitle>
+            {editingId ? (isReadonly ? 'View Role' : 'Edit Role') : 'Add Role'}
+          </DialogTitle>
+          <DialogContent sx={{ pt: 1 }}>
             {!editingId && (
               <Controller
                 name="name"
@@ -151,32 +151,64 @@ export function TenantRoles() {
                     error={!!fieldState.error}
                     helperText={fieldState.error?.message}
                     sx={{ mb: 2, mt: 1 }}
+                    disabled={isReadonly}
                   />
                 )}
               />
             )}
-            <Typography variant="subtitle2" mb={1}>Permissions</Typography>
-            <FormGroup>
-              {ALL_PERMISSIONS.map(p => (
-                <FormControlLabel
-                  key={p}
-                  control={
-                    <Checkbox
-                      size="small"
-                      checked={selectedPermissions.includes(p)}
-                      onChange={() => togglePermission(p)}
-                    />
-                  }
-                  label={p}
-                />
-              ))}
-            </FormGroup>
+
+            <Typography variant="subtitle2" mt={editingId ? 1 : 0} mb={1}>Permissions</Typography>
+
+            <Table size="small" sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
+              <TableBody>
+                {(resourceDefinitions || []).map((def) => (
+                  <TableRow key={def.id}>
+                    <TableCell sx={{ fontWeight: 600, width: '35%', textTransform: 'capitalize', borderBottom: '1px solid', borderColor: 'divider' }}>
+                      {def.name.replace('_', ' ')}
+                    </TableCell>
+                    <TableCell sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+                      <FormGroup row sx={{ gap: 2 }}>
+                        {(def.actions || []).map(action => {
+                          const fullPerm = `${def.id}:${action}`;
+                          return (
+                            <FormControlLabel
+                              key={fullPerm}
+                              control={
+                                <Checkbox
+                                  size="small"
+                                  checked={selectedPermissions.includes(fullPerm)}
+                                  onChange={() => togglePermission(fullPerm)}
+                                  disabled={isReadonly}
+                                  sx={{ py: 0.5 }}
+                                />
+                              }
+                              label={<Typography variant="body2" sx={{ textTransform: 'capitalize' }}>{action.replace('_', ' ')}</Typography>}
+                              sx={{ m: 0 }}
+                            />
+                          );
+                        })}
+                        {(!def.actions || def.actions.length === 0) && (
+                          <Typography variant="body2" color="text.secondary">No actions defined</Typography>
+                        )}
+                      </FormGroup>
+                    </TableCell>
+                  </TableRow>
+                ))}
+                {(!resourceDefinitions || resourceDefinitions.length === 0) && (
+                  <TableRow>
+                     <TableCell colSpan={2} align="center"><Typography variant="body2" color="text.secondary">Loading resource definitions...</Typography></TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained" disabled={actionLoading}>
-              {actionLoading ? <CircularProgress size={18} /> : (editingId ? 'Save' : 'Create')}
-            </Button>
+            <Button onClick={() => setDialogOpen(false)}>{isReadonly ? 'Close' : 'Cancel'}</Button>
+            {!isReadonly && (
+              <Button type="submit" variant="contained" disabled={actionLoading}>
+                {actionLoading ? <CircularProgress size={18} /> : (editingId ? 'Save' : 'Create')}
+              </Button>
+            )}
           </DialogActions>
         </form>
       </Dialog>
@@ -189,6 +221,6 @@ export function TenantRoles() {
           <Button color="error" variant="contained" onClick={onDeleteConfirm} disabled={actionLoading}>Delete</Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </TenantLayout>
   );
 }
