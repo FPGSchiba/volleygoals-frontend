@@ -1,0 +1,44 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.tenant-details-section {
+  margin-bottom: 32px;
+}
+
+.tenant-details-section-title {
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.tenant-details-members-list {
+  width: 100%;
+}
+
+.tenant-details-teams-list {
+  width: 100%;
+}
+
+.tenant-details-dialog-search {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.tenant-details-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.tenant-details-list-row {
+  cursor: default;
+}
+
+.tenant-details-actions {
+  display: flex;
+  gap: 8px;
+
+  @include mobile-only {
+    flex-direction: column;
+  }
+}
