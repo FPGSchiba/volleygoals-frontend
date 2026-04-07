@@ -480,6 +480,11 @@
       "permissionsLabel": "Permissions",
       "noRoles": "No custom roles defined.",
       "noActions": "No actions defined"
+    },
+    "tenantPolicies": {
+      "title": "Policies",
+      "selectResource": "Select a resource type to configure its policy.",
+      "noResource": "No resource selected"
     }
   },
   "admin.invites": {

@@ -3,6 +3,7 @@ import {
   Box, Typography, List, ListItemButton, ListItemText, Paper
 } from '@mui/material';
 import { useParams } from 'react-router-dom';
+import i18next from 'i18next';
 import { useTenantStore } from '../../store/tenants';
 import PermissionEditor from '../../components/PermissionEditor/PermissionEditor';
 import { TenantLayout } from './TenantLayout';
@@ -80,23 +81,32 @@ export function TenantPolicies() {
 
   return (
     <TenantLayout currentTab={2}>
-      <Typography variant="h6" mb={2}>Ownership Policies</Typography>
+      <Typography variant="h6" mb={2}>{i18next.t('admin.tenantPolicies.title')}</Typography>
 
       {normalizedPolicies.length === 0 && (
         <Typography variant="body2" color="text.secondary" mb={2}>
-          No ownership policies found. You can grant access using the checkboxes below.
+          {i18next.t('admin.tenantPolicies.selectResource')}
         </Typography>
       )}
 
-      <Box display="flex" gap={2}>
-        <Box sx={{ width: 300 }}>
+      <Box className="tenant-policies-page">
+        <Box className="tenant-policies-sidebar">
           <Paper variant="outlined">
+            <Typography className="tenant-policies-sidebar-title" variant="subtitle2">
+              {i18next.t('admin.tenantPolicies.title')}
+            </Typography>
             <List dense>
               {resources.map(rt => {
                 const p = normalizedPolicies.find((op: any) => op.resourceType === rt);
                 const count = p ? (p.ownerPermissions?.length ?? 0) : 0;
+                const isActive = rt === selectedResource;
                 return (
-                  <ListItemButton key={rt} selected={rt === selectedResource} onClick={() => setSelectedResource(rt)}>
+                  <ListItemButton
+                    key={rt}
+                    selected={isActive}
+                    onClick={() => setSelectedResource(rt)}
+                    className={`tenant-policies-sidebar-item${isActive ? ' tenant-policies-sidebar-item--active' : ''}`}
+                  >
                     <ListItemText primary={((resourceDefinitions || []).find(d => d.id === rt)?.name ?? rt).replace('_', ' ')} secondary={`${count} explicit`} />
                   </ListItemButton>
                 );
@@ -104,7 +114,7 @@ export function TenantPolicies() {
             </List>
           </Paper>
         </Box>
-        <Box sx={{ flex: 1 }}>
+        <Box className="tenant-policies-content">
           {selectedResource ? (
             <Paper variant="outlined" sx={{ p: 2 }}>
               <PermissionEditor
@@ -118,7 +128,7 @@ export function TenantPolicies() {
               />
             </Paper>
           ) : (
-            <Typography variant="body2">Select a resource to edit</Typography>
+            <Typography variant="body2">{i18next.t('admin.tenantPolicies.noResource')}</Typography>
           )}
         </Box>
       </Box>

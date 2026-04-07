@@ -480,6 +480,11 @@
       "permissionsLabel": "Berechtigungen",
       "noRoles": "Keine benutzerdefinierten Rollen definiert.",
       "noActions": "Keine Aktionen definiert"
+    },
+    "tenantPolicies": {
+      "title": "Richtlinien",
+      "selectResource": "Ressourcentyp auswählen, um die Richtlinie zu konfigurieren.",
+      "noResource": "Keine Ressource ausgewählt"
     }
   },
   "common": {
