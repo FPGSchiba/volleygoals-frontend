@@ -2,8 +2,8 @@
 
 // Breakpoints
 $bp-sm: 600px;   // mobile → tablet boundary
-$bp-md: 960px;   // tablet → desktop boundary
-$bp-lg: 1280px;  // desktop → wide boundary
+$bp-md: 900px;   // tablet → desktop boundary (matches MUI theme.breakpoints.values.md)
+$bp-lg: 1200px;  // desktop → wide boundary (matches MUI theme.breakpoints.values.lg)
 
 // Spacing scale (multiples of 4px)
 $space-1: 4px;
