@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import i18next from 'i18next';
 import {
-  Grid, TextField, TableCell, Button, Dialog, DialogTitle, DialogContent, DialogActions,
+  Grid, TextField, TableCell, Button, Dialog, DialogTitle, DialogContent, DialogActions, Box,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { useTenantStore } from '../../store/tenants';
 import { useForm, Controller } from 'react-hook-form';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { ITenant } from '../../store/types';
+import { UserDisplay } from '../../components/UserDisplay';
 
 export interface ITenantFilterOption {
   name?: string;
@@ -28,7 +29,7 @@ export function Tenants() {
   const initialFilter: ITenantFilterOption = {};
 
   const sortableFields = [
-    { field: 'name', label: 'Name' },
+    { field: 'name', label: i18next.t('admin.tenants.columns.name', 'Name') },
   ];
 
   const fetchAdapter = async (filter?: ITenantFilterOption): Promise<FetchResult<ITenant>> => {
@@ -67,6 +68,7 @@ export function Tenants() {
       <Grid key="name">
         <TextField
           fullWidth
+          className="tenants-filter-name"
           label={i18next.t('admin.tenants.filter.name', 'Name')}
           value={filter.name ?? ''}
           onChange={(e) => setFilter({ ...filter, name: e.target.value })}
@@ -78,7 +80,7 @@ export function Tenants() {
   const renderRow = (tenant: ITenant) => {
     return [
       <TableCell key="name">{tenant.name}</TableCell>,
-      <TableCell key="owner">{tenant.ownerId}</TableCell>,
+      <TableCell key="owner"><UserDisplay fallbackId={tenant.ownerId} /></TableCell>,
       <TableCell key="created">{new Date(tenant.createdAt).toLocaleDateString()}</TableCell>,
     ];
   };
@@ -95,7 +97,7 @@ export function Tenants() {
   };
 
   return (
-    <>
+    <Box className="tenants-page-root">
       <ItemList<ITenant, ITenantFilterOption>
         title={i18next.t('admin.tenants.title', 'Tenants')}
         columns={[
@@ -120,7 +122,7 @@ export function Tenants() {
       <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
         <form onSubmit={handleSubmit(onCreateSubmit)}>
           <DialogTitle>{i18next.t('admin.tenants.dialog.createTitle', 'Create Tenant')}</DialogTitle>
-          <DialogContent>
+          <DialogContent className="tenants-dialog-form">
             <Controller
               name="name"
               control={control}
@@ -148,6 +150,6 @@ export function Tenants() {
           </DialogActions>
         </form>
       </Dialog>
-    </>
+    </Box>
   );
 }

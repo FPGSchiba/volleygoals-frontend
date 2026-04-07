@@ -1,0 +1,40 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.tenants-page-root {
+  width: 100%;
+}
+
+.tenants-list-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  @include mobile-only {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.tenants-filter-name {
+  min-width: 160px;
+
+  @include mobile-only {
+    width: 100%;
+  }
+}
+
+.tenants-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tenants-list-row {
+  cursor: pointer;
+}
+
+.tenants-list-actions {
+  display: flex;
+  gap: 8px;
+}
