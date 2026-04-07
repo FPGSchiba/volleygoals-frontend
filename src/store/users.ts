@@ -23,6 +23,7 @@ type UsersActions = {
   deleteMembership: (id: string, teamId: string) => Promise<void>;
   updateMembership: (id: string, teamId: string, role: string, status: string) => Promise<void>;
   createMembership: (teamId: string, userId: string, role: string) => Promise<void>;
+  searchUsers: (query: string) => Promise<IUser[]>;
 }
 
 const useUsersStore = create<UsersState & UsersActions>((set, get) => ({
@@ -152,7 +153,13 @@ const useUsersStore = create<UsersState & UsersActions>((set, get) => ({
         currentUserMemberships: [...(state.currentUserMemberships || []), response.teamMember as ITeamMember]
       }));
     }
-  }
+  },
+  searchUsers: async (query: string): Promise<IUser[]> => {
+    const isEmail = query.includes('@');
+    const filterStr = isEmail ? `email ^= "${query}"` : `name ^= "${query}"`;
+    const response = await VolleyGoalsAPI.fetchUsers({ filter: filterStr, limit: 10 });
+    return response.users || [];
+  },
 }))
 
 export {useUsersStore}

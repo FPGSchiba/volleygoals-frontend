@@ -65,6 +65,7 @@ export function mockTeamState(overrides?: Record<string, any>) {
     createInvite: jest.fn().mockResolvedValue(undefined),
     revokeInvite: jest.fn().mockResolvedValue(undefined),
     resendInvite: jest.fn().mockResolvedValue(undefined),
+    searchTeams: jest.fn().mockResolvedValue([]),
     ...overrides,
   };
 }
@@ -82,6 +83,7 @@ export function mockUsersState(overrides?: Record<string, any>) {
     deleteMembership: jest.fn().mockResolvedValue(undefined),
     updateMembership: jest.fn().mockResolvedValue(undefined),
     createMembership: jest.fn().mockResolvedValue(undefined),
+    searchUsers: jest.fn().mockResolvedValue([]),
     ...overrides,
   };
 }

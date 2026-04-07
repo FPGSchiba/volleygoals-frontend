@@ -38,6 +38,7 @@ type TeamActions = {
   createInvite: (teamId: string, email: string, role: RoleType, message: string, sendEmail: boolean) => Promise<void>;
   revokeInvite: (inviteId: string, teamId: string) => Promise<void>;
   resendInvite: (inviteId: string) => Promise<void>;
+  searchTeams: (query: string) => Promise<ITeam[]>;
 }
 
 const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
@@ -233,6 +234,10 @@ const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
         title: i18next.t('success.ok.title', 'Success')
       });
     }
+  },
+  searchTeams: async (query: string): Promise<ITeam[]> => {
+    const response = await VolleyGoalsAPI.listTeams({ name: query, limit: 10 });
+    return response.items || [];
   },
  }))
 
