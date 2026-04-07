@@ -275,17 +275,17 @@
   },
   "success": {
     "ok": {
-      "title": "Success",
-      "message": "The operation was completed successfully."
+      "title": "Erfolgreich",
+      "message": "Der Vorgang wurde erfolgreich abgeschlossen."
     },
     "team": {
       "created": {
-        "title": "Team Created",
-        "message": "The team has been created successfully."
+        "title": "Team erstellt",
+        "message": "Das Team wurde erfolgreich erstellt."
       },
       "deleted": {
-        "title": "Team Deleted",
-        "message": "The team has been deleted successfully."
+        "title": "Team gelöscht",
+        "message": "Das Team wurde erfolgreich gelöscht."
       }
     }
   },
@@ -418,7 +418,56 @@
     "actions": {
       "goToUsers": "Zu Benutzern",
       "deactivate": "Deaktivieren",
+      "activate": "Aktivieren",
       "delete": "Löschen"
+    },
+    "users": {
+      "title": "Benutzer",
+      "columns": {
+        "avatar": "",
+        "email": "E-Mail",
+        "name": "Name",
+        "type": "Typ",
+        "status": "Status",
+        "created": "Erstellt",
+        "updated": "Aktualisiert"
+      }
+    },
+    "tenants": {
+      "title": "Mandanten",
+      "columns": {
+        "name": "Name",
+        "owner": "Eigentümer",
+        "created": "Erstellt"
+      },
+      "filter": {
+        "name": "Name"
+      },
+      "dialog": {
+        "createTitle": "Mandant erstellen",
+        "name": "Mandantenname",
+        "nameRequired": "Name ist erforderlich"
+      }
+    },
+    "tenantDetails": {
+      "members": {
+        "title": "Mitglieder",
+        "columns": {
+          "member": "Mitglied",
+          "role": "Rolle",
+          "status": "Status",
+          "createdAt": "Erstellt am"
+        },
+        "searchLabel": "Mitglied suchen"
+      },
+      "teams": {
+        "title": "Teams",
+        "columns": {
+          "name": "Name",
+          "status": "Status",
+          "created": "Erstellt"
+        }
+      }
     }
   },
   "common": {

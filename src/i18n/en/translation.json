@@ -418,7 +418,56 @@
     "actions": {
       "goToUsers": "Go to Users",
       "deactivate": "Deactivate",
+      "activate": "Activate",
       "delete": "Delete"
+    },
+    "users": {
+      "title": "Users",
+      "columns": {
+        "avatar": "",
+        "email": "Email",
+        "name": "Name",
+        "type": "Type",
+        "status": "Status",
+        "created": "Created",
+        "updated": "Updated"
+      }
+    },
+    "tenants": {
+      "title": "Tenants",
+      "columns": {
+        "name": "Name",
+        "owner": "Owner",
+        "created": "Created"
+      },
+      "filter": {
+        "name": "Name"
+      },
+      "dialog": {
+        "createTitle": "Create Tenant",
+        "name": "Tenant Name",
+        "nameRequired": "Name is required"
+      }
+    },
+    "tenantDetails": {
+      "members": {
+        "title": "Members",
+        "columns": {
+          "member": "Member",
+          "role": "Role",
+          "status": "Status",
+          "createdAt": "Created At"
+        },
+        "searchLabel": "Search Member"
+      },
+      "teams": {
+        "title": "Teams",
+        "columns": {
+          "name": "Name",
+          "status": "Status",
+          "created": "Created"
+        }
+      }
     }
   },
   "admin.invites": {
