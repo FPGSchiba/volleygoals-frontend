@@ -16,7 +16,6 @@ import i18next from 'i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { formatDateTime } from '../../utils/dateTime';
 import { useNavigate } from 'react-router-dom';
-import '../../resources/styles/pages/goals.scss';
 
 type GoalForm = {
   title: string;

@@ -25,9 +25,8 @@ body {
   @include meta.load-css("components/notification");
   @include meta.load-css("components/itemlist");
 
-  // Pages
+  // Pages — user
   @include meta.load-css("pages/login");
-  @include meta.load-css("pages/team-details");
   @include meta.load-css("pages/accept-invite");
   @include meta.load-css("pages/user-details");
   @include meta.load-css("pages/invite-error");
@@ -38,21 +37,32 @@ body {
   @include meta.load-css("pages/teams");
   @include meta.load-css("pages/seasons");
   @include meta.load-css("pages/goals");
+  @include meta.load-css("pages/goal-details");
+  @include meta.load-css("pages/season-details");
+  @include meta.load-css("pages/progress-details");
+  @include meta.load-css("pages/progress-creation");
+  @include meta.load-css("pages/dashboard");
+  @include meta.load-css("pages/team-details");
+
+  // Pages — admin / trainer
+  @include meta.load-css("pages/users");
+  @include meta.load-css("pages/tenants");
+  @include meta.load-css("pages/tenant-details");
+  @include meta.load-css("pages/tenant-roles");
+  @include meta.load-css("pages/tenant-policies");
+  @include meta.load-css("pages/members");
+  @include meta.load-css("pages/invites");
+  @include meta.load-css("pages/team-settings");
 
   .app {
     &.app-container {
       display: flex;
       flex-direction: row;
-      min-height: 100vh; /* ensure app fills viewport but allow it to grow */
-      /* allow page-level scrolling when content exceeds viewport */
-    }
-
-    &.app-main {
-
+      min-height: 100vh;
     }
   }
 
-  /* Make the main region size via flex; don't force height:100% (that made inner content stretch) */
+  /* Make the main region size via flex */
   .app.app-container main {
     display: flex;
     flex-direction: column;
@@ -62,13 +72,10 @@ body {
     max-height: 100%;
   }
 
-  /* ItemList: make list a column flex container but let the table size to content up to a max
-     so small tables don't stretch to full viewport height. When it exceeds max-height the table
-     will scroll internally. */
+  /* ItemList flex layout */
   .item-list {
     display: flex;
     flex-direction: column;
-    /* don't force height:100% so component grows with content */
     min-height: 0;
 
     .item-list-header {
@@ -80,11 +87,10 @@ body {
     }
 
     .item-list-table {
-      /* allow the table container to size to its content but cap its height */
-      flex: 0 1 auto; /* grow/shrink based on content; do not force to fill parent */
-      min-height: 0; /* allow internal overflow handling */
-      max-height: calc(100vh - 220px); /* cap height so it won't create a page scrollbar */
-      overflow: auto; /* scroll inside the table area when content exceeds max-height */
+      flex: 0 1 auto;
+      min-height: 0;
+      max-height: calc(100vh - 220px);
+      overflow: auto;
     }
 
     .item-list-pagination {
@@ -92,8 +98,6 @@ body {
     }
   }
 
-  /* Ensure immediate page-level children don't get forced to fill viewport height. This lets pages grow
-     with their content, while the app root prevents page scrolling. */
   main > * {
     display: flex;
     flex-direction: column;

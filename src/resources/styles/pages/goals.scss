@@ -88,7 +88,7 @@
   .MuiInputBase-root textarea,
   textarea {
     scrollbar-width: thin !important;
-    scrollbar-color: red transparent !important;
+    scrollbar-color: var(--palette-primary-main) transparent !important;
   }
 
   /* WebKit scrollbar styling */
@@ -105,7 +105,7 @@
   textarea::-webkit-scrollbar-thumb,
   .MuiOutlinedInput-inputMultiline::-webkit-scrollbar-thumb,
   .MuiOutlinedInput-input::-webkit-scrollbar-thumb {
-    background: red !important;
+    background: var(--palette-primary-main) !important;
     border-radius: 6px !important;
     border: 2px solid rgba(0, 0, 0, 0) !important; /* space around thumb */
   }

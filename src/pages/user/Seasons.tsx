@@ -9,7 +9,6 @@ import { RoleType } from '../../store/types';
 import i18next from 'i18next';
 import { useForm, Controller } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import '../../resources/styles/pages/seasons.scss';
 
 // Helpers to convert between date-only (YYYY-MM-DD) and ISO datetimes
 const isoToDateOnly = (iso?: string) => {
