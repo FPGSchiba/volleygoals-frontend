@@ -2,11 +2,12 @@ import React, { useMemo, useState } from 'react';
 import {
   Box, Grid, TextField, MenuItem, TableCell, Button, Chip, Paper, Typography,
   Dialog, DialogTitle, DialogContent, DialogActions, InputAdornment, IconButton,
-  ToggleButtonGroup, ToggleButton, Avatar
+  ToggleButtonGroup, ToggleButton
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { ItemList, FetchResult } from '../../components/ItemList';
+import { UserDisplay } from '../../components/UserDisplay';
 import { IGoal, GoalType, GoalStatus } from '../../store/types';
 import { IGoalFilterOption } from '../../services/types';
 import { useGoalStore } from '../../store/goals';
@@ -74,20 +75,6 @@ export function Goals() {
   const [actionLoading, setActionLoading] = useState(false);
   const { control: createControl, handleSubmit: handleCreateSubmit, reset: resetCreate } = useForm<GoalForm>({ defaultValues: { title: '', description: '', goalType: '' } });
 
-  const resolveOwner = (g: IGoal) => {
-    const name = g.owner?.name || g.owner?.preferredUsername;
-    const picture = g.owner?.picture;
-    if (!name && !picture) return g.ownerId || '-';
-    return (
-      <Box display="flex" alignItems="center" gap={1}>
-        <Avatar src={picture} alt={name || g.ownerId} sx={{ width: 24, height: 24 }}>
-          {!picture && (name || g.ownerId).charAt(0).toUpperCase()}
-        </Avatar>
-        <Typography variant="body2">{name || g.ownerId}</Typography>
-      </Box>
-    );
-  };
-
   const openCreate = () => {
     if (!canCreate) return;
     let defaultType: GoalType | '' = '';
@@ -148,7 +135,9 @@ export function Goals() {
   const renderRow = (g: IGoal) => [
     <TableCell key="title">{g.title}</TableCell>,
     <TableCell key="type"><Chip label={i18next.t(`user.goals.type.${g.goalType}`, g.goalType)} size="small" color={g.goalType === GoalType.Team ? 'info' : 'default'} variant="outlined" /></TableCell>,
-    <TableCell key="owner">{resolveOwner(g) || '-'}</TableCell>,
+    <TableCell key="owner">
+      <UserDisplay user={g.owner} fallbackId={g.ownerId} />
+    </TableCell>,
     <TableCell key="status"><Chip label={statusLabel(g)} color={statusColor(g.status)} size="small" /></TableCell>,
     <TableCell key="created">{formatDateTime(g.createdAt)}</TableCell>,
     <TableCell key="updated">{g.updatedAt ? formatDateTime(g.updatedAt) : '-'}</TableCell>,
