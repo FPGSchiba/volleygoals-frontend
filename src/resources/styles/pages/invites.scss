@@ -1,0 +1,39 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.invites-page-root {
+  width: 100%;
+}
+
+.invites-tab-bar {
+  margin-bottom: 16px;
+}
+
+.invites-filter-status {
+  min-width: 140px;
+
+  @include mobile-only {
+    width: 100%;
+  }
+}
+
+.invites-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.invites-dialog-send-email {
+  margin-top: 4px;
+}
+
+.invites-list-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.invites-status-chip {
+  text-transform: capitalize;
+}

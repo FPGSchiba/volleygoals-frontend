@@ -85,18 +85,17 @@ export function Invites() {
   const renderActions = (inv: IInvite): React.ReactElement[] => {
     if (!canManage) return [];
     const pending = inv.status === 'pending' || !inv.status;
+    if (!pending) return [];
     return [
-      pending ? (
-        <Button key="resend" size="small" variant="outlined" onClick={() => resendInvite(inv.id)} style={{ marginRight: 8 }}>
+      <Box key="actions" className="invites-list-actions">
+        <Button size="small" variant="outlined" onClick={() => resendInvite(inv.id)}>
           {i18next.t('invites.resend', 'Resend')}
         </Button>
-      ) : null,
-      pending ? (
-        <Button key="revoke" size="small" variant="contained" color="error" onClick={() => { setCurrentInvite(inv); setRevokeOpen(true); }}>
+        <Button size="small" variant="contained" color="error" onClick={() => { setCurrentInvite(inv); setRevokeOpen(true); }}>
           {i18next.t('invites.revoke', 'Revoke')}
         </Button>
-      ) : null,
-    ].filter((x): x is React.ReactElement => x !== null);
+      </Box>,
+    ];
   };
 
   const tabOptions = [
@@ -107,7 +106,7 @@ export function Invites() {
   ];
 
   return (
-    <Paper sx={{ borderRadius: 3 }}>
+    <Paper className="invites-page-root" sx={{ borderRadius: 3 }}>
       <Box p={{ xs: 2, sm: 3 }}>
         <Typography variant="h5">{i18next.t('invites.title', 'Invites')}</Typography>
         <Box mt={1.5}>
@@ -167,7 +166,7 @@ export function Invites() {
         <DialogTitle>{i18next.t('invites.createTitle', 'Create Invite')}</DialogTitle>
         <DialogContent>
           <form id="invite-create-form" onSubmit={handleSubmit(onCreate)}>
-            <Box mt={1} display="flex" flexDirection="column" gap={2}>
+            <Box className="invites-dialog-form" mt={1}>
               <Controller name="email" control={control} rules={{ required: true, pattern: /^\S+@\S+\.\S+$/ }} render={({ field, fieldState }) => (
                 <TextField fullWidth label={i18next.t('invites.email', 'Email')} type="email" error={!!fieldState.error} {...field} />
               )} />
