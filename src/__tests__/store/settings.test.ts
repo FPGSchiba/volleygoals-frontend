@@ -1,4 +1,4 @@
-import { useSettingsStore } from '../../store/settings';
+import { useSettingsStore, getInitialTheme, getInitialLanguage } from '../../store/settings';
 
 beforeEach(() => {
   localStorage.clear();
@@ -43,14 +43,12 @@ describe('useSettingsStore', () => {
   it('migrates old theme key from localStorage on first load', () => {
     localStorage.setItem('theme', 'light');
     localStorage.removeItem('vg-settings');
-    const { getInitialTheme } = require('../../store/settings');
     expect(getInitialTheme()).toBe('light');
   });
 
   it('migrates old vg_lang key from localStorage on first load', () => {
     localStorage.setItem('vg_lang', 'de');
     localStorage.removeItem('vg-settings');
-    const { getInitialLanguage } = require('../../store/settings');
     expect(getInitialLanguage()).toBe('de');
   });
 });

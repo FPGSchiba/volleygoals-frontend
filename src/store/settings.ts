@@ -4,15 +4,15 @@ import { persist } from 'zustand/middleware';
 type Theme = 'light' | 'dark';
 type Language = 'en' | 'de';
 
-type SettingsState = {
+interface SettingsState {
   theme: Theme;
   language: Language;
-};
+}
 
-type SettingsActions = {
+interface SettingsActions {
   setTheme: (theme: Theme) => void;
   setLanguage: (language: Language) => void;
-};
+}
 
 // Exported so tests can verify migration logic independently
 export function getInitialTheme(): Theme {
@@ -30,7 +30,9 @@ export function getInitialLanguage(): Language {
   try {
     const v = localStorage.getItem('vg_lang');
     if (v === 'en' || v === 'de') return v;
-  } catch {}
+  } catch {
+    return 'en';
+  }
   return 'en';
 }
 
