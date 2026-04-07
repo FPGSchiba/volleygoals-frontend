@@ -1,0 +1,65 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.goal-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+}
+
+.goal-details-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.goal-details-avatar {
+  flex-shrink: 0;
+}
+
+.goal-details-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.goal-details-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.goal-details-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.goal-details-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.goal-details-meta-label {
+  font-size: 0.75rem;
+  color: var(--palette-text-secondary);
+}
+
+.goal-details-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  @include mobile-only {
+    flex-direction: column;
+  }
+}
+
+.goal-details-section {
+  padding: 16px;
+  background: var(--palette-background-paper);
+  border: 1px solid var(--palette-divider);
+  border-radius: 8px;
+}

@@ -13,7 +13,6 @@ import {
   Paper,
   TextField,
   Typography,
-  Avatar,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
@@ -25,6 +24,7 @@ import { usePermission } from "../../hooks/usePermission";
 import { useTeamStore } from "../../store/teams";
 import { CommentType, GoalStatus, GoalType, IGoal } from "../../store/types";
 import { CommentSection } from "../../components/CommentSection";
+import { UserDisplay } from "../../components/UserDisplay";
 import i18next from "i18next";
 
 type EditForm = { title: string; description: string; status: GoalStatus | ""; ownerId: string };
@@ -154,9 +154,9 @@ export function GoalDetails() {
       : (settings?.allowIndividualGoalComments ?? false);
 
   return (
-    <Paper>
+    <Paper className="goal-details-page">
       <Box p={2}>
-        <Box display="flex" alignItems="center" gap={1}>
+        <Box className="goal-details-header" display="flex" alignItems="center" gap={1}>
           <IconButton onClick={() => navigate("/goals")} size="small">
             <ArrowBackIcon />
           </IconButton>
@@ -218,37 +218,25 @@ export function GoalDetails() {
                 )}
               />
 
-              <Box display="flex" alignItems="center" gap={1}>
-                <Avatar
-                  src={currentGoal.owner?.picture}
-                  alt={
-                    currentGoal.owner?.name ||
-                    currentGoal.owner?.preferredUsername ||
-                    currentGoal.ownerId
-                  }
-                  sx={{ width: 24, height: 24 }}
-                >
-                  {!currentGoal.owner?.picture &&
-                    (
-                      currentGoal.owner?.name ||
-                      currentGoal.owner?.preferredUsername ||
-                      currentGoal.ownerId
-                    )
-                      ?.charAt(0)
-                      .toUpperCase()}
-                </Avatar>
-                <Controller
-                  name="ownerId"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      size="small"
-                      label={i18next.t("goalDetails.owner", "Owner")}
-                      disabled={!canModify || actionLoading}
-                      {...field}
-                    />
-                  )}
-                />
+              <Box className="goal-details-meta-item" display="flex" alignItems="center" gap={1}>
+                <Typography className="goal-details-meta-label" variant="caption">
+                  {i18next.t("goalDetails.owner", "Owner")}
+                </Typography>
+                <UserDisplay user={currentGoal?.owner} fallbackId={currentGoal?.ownerId} />
+                {canModify && (
+                  <Controller
+                    name="ownerId"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        size="small"
+                        label={i18next.t("goalDetails.ownerId", "Owner ID")}
+                        disabled={actionLoading}
+                        {...field}
+                      />
+                    )}
+                  />
+                )}
               </Box>
             </Box>
           </form>
@@ -261,7 +249,7 @@ export function GoalDetails() {
         </Box>
 
         {(canModify || canDelete) && (
-          <Box mt={2} display="flex" gap={1} flexWrap="wrap">
+          <Box className="goal-details-actions" mt={2} display="flex" gap={1} flexWrap="wrap">
             {canModify && (
               <>
                 <Button
@@ -299,8 +287,8 @@ export function GoalDetails() {
           </Box>
         )}
 
-        <Box mt={2}>
-          <Typography variant="subtitle1">Seasons</Typography>
+        <Box className="goal-details-section" mt={2}>
+          <Typography variant="subtitle1">{i18next.t("goalDetails.seasons", "Seasons")}</Typography>
           {goalSeasons && goalSeasons.map((tag: any) => {
             const seasonId = tag.seasonId || tag;
             const season = seasons.find(s => s.id === seasonId);
@@ -322,7 +310,7 @@ export function GoalDetails() {
                 select
                 size="small"
                 fullWidth
-                label="Tag to season"
+                label={i18next.t("goalDetails.tagToSeason", "Tag to season")}
                 value=""
                 onChange={(e) => { if (e.target.value) tagGoalToSeason(teamId, goalId!, e.target.value); }}
               >
