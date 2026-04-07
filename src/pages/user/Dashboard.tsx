@@ -177,26 +177,23 @@ export function Dashboard() {
   const recentActivities = activities.slice(0, 7);
 
   return (
-    <Box sx={{ p: { xs: 2, sm: 3 }, maxWidth: 1400 }}>
-      <Typography variant="h4" fontWeight={700} color="text.primary" mb={0.5}>
-        {i18next.t('dashboard.title', 'Dashboard')}
-      </Typography>
-      {activeSeason && (
-        <Box display="flex" alignItems="center" gap={1} mb={3}>
-          <Typography variant="body2" color="text.secondary" component="span">
-            {activeSeason.name} · {i18next.t('dashboard.activeSeason', 'Active Season')}
-          </Typography>
-          <Chip label={activeSeason.status} size="small" color="success" sx={{ borderRadius: 1 }} />
-        </Box>
-      )}
+    <Box className="dashboard-page" sx={{ p: { xs: 2, sm: 3 }, maxWidth: 1400 }}>
+      <Box className="dashboard-header">
+        <Typography variant="h4" fontWeight={700} color="text.primary" className="dashboard-title">
+          {i18next.t('dashboard.title', 'Dashboard')}
+        </Typography>
+        {activeSeason && (
+          <Box display="flex" alignItems="center" gap={1}>
+            <Typography variant="body2" color="text.secondary" component="span">
+              {activeSeason.name} · {i18next.t('dashboard.activeSeason', 'Active Season')}
+            </Typography>
+            <Chip label={activeSeason.status} size="small" color="success" sx={{ borderRadius: 1 }} />
+          </Box>
+        )}
+      </Box>
 
       {/* Stat Cards Row */}
-      <Box
-        display="flex"
-        flexWrap="wrap"
-        gap={2}
-        mb={3}
-      >
+      <Box className="dashboard-stats-grid">
         <StatCard
           icon={<TrackChangesIcon sx={{ fontSize: 36 }} />}
           label={i18next.t('dashboard.stats.openGoals', 'Open Goals')}
@@ -240,8 +237,8 @@ export function Dashboard() {
         {!isMobile && (
         <Card sx={{ flex: '2 1 0', minWidth: 0, borderRadius: 3 }} elevation={1}>
           <CardContent sx={{ pb: '16px !important' }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-              <Typography variant="h6" fontWeight={600}>
+            <Box className="dashboard-section-header">
+              <Typography variant="h6" className="dashboard-section-title">
                 {i18next.t('dashboard.myProgress', 'My Progress')}
               </Typography>
               <Button
@@ -311,8 +308,8 @@ export function Dashboard() {
         {/* Activity Feed */}
         <Card sx={{ flex: '1 1 0', minWidth: 0, borderRadius: 3 }} elevation={1}>
           <CardContent sx={{ pb: '16px !important' }}>
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-              <Typography variant="h6" fontWeight={600}>
+            <Box className="dashboard-section-header">
+              <Typography variant="h6" className="dashboard-section-title">
                 {i18next.t('dashboard.activityHistory', 'Recent Activity')}
               </Typography>
             </Box>
@@ -344,6 +341,7 @@ export function Dashboard() {
                   return (
                     <Box
                       key={a.id}
+                      className="dashboard-activity-item"
                       display="flex"
                       alignItems="flex-start"
                       gap={1.5}
