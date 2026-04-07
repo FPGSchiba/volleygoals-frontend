@@ -39,8 +39,8 @@ export function ProgressCreation() {
   }, [seasons]);
 
   React.useEffect(() => {
-    if (selectedSeasonId) fetchGoals(selectedSeasonId, {});
-  }, [selectedSeasonId]);
+    if (teamId) fetchGoals(teamId, {});
+  }, [teamId]);
 
   const activeGoals = goals.filter(g => g.status === GoalStatus.Open || g.status === GoalStatus.InProgress);
 

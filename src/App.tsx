@@ -21,6 +21,7 @@ import {InviteError} from "./pages/help/InviteError";
 import {useCognitoUserStore} from './store/cognitoUser';
 import {SelectTeam} from "./pages/help/SelectTeam";
 import {Seasons} from "./pages/user/Seasons";
+import {SeasonDetails} from "./pages/user/SeasonDetails";
 import {Goals} from "./pages/user/Goals";
 import {Progress} from "./pages/user/Progress";
 import {Members} from "./pages/trainer/Members";
@@ -147,6 +148,7 @@ function AppContent() {
               <Route path="" element={<Dashboard />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path={"/seasons"} element={<Seasons />} />
+              <Route path={"/seasons/:seasonId"} element={<SeasonDetails />} />
               <Route path={"/goals"} element={<Goals />} />
               <Route path={"/goals/:goalId"} element={<GoalDetails />} />
               <Route path={"/progress"} element={<Progress />} />

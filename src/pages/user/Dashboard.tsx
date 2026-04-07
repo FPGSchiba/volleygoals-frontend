@@ -134,7 +134,6 @@ export function Dashboard() {
 
   React.useEffect(() => {
     if (activeSeason?.id) {
-      fetchGoals(activeSeason.id, { limit: 100 } as any);
       fetchReports(activeSeason.id, { limit: 100 } as any).catch(() => {});
       setSeasonStats(null);
       VolleyGoalsAPI.getSeasonStats(activeSeason.id)
@@ -142,6 +141,12 @@ export function Dashboard() {
         .catch(() => {});
     }
   }, [activeSeason?.id]);
+
+  React.useEffect(() => {
+    if (teamId) {
+      fetchGoals(teamId, { limit: 100 } as any);
+    }
+  }, [teamId]);
 
   const ownGoals = goals.filter(g => g.ownerId === currentUser?.id);
 

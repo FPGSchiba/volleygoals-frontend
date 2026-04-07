@@ -49,8 +49,8 @@ export function ProgressEntryDetails() {
   }, [progressId, seasonId]);
 
   React.useEffect(() => {
-    if (seasonId) fetchGoals(seasonId, {});
-  }, [seasonId]);
+    if (teamId) fetchGoals(teamId, {});
+  }, [teamId]);
 
   React.useEffect(() => {
     if (teamId) {

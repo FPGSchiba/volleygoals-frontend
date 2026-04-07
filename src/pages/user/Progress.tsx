@@ -109,9 +109,14 @@ export function Progress() {
   React.useEffect(() => {
     if (selectedSeasonId && allowFetch) {
       fetchReports(selectedSeasonId, { limit: 100 } as any).catch(() => {});
-      fetchGoals(selectedSeasonId, { limit: 100 } as any).catch(() => {});
     }
   }, [selectedSeasonId, allowFetch]);
+
+  React.useEffect(() => {
+    if (teamId && allowFetch) {
+      fetchGoals(teamId, { limit: 100 } as any).catch(() => {});
+    }
+  }, [teamId, allowFetch]);
 
   const resolveAuthor = (id: string): string => {
     if (currentUser?.id === id) return currentUser.name || currentUser.preferredUsername || currentUser.email || id;

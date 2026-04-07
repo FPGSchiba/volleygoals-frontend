@@ -74,6 +74,9 @@ export interface GenericListProps<Item, FilterOptions extends IFilterOption> {
   // simplifies the API and gives the page full control over action behavior.
   renderActions?: (item: Item) => React.ReactNode;
 
+  // Optional row-level click handler (e.g. open details page)
+  onRowClick?: (item: Item) => void;
+
   items: Item[];
   count: number;
   // If true, ItemList will not perform the initial fetch until this becomes false.
@@ -97,6 +100,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
   renderFilterFields,
   sortableFields,
   renderActions,
+  onRowClick,
   items,
   count,
   initialFetchPaused = false
@@ -311,7 +315,7 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                   }
 
                   return (
-                    <TableRow key={id} className="item-list-row">
+                    <TableRow key={id} className="item-list-row" onClick={onRowClick ? () => onRowClick(item) : undefined} sx={onRowClick ? { cursor: 'pointer' } : undefined}>
                       {Array.isArray(rendered) ? (
                         rendered.map((cell, idx) => {
                           // Robust detection for existing TableCell: check MUI's muiName or component prop
@@ -336,12 +340,12 @@ export function ItemList<Item, FilterOptions extends IFilterOption>({
                            ) : (
                              <>
                                {onEdit && (
-                                 <Button style={{ marginRight: '5px' }} variant="contained" size="small" onClick={() => handleEdit(item)} className="item-list-action-button item-list-action-edit">
+                                 <Button style={{ marginRight: '5px' }} variant="contained" size="small" onClick={(e) => { e.stopPropagation(); handleEdit(item); }} className="item-list-action-button item-list-action-edit">
                                    Edit
                                  </Button>
                                )}
                                {onDelete && (
-                                 <Button variant="contained" size="small" onClick={() => handleDelete(id)} className="item-list-action-button item-list-action-delete">
+                                 <Button variant="contained" size="small" onClick={(e) => { e.stopPropagation(); handleDelete(id); }} className="item-list-action-button item-list-action-delete">
                                    Delete
                                  </Button>
                                )}

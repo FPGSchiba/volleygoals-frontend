@@ -18,8 +18,8 @@ describe('cognitoUser store - currentPermissions', () => {
     useCognitoUserStore.getState().setSelectedTeam('team-1');
 
     const { currentPermissions } = useCognitoUserStore.getState();
-    expect(currentPermissions).toContain('goals:read');
-    expect(currentPermissions).toContain('goals:write');
+    expect(currentPermissions).toContain('team_goals:read');
+    expect(currentPermissions).toContain('team_goals:write');
   });
 
   it('sets currentPermissions to [] when no team is selected', () => {

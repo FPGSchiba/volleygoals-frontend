@@ -7,9 +7,6 @@ import { useTenantStore } from '../../store/tenants';
 import PermissionEditor from '../../components/PermissionEditor/PermissionEditor';
 import { TenantLayout } from './TenantLayout';
 
-// Default resource types to show. We'll merge these with any discovered resourceTypes from the API items.
-const DEFAULT_RESOURCE_TYPES = ['goals', 'progress', 'comments'];
-
 export function TenantPolicies() {
   const { tenantId } = useParams<{ tenantId: string }>();
 
@@ -57,7 +54,7 @@ export function TenantPolicies() {
       if (p && p.resourceType) discovered.add(p.resourceType);
     });
     const defIds = (resourceDefinitions || []).map(r => r.id);
-    return Array.from(new Set([...Array.from(discovered), ...defIds, ...DEFAULT_RESOURCE_TYPES]));
+    return Array.from(new Set([...Array.from(discovered), ...defIds]));
   }, [normalizedPolicies, resourceDefinitions]);
 
   useEffect(() => {

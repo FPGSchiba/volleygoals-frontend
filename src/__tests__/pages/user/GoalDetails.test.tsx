@@ -54,18 +54,19 @@ describe('GoalDetails', () => {
     expect(screen.getByText('in_progress')).toBeInTheDocument();
   });
 
-  it('shows edit/delete buttons for owner', () => {
+  it('shows edit/delete buttons when having permissions', () => {
     const userId = 'user-1';
-    const goal = buildGoal({ id: 'g1', teamId: 't1', ownerId: userId });
+    const goal = buildGoal({ id: 'g1', teamId: 't1', ownerId: userId, goalType: GoalType.Team });
     setupMockStore(useCognitoUserStore as any, mockCognitoUserState({
       user: { id: userId, email: 'u@t.com', name: 'U', enabled: true, userStatus: 'CONFIRMED', userType: 'USERS', updatedAt: '', createdAt: '' },
+      currentPermissions: ['team_goals:write', 'team_goals:delete'],
     }));
     setupMockStore(useGoalStore as any, mockGoalState({ currentGoal: goal }));
     setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
     setupMockStore(useTeamStore as any, mockTeamState());
 
     render(<GoalDetails />);
-    expect(screen.getByText('Edit Goal')).toBeInTheDocument();
-    expect(screen.getByText('Delete Goal')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
   });
 });

@@ -47,16 +47,17 @@ export function CommentSection({ targetId, commentType, enabled = true, allowFil
     }
   }, [targetId, commentType]);
 
+  const [showAllComments, setShowAllComments] = useState(false);
+
   useEffect(() => {
     if (enabled !== false) {
       loadComments();
     }
-  }, [targetId, commentType, enabled]);
+  }, [targetId, commentType, enabled, loadComments]);
 
   if (enabled === false) {
     return <Alert severity="info">{i18next.t('comments.disabled', 'Comments are disabled for this goal type.')}</Alert>;
   }
-
   const resolveCommentAuthor = (c: IComment) => {
     if (c.authorName) return { name: c.authorName, picture: c.authorPicture as string | undefined };
     if (currentUser?.id === c.authorId) {
@@ -109,7 +110,6 @@ export function CommentSection({ targetId, commentType, enabled = true, allowFil
     return sortOrder === 'asc' ? diff : -diff;
   });
 
-  const [showAllComments, setShowAllComments] = useState(false);
   const displayedComments = showAllComments ? sortedComments : sortedComments.slice(0, 3);
   const hasMoreComments = sortedComments.length > 3;
 

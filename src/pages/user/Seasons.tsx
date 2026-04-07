@@ -200,40 +200,55 @@ export function Seasons() {
   };
 
   const renderActions = (season: ISeason) => {
-    const editBtn = (
-      <Button key="edit" variant="contained" size="small" onClick={() => openEdit(season)} style={{ marginRight: 8 }} disabled={actionLoading || !canEdit}>
-        {i18next.t('common.edit','Edit')}
-      </Button>
-    );
-
     const deleteBtn = (
-      <Button key="delete" variant="contained" size="small" color="error" onClick={() => openDelete(season)} disabled={actionLoading || !canEdit}>
+      <Button
+        key="delete"
+        variant="contained"
+        size="small"
+        color="error"
+        onClick={(e) => { e.stopPropagation(); openDelete(season); }}
+        disabled={actionLoading || !canEdit}
+      >
         {i18next.t('admin.actions.delete','Delete')}
       </Button>
     );
 
     const activateBtn = (
-      <Button key="activate" variant="contained" size="small" color="success" onClick={() => handleActivate(season.id)} style={{ marginRight: 8 }} disabled={actionLoading || !canEdit}>
+      <Button
+        key="activate"
+        variant="contained"
+        size="small"
+        color="success"
+        onClick={(e) => { e.stopPropagation(); handleActivate(season.id); }}
+        style={{ marginRight: 8 }}
+        disabled={actionLoading || !canEdit}
+      >
         {i18next.t('user.seasons.actions.activate','Activate')}
       </Button>
     );
 
     const completeBtn = (
-      <Button key="complete" variant="contained" size="small" color="warning" onClick={() => handleComplete(season.id)} disabled={actionLoading || !canEdit}>
+      <Button
+        key="complete"
+        variant="contained"
+        size="small"
+        color="warning"
+        onClick={(e) => { e.stopPropagation(); handleComplete(season.id); }}
+        disabled={actionLoading || !canEdit}
+      >
         {i18next.t('user.seasons.actions.complete','Complete')}
       </Button>
     );
 
-    // Show activate for planned, complete for active. Always allow edit and delete.
     if (season.status === SeasonStatus.Planned) {
-      return [editBtn, activateBtn, deleteBtn];
+      return [activateBtn, deleteBtn];
     }
 
     if (season.status === SeasonStatus.Active) {
-      return [editBtn, completeBtn];
+      return [completeBtn];
     }
 
-    return [editBtn, deleteBtn];
+    return [deleteBtn];
   };
 
   return (
@@ -250,7 +265,8 @@ export function Seasons() {
             initialFetchPaused={!allowFetch}
             create={openCreate}
             createDisabled={!canEdit}
-            onEdit={(item) => openEdit(item)}
+            onEdit={(item) => navigate(`/seasons/${item.id}`)}
+            onRowClick={(item) => navigate(`/seasons/${item.id}`)}
             renderFilterFields={renderFilterFields}
             renderRow={(item) => renderRow(item)}
             renderActions={(item) => renderActions(item as ISeason)}

@@ -15,6 +15,7 @@ type GoalState = {
   };
   currentGoal?: IGoal;
   goalSeasons: IGoalSeasonTag[];
+  seasonGoals: IGoal[];
 }
 
 type GoalActions = {
@@ -26,6 +27,7 @@ type GoalActions = {
   tagGoalToSeason: (teamId: string, goalId: string, seasonId: string) => Promise<void>;
   untagGoalFromSeason: (teamId: string, goalId: string, seasonId: string) => Promise<void>;
   fetchGoalSeasons: (teamId: string, goalId: string) => Promise<void>;
+  fetchSeasonGoals: (teamId: string, seasonId: string) => Promise<void>;
 }
 
 const useGoalStore = create<GoalState & GoalActions>((set) => ({
@@ -38,6 +40,7 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
   },
   currentGoal: undefined,
   goalSeasons: [],
+  seasonGoals: [],
   createGoal: async (teamId: string, type: GoalType, title: string, description: string) => {
     const response = await VolleyGoalsAPI.createGoal(teamId, {type, title, description});
     if (!response.goal) {
@@ -164,7 +167,10 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
       });
     } else {
       set((state) => ({
-        goalSeasons: state.goalSeasons.filter(t => !(t.goalId === goalId && t.seasonId === seasonId))
+        goalSeasons: state.goalSeasons.filter((t: any) => {
+          const sId = typeof t === 'string' ? t : (t.seasonId || t.id);
+          return sId !== seasonId;
+        })
       }));
     }
   },
@@ -176,6 +182,19 @@ const useGoalStore = create<GoalState & GoalActions>((set) => ({
       useNotificationStore.getState().notify({
         level: 'error',
         message: i18next.t(`${response.message}.message`, "Something went wrong while fetching goal seasons."),
+        title: i18next.t(`${response.message}.title`, "Something went wrong"),
+        details: response.error
+      });
+    }
+  },
+  fetchSeasonGoals: async (teamId: string, seasonId: string) => {
+    const response = await VolleyGoalsAPI.listGoals(teamId, { seasonId });
+    if (response.items) {
+      set(() => ({ seasonGoals: response.items! }));
+    } else {
+      useNotificationStore.getState().notify({
+        level: 'error',
+        message: i18next.t(`${response.message}.message`, "Something went wrong while fetching season goals."),
         title: i18next.t(`${response.message}.title`, "Something went wrong"),
         details: response.error
       });

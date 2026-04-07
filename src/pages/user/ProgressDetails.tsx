@@ -56,11 +56,12 @@ export function ProgressDetails() {
     }
   }, [progressId, seasonId]);
 
-  React.useEffect(() => {
-    if (seasonId) fetchGoals(seasonId, {});
-  }, [seasonId]);
-
   const teamId = selectedTeam?.team?.id;
+
+  React.useEffect(() => {
+    if (teamId) fetchGoals(teamId, {});
+  }, [teamId]);
+
 
   React.useEffect(() => {
     if (teamId && (!seasons || seasons.length === 0)) {

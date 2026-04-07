@@ -1,33 +1,41 @@
 import { IRoleDefinition } from '../store/types';
 
 export const ALL_PERMISSIONS = [
-  'goals:read', 'goals:write', 'goals:delete',
-  'progress_reports:read', 'progress_reports:write', 'progress_reports:delete',
-  'comments:read', 'comments:write', 'comments:delete',
-  'members:read', 'members:write',
-  'seasons:read', 'seasons:write',
-  'invites:read', 'invites:write',
+  'teams:read', 'teams:write', 'teams:delete',
   'team_settings:read', 'team_settings:write',
+  'members:read', 'members:write', 'members:delete',
+  'invites:read', 'invites:write', 'invites:delete',
+  'seasons:read', 'seasons:write', 'seasons:delete',
+  'team_goals:read', 'team_goals:write', 'team_goals:delete',
+  'individual_goals:read', 'individual_goals:write', 'individual_goals:delete',
+  'progress_reports:read', 'progress_reports:write', 'progress_reports:delete',
+  'progress:read', 'progress:write',
+  'comments:read', 'comments:write', 'comments:delete',
+  'activities:read'
 ] as const;
 
 export type Permission = typeof ALL_PERMISSIONS[number];
 
 const DEFAULT_PERMISSIONS: Record<string, Permission[]> = {
-  admin: [...ALL_PERMISSIONS],
+  admin: [...ALL_PERMISSIONS] as Permission[],
   trainer: [
-    'goals:read', 'goals:write',
+    'team_goals:read', 'team_goals:write', 'team_goals:delete',
+    'individual_goals:read',
     'members:read',
     'seasons:read',
     'invites:read', 'invites:write',
     'comments:read', 'comments:write',
     'progress_reports:read', 'progress_reports:write',
     'team_settings:read',
+    'activities:read',
   ],
   member: [
-    'goals:read',
+    'team_goals:read', 'individual_goals:read',
+    'individual_goals:write', 'individual_goals:delete',
     'comments:read', 'comments:write',
     'seasons:read',
     'progress_reports:read', 'progress_reports:write',
+    'activities:read',
   ],
 };
 

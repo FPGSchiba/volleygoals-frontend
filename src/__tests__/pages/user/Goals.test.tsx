@@ -42,11 +42,6 @@ describe('Goals', () => {
     expect(headings.length).toBeGreaterThanOrEqual(1);
   });
 
-  it('renders season selector', () => {
-    setup();
-    render(<Goals />);
-    expect(screen.getByLabelText('Season')).toBeInTheDocument();
-  });
 
   it('renders search input', () => {
     setup();

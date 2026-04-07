@@ -45,7 +45,7 @@ type NavItem = {
   path: string;
   icon?: React.ReactNode;
   userType: UserType;
-  readPermission?: Permission;
+  readPermission?: Permission | Permission[];
 };
 
 const NAV_ITEMS: NavItem[] = [
@@ -56,7 +56,7 @@ const NAV_ITEMS: NavItem[] = [
   // Users Only
   { key: 'dashboard',    labelKey: 'nav.dashboard',    path: '/dashboard',     icon: <DashboardIcon />,          userType: UserType.User },
   { key: 'seasons',      labelKey: 'nav.seasons',      path: '/seasons',       icon: <DateRangeIcon />,          userType: UserType.User, readPermission: 'seasons:read' },
-  { key: 'goals',        labelKey: 'nav.goals',        path: '/goals',         icon: <TrackChangesIcon />,       userType: UserType.User, readPermission: 'goals:read' },
+  { key: 'goals',        labelKey: 'nav.goals',        path: '/goals',         icon: <TrackChangesIcon />,       userType: UserType.User, readPermission: ['team_goals:read', 'individual_goals:read'] },
   { key: 'progress',     labelKey: 'nav.progress',     path: '/progress',      icon: <PublishedWithChangesIcon />, userType: UserType.User, readPermission: 'progress_reports:read' },
   { key: 'members',      labelKey: 'nav.members',      path: '/members',       icon: <GroupIcon />,              userType: UserType.User, readPermission: 'members:read' },
   { key: 'teamSettings', labelKey: 'nav.teamSettings', path: '/team-settings', icon: <SettingsIcon />,           userType: UserType.User, readPermission: 'team_settings:read' },
@@ -274,6 +274,9 @@ export function Navigation(props: NavigationProps) {
     const items = NAV_ITEMS.filter(item => {
       if (item.userType !== userType) return false;
       if (!item.readPermission) return true;
+      if (Array.isArray(item.readPermission)) {
+        return item.readPermission.some(p => currentPermissions.includes(p));
+      }
       return currentPermissions.includes(item.readPermission);
     });
     setVisibleItems(items);
