@@ -134,7 +134,7 @@ export function TenantRoles() {
         </Box>
 
         {(!roleDefinitions || roleDefinitions.length === 0) && (
-          <Typography variant="body2" color="text.secondary">No custom roles defined.</Typography>
+          <Typography variant="body2" color="text.secondary">{i18next.t('admin.tenantRoles.noRoles', 'No custom roles defined.')}</Typography>
         )}
 
         <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="md" fullWidth>
@@ -197,7 +197,7 @@ export function TenantRoles() {
                               );
                             })}
                             {(!def.actions || def.actions.length === 0) && (
-                              <Typography variant="body2" color="text.secondary">No actions defined</Typography>
+                              <Typography variant="body2" color="text.secondary">{i18next.t('admin.tenantRoles.noActions', 'No actions defined')}</Typography>
                             )}
                           </FormGroup>
                         </TableCell>

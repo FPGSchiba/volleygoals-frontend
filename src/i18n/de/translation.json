@@ -477,7 +477,9 @@
       "deleteConfirm": "Diese Rolle löschen?",
       "nameLabel": "Rollenname",
       "nameRequired": "Rollenname ist erforderlich",
-      "permissionsLabel": "Berechtigungen"
+      "permissionsLabel": "Berechtigungen",
+      "noRoles": "Keine benutzerdefinierten Rollen definiert.",
+      "noActions": "Keine Aktionen definiert"
     }
   },
   "common": {

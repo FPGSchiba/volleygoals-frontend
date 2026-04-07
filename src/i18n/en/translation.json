@@ -477,7 +477,9 @@
       "deleteConfirm": "Delete this role?",
       "nameLabel": "Role Name",
       "nameRequired": "Role name is required",
-      "permissionsLabel": "Permissions"
+      "permissionsLabel": "Permissions",
+      "noRoles": "No custom roles defined.",
+      "noActions": "No actions defined"
     }
   },
   "admin.invites": {
