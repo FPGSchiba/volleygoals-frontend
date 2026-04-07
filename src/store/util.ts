@@ -1,33 +1,30 @@
-// Add simple session storage helpers used by the stores
+// Storage helpers — use localStorage so data persists across browser sessions.
 
-export const setSessionItem = (key: string, value: string | null): void => {
+export const setStorageItem = (key: string, value: string | null): void => {
   try {
     if (value === null || value === undefined) {
-      sessionStorage.removeItem(key);
+      localStorage.removeItem(key);
     } else {
-      sessionStorage.setItem(key, value);
+      localStorage.setItem(key, value);
     }
-  } catch (e) {
-    // ignore session storage errors (e.g. SSR or blocked storage)
-    // console.warn('setSessionItem error', e);
+  } catch {
+    // ignore storage errors (e.g. private browsing with full storage)
   }
 };
 
-export const getSessionItem = (key: string): string | undefined => {
+export const getStorageItem = (key: string): string | undefined => {
   try {
-    const v = sessionStorage.getItem(key);
+    const v = localStorage.getItem(key);
     return v ?? undefined;
-  } catch (e) {
-    // ignore session storage errors
+  } catch {
     return undefined;
   }
 };
 
-export const removeSessionItem = (key: string): void => {
+export const removeStorageItem = (key: string): void => {
   try {
-    sessionStorage.removeItem(key);
-  } catch (e) {
+    localStorage.removeItem(key);
+  } catch {
     // ignore
   }
 };
-

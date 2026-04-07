@@ -31,7 +31,7 @@ describe('cognitoUser store - currentPermissions', () => {
 
 // The store auto-loads on import; set initial state for tests
 beforeEach(() => {
-  sessionStorage.clear();
+  localStorage.clear();
   const team1 = buildTeam({ id: 'team-1', name: 'Team 1' });
   const team2 = buildTeam({ id: 'team-2', name: 'Team 2' });
   useCognitoUserStore.setState({
@@ -49,13 +49,13 @@ beforeEach(() => {
 
 describe('cognitoUser store', () => {
   describe('setSelectedTeam', () => {
-    it('persists selection to sessionStorage and updates state', () => {
+    it('persists selection to localStorage and updates state', () => {
       const { setSelectedTeam } = useCognitoUserStore.getState();
       setSelectedTeam('team-1');
 
       const { selectedTeam } = useCognitoUserStore.getState();
       expect(selectedTeam?.team.id).toBe('team-1');
-      expect(sessionStorage.getItem('vg:selectedTeamId')).toBe('team-1');
+      expect(localStorage.getItem('vg:selectedTeamId')).toBe('team-1');
     });
 
     it('selects the correct team from available teams', () => {

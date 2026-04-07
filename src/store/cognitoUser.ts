@@ -2,7 +2,7 @@ import {create} from "zustand";
 import { fetchAuthSession, AuthSession, getCurrentUser, AuthUser, signOut } from 'aws-amplify/auth';
 import {ITeamAssignment, IUser, IProfileUpdate, IRoleDefinition, UserType} from "./types";
 import VolleyGoalsAPI from "../services/backend.api";
-import {getSessionItem, setSessionItem} from "./util";
+import {getStorageItem, setStorageItem, removeStorageItem} from "./util";
 import {SELECTED_TEAM_KEY} from "./consts";
 import {useNotificationStore} from "./notification";
 import i18next from "i18next";
@@ -79,7 +79,7 @@ const loadUserStore = async (): Promise<{cognitoUser?: AuthUser, session?: AuthS
     const userRoles: string[] = Array.isArray(groups) ? groups : [groups].filter(Boolean);
     VolleyGoalsAPI.setToken(idToken);
     const { user, assignments } = await loadSelf();
-    const selectedTeamId = getSessionItem(SELECTED_TEAM_KEY);
+    const selectedTeamId = getStorageItem(SELECTED_TEAM_KEY);
     const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
     return { cognitoUser, session, userType: userRoles.map((role) => role as UserType)[0], user, availableTeams: assignments, selectedTeam };
   } catch (error) {
@@ -133,7 +133,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
     setSelectedTeam: (teamId: string) => {
       const { availableTeams } = get();
       const selected = availableTeams?.find(t => t.team.id === teamId);
-      setSessionItem(SELECTED_TEAM_KEY, teamId);
+      setStorageItem(SELECTED_TEAM_KEY, teamId);
       const roleDefinitions = useTenantStore.getState().roleDefinitions;
       const currentPermissions = computePermissions(selected, roleDefinitions);
       set({ selectedTeam: selected, currentPermissions });
@@ -145,7 +145,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
     },
     fetchSelf: async () => {
       const { user, assignments } = await loadSelf();
-      const selectedTeamId = getSessionItem(SELECTED_TEAM_KEY);
+      const selectedTeamId = getStorageItem(SELECTED_TEAM_KEY);
       const selectedTeam = assignments?.find(t => t.team.id === selectedTeamId);
       const roleDefinitions = useTenantStore.getState().roleDefinitions;
       const currentPermissions = computePermissions(selectedTeam, roleDefinitions);
@@ -185,7 +185,7 @@ const useCognitoUserStore = create<UserState & UserActions>((set, get) => {
         return false;
       }
       // Clear selected team from session and refresh assignments
-      sessionStorage.removeItem(SELECTED_TEAM_KEY);
+      removeStorageItem(SELECTED_TEAM_KEY);
       const { user, assignments } = await loadSelf();
       set({ user, availableTeams: assignments, selectedTeam: undefined });
       return true;
