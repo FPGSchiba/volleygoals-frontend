@@ -739,6 +739,12 @@
       "archived": "Archived"
     }
   },
+  "seasonDetails": {
+    "title": "Season Details",
+    "infoSection": "Season Info",
+    "associatedGoals": "Associated Goals",
+    "tagGoal": "Tag goal to this season"
+  },
   "user": {
     "goals": {
       "type": {
@@ -749,6 +755,20 @@
       "status": {
         "open": "Open",
         "inProgress": "In Progress",
+        "completed": "Completed",
+        "archived": "Archived"
+      }
+    },
+    "seasons": {
+      "form": {
+        "name": "Name",
+        "status": "Status",
+        "startDate": "Start Date",
+        "endDate": "End Date"
+      },
+      "status": {
+        "planned": "Planned",
+        "active": "Active",
         "completed": "Completed",
         "archived": "Archived"
       }

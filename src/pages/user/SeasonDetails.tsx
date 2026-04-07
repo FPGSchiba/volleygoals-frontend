@@ -101,30 +101,52 @@ export function SeasonDetails() {
 
   if (loading || !season) {
     return (
-      <Paper>
+      <Paper className="season-details-section">
         <Box p={2}>
-          <Box display="flex" alignItems="center" gap={1}>
+          <Box className="season-details-header">
             <IconButton onClick={() => navigate('/seasons')} size="small">
               <ArrowBackIcon />
             </IconButton>
-            <Typography variant="h5">{i18next.t('seasonDetails.title', 'Season Details')}</Typography>
+            <Typography variant="h5" className="season-details-title">
+              {i18next.t('seasonDetails.title', 'Season Details')}
+            </Typography>
           </Box>
-          <Typography mt={2}>Loading...</Typography>
+          <Typography mt={2}>{i18next.t('common.loading', 'Loading...')}</Typography>
         </Box>
       </Paper>
     );
   }
 
   return (
-    <Paper>
-      <Box p={2}>
+    <Box className="season-details-page">
+      <Box className="season-details-header">
         <Box display="flex" alignItems="center" gap={1}>
           <IconButton onClick={() => navigate('/seasons')} size="small">
             <ArrowBackIcon />
           </IconButton>
-          <Typography variant="h5">{i18next.t('seasonDetails.title', 'Season Details')}</Typography>
+          <Typography variant="h5" className="season-details-title">
+            {i18next.t('seasonDetails.title', 'Season Details')}
+          </Typography>
         </Box>
-        <Box mt={2} display="flex" flexDirection="column" gap={2}>
+        <Box className="season-details-meta">
+          <Chip
+            label={season.status}
+            color={
+              season.status === SeasonStatus.Active
+                ? 'success'
+                : season.status === SeasonStatus.Planned
+                  ? 'primary'
+                  : 'default'
+            }
+          />
+        </Box>
+      </Box>
+
+      <Paper className="season-details-section">
+        <Typography variant="subtitle1" className="season-details-section-title">
+          {i18next.t('seasonDetails.infoSection', 'Season Info')}
+        </Typography>
+        <Box display="flex" flexDirection="column" gap={2}>
           <TextField
             fullWidth
             label={i18next.t('user.seasons.form.name', 'Name')}
@@ -132,31 +154,19 @@ export function SeasonDetails() {
             onChange={(e) => setDraftName(e.target.value)}
             disabled={!canEdit || saving}
           />
-          <Box display="flex" gap={1}>
-            <TextField
-              select
-              size="small"
-              label={i18next.t('user.seasons.form.status', 'Status')}
-              value={draftStatus}
-              onChange={(e) => setDraftStatus(e.target.value as SeasonStatus)}
-              disabled={!canEdit || saving}
-            >
-              <MenuItem value={SeasonStatus.Planned}>{i18next.t('user.seasons.status.planned','Planned')}</MenuItem>
-              <MenuItem value={SeasonStatus.Active}>{i18next.t('user.seasons.status.active','Active')}</MenuItem>
-              <MenuItem value={SeasonStatus.Completed}>{i18next.t('user.seasons.status.completed','Completed')}</MenuItem>
-              <MenuItem value={SeasonStatus.Archived}>{i18next.t('user.seasons.status.archived','Archived')}</MenuItem>
-            </TextField>
-            <Chip
-              label={season.status}
-              color={
-                season.status === SeasonStatus.Active
-                  ? 'success'
-                  : season.status === SeasonStatus.Planned
-                    ? 'primary'
-                    : 'default'
-              }
-            />
-          </Box>
+          <TextField
+            select
+            size="small"
+            label={i18next.t('user.seasons.form.status', 'Status')}
+            value={draftStatus}
+            onChange={(e) => setDraftStatus(e.target.value as SeasonStatus)}
+            disabled={!canEdit || saving}
+          >
+            <MenuItem value={SeasonStatus.Planned}>{i18next.t('user.seasons.status.planned', 'Planned')}</MenuItem>
+            <MenuItem value={SeasonStatus.Active}>{i18next.t('user.seasons.status.active', 'Active')}</MenuItem>
+            <MenuItem value={SeasonStatus.Completed}>{i18next.t('user.seasons.status.completed', 'Completed')}</MenuItem>
+            <MenuItem value={SeasonStatus.Archived}>{i18next.t('user.seasons.status.archived', 'Archived')}</MenuItem>
+          </TextField>
           <Box display="flex" gap={2}>
             <TextField
               fullWidth
@@ -180,43 +190,45 @@ export function SeasonDetails() {
         </Box>
 
         {canEdit && (
-          <Box mt={2}>
+          <Box mt={2} className="season-details-actions">
             <Button variant="contained" onClick={handleSaveSeason} disabled={saving}>
               {i18next.t('common.save', 'Save')}
             </Button>
           </Box>
         )}
+      </Paper>
 
-        <Box mt={4}>
-          <Typography variant="subtitle1">Associated Goals</Typography>
-          {seasonGoals.map(g => (
-            <Box key={g.id} display="flex" alignItems="center" gap={1} mt={0.5}>
-              <Typography variant="body2">{g.title}</Typography>
-              {canEdit && (
-                <IconButton size="small" onClick={() => handleUntag(g.id)}>
-                  <ClearIcon fontSize="small" />
-                </IconButton>
-              )}
-            </Box>
-          ))}
-          {canEdit && (
-            <Box mt={2} maxWidth={300}>
-              <TextField
-                select
-                size="small"
-                fullWidth
-                label="Tag goal to this season"
-                value=""
-                onChange={(e) => { if (e.target.value) handleTag(e.target.value); }}
-              >
-                {goals
-                  .filter(g => !seasonGoals.some(sg => sg.id === g.id))
-                  .map(g => <MenuItem key={g.id} value={g.id}>{g.title}</MenuItem>)}
-              </TextField>
-            </Box>
-          )}
-        </Box>
-      </Box>
-    </Paper>
+      <Paper className="season-details-section">
+        <Typography variant="subtitle1" className="season-details-section-title">
+          {i18next.t('seasonDetails.associatedGoals', 'Associated Goals')}
+        </Typography>
+        {seasonGoals.map(g => (
+          <Box key={g.id} className="season-details-goal-item">
+            <Typography variant="body2">{g.title}</Typography>
+            {canEdit && (
+              <IconButton size="small" onClick={() => handleUntag(g.id)}>
+                <ClearIcon fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
+        ))}
+        {canEdit && (
+          <Box mt={2} maxWidth={300}>
+            <TextField
+              select
+              size="small"
+              fullWidth
+              label={i18next.t('seasonDetails.tagGoal', 'Tag goal to this season')}
+              value=""
+              onChange={(e) => { if (e.target.value) handleTag(e.target.value); }}
+            >
+              {goals
+                .filter(g => !seasonGoals.some(sg => sg.id === g.id))
+                .map(g => <MenuItem key={g.id} value={g.id}>{g.title}</MenuItem>)}
+            </TextField>
+          </Box>
+        )}
+      </Paper>
+    </Box>
   );
 }

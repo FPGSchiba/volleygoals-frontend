@@ -1,0 +1,63 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.season-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1000px;
+}
+
+.season-details-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  @include mobile-only {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.season-details-title {
+  font-weight: 600;
+}
+
+.season-details-meta {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.season-details-section {
+  padding: 16px;
+  background: var(--palette-background-paper);
+  border: 1px solid var(--palette-divider);
+  border-radius: 8px;
+}
+
+.season-details-section-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.season-details-goal-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--palette-divider);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.season-details-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

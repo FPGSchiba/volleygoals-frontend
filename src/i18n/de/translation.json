@@ -758,6 +758,12 @@
       "archived": "Archiviert"
     }
   },
+  "seasonDetails": {
+    "title": "Saison Details",
+    "infoSection": "Saison Info",
+    "associatedGoals": "Zugeordnete Ziele",
+    "tagGoal": "Ziel dieser Saison zuordnen"
+  },
   "user": {
     "goals": {
       "type": {
@@ -768,6 +774,20 @@
       "status": {
         "open": "Offen",
         "inProgress": "In Bearbeitung",
+        "completed": "Abgeschlossen",
+        "archived": "Archiviert"
+      }
+    },
+    "seasons": {
+      "form": {
+        "name": "Name",
+        "status": "Status",
+        "startDate": "Startdatum",
+        "endDate": "Enddatum"
+      },
+      "status": {
+        "planned": "Geplant",
+        "active": "Aktiv",
         "completed": "Abgeschlossen",
         "archived": "Archiviert"
       }
