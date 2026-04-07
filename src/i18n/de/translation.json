@@ -468,6 +468,16 @@
           "created": "Erstellt"
         }
       }
+    },
+    "tenantRoles": {
+      "title": "Rollen",
+      "createButton": "Rolle erstellen",
+      "editTitle": "Rolle bearbeiten",
+      "createTitle": "Rolle erstellen",
+      "deleteConfirm": "Diese Rolle löschen?",
+      "nameLabel": "Rollenname",
+      "nameRequired": "Rollenname ist erforderlich",
+      "permissionsLabel": "Berechtigungen"
     }
   },
   "common": {

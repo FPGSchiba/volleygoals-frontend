@@ -1,0 +1,53 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.tenant-roles-page {
+  width: 100%;
+}
+
+.tenant-roles-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+
+  @include mobile-only {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+.tenant-roles-title {
+  font-weight: 600;
+}
+
+.tenant-roles-list-item {
+  border: 1px solid var(--palette-divider);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: var(--palette-background-paper);
+}
+
+.tenant-roles-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.tenant-roles-permissions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--palette-divider);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+.tenant-roles-actions {
+  display: flex;
+  gap: 8px;
+}
