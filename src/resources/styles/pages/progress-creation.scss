@@ -1,0 +1,62 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.progress-creation-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 800px;
+}
+
+.progress-creation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.progress-creation-title {
+  font-weight: 600;
+}
+
+.progress-creation-section {
+  padding: 16px;
+  background: var(--palette-background-paper);
+  border: 1px solid var(--palette-divider);
+  border-radius: 8px;
+}
+
+.progress-creation-section-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.progress-creation-field {
+  margin-bottom: 12px;
+}
+
+.progress-creation-goal-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--palette-divider);
+  border-radius: 6px;
+  margin-top: 8px;
+}
+
+.progress-creation-goal-title {
+  font-weight: 500;
+}
+
+.progress-creation-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+
+  @include mobile-only {
+    flex-direction: column;
+  }
+}

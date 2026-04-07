@@ -61,10 +61,12 @@ export function ProgressCreation() {
   };
 
   return (
-    <Paper>
+    <Paper className="progress-creation-page">
       <Box p={2}>
-        <Typography variant="h5">{i18next.t('progress.createTitle', 'Create Progress Report')}</Typography>
-        <Box mt={2}>
+        <Box className="progress-creation-header">
+          <Typography variant="h5" className="progress-creation-title">{i18next.t('progress.createTitle', 'Create Progress Report')}</Typography>
+        </Box>
+        <Box className="progress-creation-section" mt={2}>
           <TextField
             select size="small" value={selectedSeasonId ?? ''}
             label={i18next.t('user.goals.selectSeason', 'Season')}
@@ -75,20 +77,20 @@ export function ProgressCreation() {
           </TextField>
         </Box>
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Box mt={2} display="flex" flexDirection="column" gap={2}>
+          <Box className="progress-creation-section" mt={2} display="flex" flexDirection="column" gap={2}>
             <Controller name="summary" control={control} rules={{ required: true }} render={({ field }) => (
-              <TextField fullWidth label={i18next.t('progress.summary', 'Summary')} {...field} />
+              <TextField fullWidth label={i18next.t('progress.summary', 'Summary')} className="progress-creation-field" {...field} />
             )} />
             <Controller name="details" control={control} rules={{ required: true }} render={({ field }) => (
-              <TextField fullWidth multiline rows={4} label={i18next.t('progress.details', 'Details')} {...field} />
+              <TextField fullWidth multiline rows={4} label={i18next.t('progress.details', 'Details')} className="progress-creation-field" {...field} />
             )} />
             {activeGoals.length > 0 && (
               <Box>
-                <Typography variant="subtitle1">{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
+                <Typography variant="subtitle1" className="progress-creation-section-title">{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
                 {activeGoals.map((g) => (
-                  <Box key={g.id} display="flex" flexDirection="column" gap={1} mt={1} p={1} border={1} borderColor="divider" borderRadius={1}>
+                  <Box key={g.id} className="progress-creation-goal-item">
                     <Box display="flex" alignItems="center" gap={2}>
-                      <Typography style={{ minWidth: 200 }}>{g.title}</Typography>
+                      <Typography className="progress-creation-goal-title" style={{ minWidth: 200 }}>{g.title}</Typography>
                       <Rating
                         max={5}
                         value={ratings[g.id] || 0}
@@ -111,7 +113,7 @@ export function ProgressCreation() {
                 {i18next.t('progress.noGoals', 'No goals available for this season.')}
               </Typography>
             )}
-            <Box display="flex" gap={1}>
+            <Box className="progress-creation-actions">
               <Button type="submit" variant="contained" disabled={loading || !selectedSeasonId}>
                 {i18next.t('common.create', 'Create')}
               </Button>
