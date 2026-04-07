@@ -8,6 +8,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { Controller, useForm } from 'react-hook-form';
 import { ItemList, FetchResult } from '../../components/ItemList';
+import { UserDisplay } from '../../components/UserDisplay';
 import { ITeamUser } from '../../store/types';
 import { ITeamMemberFilterOption } from '../../services/types';
 import { useTeamStore } from '../../store/teams';
@@ -91,7 +92,7 @@ export function Members() {
   };
 
   const renderRow = (m: ITeamUser) => [
-    <TableCell key="name">{m.name || m.preferredUsername || m.email}</TableCell>,
+    <TableCell key="name"><UserDisplay user={m} size="small" /></TableCell>,
     <TableCell key="email">{m.email}</TableCell>,
     <TableCell key="role"><Chip label={m.role} size="small" /></TableCell>,
     <TableCell key="status"><Chip label={m.status} size="small" color={m.status === 'active' ? 'success' : 'default'} /></TableCell>,
@@ -102,31 +103,34 @@ export function Members() {
     if (!canManage) return [];
     const isSelf = currentUser?.id === m.id;
     return [
-      <Button key="edit" size="small" variant="contained" onClick={() => openEdit(m)} style={{ marginRight: 8 }} disabled={isSelf || actionLoading}>
-        {i18next.t('common.edit', 'Edit')}
-      </Button>,
-      m.status !== 'removed' ? (
-        <Button key="remove" size="small" variant="contained" color="error" onClick={() => { setCurrentMember(m); setDeleteOpen(true); }}>
-          {i18next.t('members.remove', 'Remove')}
+      <Box key="actions" className="members-list-actions">
+        <Button size="small" variant="contained" onClick={() => openEdit(m)} disabled={isSelf || actionLoading}>
+          {i18next.t('common.edit', 'Edit')}
         </Button>
-      ) : null,
-    ].filter((x): x is React.ReactElement => x !== null);
+        {m.status !== 'removed' && (
+          <Button size="small" variant="contained" color="error" onClick={() => { setCurrentMember(m); setDeleteOpen(true); }}>
+            {i18next.t('members.remove', 'Remove')}
+          </Button>
+        )}
+      </Box>,
+    ];
   };
 
   return (
-    <Paper sx={{ borderRadius: 3 }}>
+    <Paper className="members-page-root">
       <Box p={{ xs: 2, sm: 3 }}>
-        <Typography variant="h5" fontWeight={600}>{i18next.t('members.title', 'Team Members')}</Typography>
+        <Typography variant="h5" className="members-page-title">{i18next.t('members.title', 'Team Members')}</Typography>
 
         {/* Search bar */}
         <Box mt={2}>
           <TextField
             size="small"
             fullWidth
+            className="members-search-field"
             placeholder={i18next.t('members.search', 'Search by name or email...')}
             value={memberSearch}
             onChange={(e) => setMemberSearch(e.target.value)}
-            sx={{ maxWidth: 400, '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -187,7 +191,7 @@ export function Members() {
         <DialogTitle>{i18next.t('members.editMember', 'Edit Member')}</DialogTitle>
         <DialogContent>
           <form id="member-edit-form" onSubmit={handleSubmit(onEdit)}>
-            <Box mt={1} display="flex" flexDirection="column" gap={2}>
+            <Box className="members-dialog-form">
               <Controller name="role" control={control} render={({ field }) => (
                 <TextField select fullWidth label={i18next.t('members.role', 'Role')} {...field}>
                   {userRole === 'admin' && <MenuItem value="admin">admin</MenuItem>}

@@ -1,0 +1,54 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.members-page-root {
+  border-radius: 12px;
+  background: var(--palette-background-paper);
+  border: 1px solid var(--palette-divider);
+}
+
+.members-page-header {
+  padding: 16px 24px 0;
+}
+
+.members-page-title {
+  font-weight: 600;
+}
+
+.members-search-wrapper {
+  padding: 12px 24px 0;
+}
+
+.members-search-field {
+  max-width: 400px;
+
+  @include mobile-only {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.members-list-wrapper {
+  padding: 8px 24px 16px;
+}
+
+.members-filter-role,
+.members-filter-status {
+  min-width: 140px;
+
+  @include mobile-only {
+    width: 100%;
+  }
+}
+
+.members-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.members-list-actions {
+  display: flex;
+  gap: 8px;
+}
