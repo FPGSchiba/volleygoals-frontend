@@ -66,11 +66,13 @@ describe('Goals', () => {
     expect(screen.getByText('Individual')).toBeInTheDocument();
   });
 
-  it('disables edit/delete buttons for member role', () => {
+  it('disables delete button for member role', () => {
     const goals = [buildGoal({ title: 'My Goal' })];
     setup({ goals, role: RoleType.Member });
     render(<Goals />);
-    const editButtons = screen.getAllByText('Edit');
-    editButtons.forEach(btn => expect(btn).toBeDisabled());
+    // Goals page uses renderActions which only renders a Delete button (no Edit button).
+    // Edit is handled via row click / onEdit navigation, not a discrete button.
+    const deleteButtons = screen.getAllByText('Delete');
+    deleteButtons.forEach(btn => expect(btn).toBeDisabled());
   });
 });

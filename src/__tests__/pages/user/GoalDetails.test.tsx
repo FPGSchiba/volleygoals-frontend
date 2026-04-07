@@ -48,13 +48,16 @@ describe('GoalDetails', () => {
     setupMockStore(useTeamStore as any, mockTeamState({ currentTeamSettings: buildTeamSettings({ allowTeamGoalComments: true }) }));
 
     render(<GoalDetails />);
-    expect(screen.getByText('Score More')).toBeInTheDocument();
-    expect(screen.getByText('Improve scoring')).toBeInTheDocument();
+    // Title and description are rendered inside TextFields, so use getByDisplayValue
+    expect(screen.getByDisplayValue('Score More')).toBeInTheDocument();
+    expect(screen.getByDisplayValue('Improve scoring')).toBeInTheDocument();
+    // goalType is shown as a Chip label
     expect(screen.getByText('team')).toBeInTheDocument();
-    expect(screen.getByText('in_progress')).toBeInTheDocument();
+    // status is shown in a select TextField; the selected MenuItem label is rendered as visible text
+    expect(screen.getByText('In Progress')).toBeInTheDocument();
   });
 
-  it('shows edit/delete buttons when having permissions', () => {
+  it('shows save/delete buttons when having permissions', () => {
     const userId = 'user-1';
     const goal = buildGoal({ id: 'g1', teamId: 't1', ownerId: userId, goalType: GoalType.Team });
     setupMockStore(useCognitoUserStore as any, mockCognitoUserState({
@@ -66,7 +69,8 @@ describe('GoalDetails', () => {
     setupMockStore(useTeamStore as any, mockTeamState());
 
     render(<GoalDetails />);
-    expect(screen.getByRole('button', { name: /edit/i })).toBeInTheDocument();
+    // GoalDetails renders a Save (submit) button for editing inline, plus a Delete button
+    expect(screen.getByRole('button', { name: /save/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /delete/i })).toBeInTheDocument();
   });
 });

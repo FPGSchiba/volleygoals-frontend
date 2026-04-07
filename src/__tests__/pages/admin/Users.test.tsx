@@ -27,6 +27,8 @@ describe('Users (Admin)', () => {
       userList: { users: [buildUser({ name: 'Jane Doe', email: 'jane@test.com' })], paginationToken: undefined },
     }));
     render(<Users />);
-    expect(screen.getByText('Jane Doe')).toBeInTheDocument();
+    // UserDisplay renders the name in two cells: avatar cell and name cell
+    const nameElements = screen.getAllByText('Jane Doe');
+    expect(nameElements.length).toBeGreaterThanOrEqual(1);
   });
 });
