@@ -170,6 +170,17 @@ export function mockInvitesState(overrides?: Record<string, any>) {
   };
 }
 
+// ---- Settings Store ----
+export function mockSettingsState(overrides?: Record<string, any>) {
+  return {
+    theme: 'dark' as 'dark' | 'light',
+    language: 'en' as 'en' | 'de',
+    setTheme: jest.fn(),
+    setLanguage: jest.fn(),
+    ...overrides,
+  };
+}
+
 /**
  * Helper to mock a zustand store hook.
  * Call this in your test after jest.mock('../../store/someStore').
