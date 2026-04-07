@@ -7,7 +7,6 @@ import { useUsersStore } from '../../store/users';
 import { useNavigate } from 'react-router-dom';
 import i18next from 'i18next';
 import { UserDisplay } from '../../components/UserDisplay';
-import '../../resources/styles/pages/users.scss';
 
 export function Users() {
   const fetchUsers = useUsersStore((state) => state.fetchUsers);
