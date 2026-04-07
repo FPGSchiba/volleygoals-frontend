@@ -235,7 +235,7 @@ export function Dashboard() {
 
         {/* Progress Chart — hidden on mobile */}
         {!isMobile && (
-        <Card sx={{ flex: '2 1 0', minWidth: 0, borderRadius: 3 }} elevation={1}>
+        <Card className="dashboard-section" sx={{ flex: '2 1 0', minWidth: 0, borderRadius: 3 }} elevation={1}>
           <CardContent sx={{ pb: '16px !important' }}>
             <Box className="dashboard-section-header">
               <Typography variant="h6" className="dashboard-section-title">
@@ -306,7 +306,7 @@ export function Dashboard() {
         )}
 
         {/* Activity Feed */}
-        <Card sx={{ flex: '1 1 0', minWidth: 0, borderRadius: 3 }} elevation={1}>
+        <Card className="dashboard-section" sx={{ flex: '1 1 0', minWidth: 0, borderRadius: 3 }} elevation={1}>
           <CardContent sx={{ pb: '16px !important' }}>
             <Box className="dashboard-section-header">
               <Typography variant="h6" className="dashboard-section-title">
@@ -360,7 +360,7 @@ export function Dashboard() {
                         {a.actorName ? a.actorName[0] : '?'}
                       </Avatar>
                       <Box flex={1} minWidth={0}>
-                        <Typography variant="body2" sx={{ lineHeight: 1.3 }}>
+                        <Typography variant="body2" className="dashboard-activity-text" sx={{ lineHeight: 1.3 }}>
                           {a.description}
                         </Typography>
                         <Box display="flex" alignItems="center" gap={0.5} mt={0.25}>
@@ -386,7 +386,7 @@ export function Dashboard() {
 
       {/* Season quick info (if active season exists) */}
       {activeSeason && seasonStats && (
-        <Card sx={{ mt: 2, borderRadius: 3 }} elevation={1}>
+        <Card className="dashboard-section" sx={{ mt: 2, borderRadius: 3 }} elevation={1}>
           <CardContent sx={{ py: 2, px: 2.5, '&:last-child': { pb: 2 } }}>
             <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={1}>
               <Box>
