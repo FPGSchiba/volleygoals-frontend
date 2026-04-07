@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Grid, TextField, TableCell, Avatar, Button, Chip } from '@mui/material';
+import { Grid, TextField, TableCell, Button, Chip } from '@mui/material';
 import { ItemList, FetchResult } from '../../components/ItemList';
 import { IUser, UserType } from '../../store/types';
 import { IUserFilterOption } from '../../services/types';
 import { useUsersStore } from '../../store/users';
 import { useNavigate } from 'react-router-dom';
 import i18next from 'i18next';
+import { UserDisplay } from '../../components/UserDisplay';
+import '../../resources/styles/pages/users.scss';
 
 export function Users() {
   const fetchUsers = useUsersStore((state) => state.fetchUsers);
@@ -69,7 +71,8 @@ export function Users() {
       <Grid key="email">
         <TextField
           fullWidth
-          label="Email"
+          className="users-filter-email"
+          label={i18next.t('admin.users.columns.email', 'Email')}
           value={filter.email ?? ''}
           onChange={(e) => setFilter({ ...filter, email: e.target.value })}
         />
@@ -77,7 +80,8 @@ export function Users() {
       <Grid key="name">
         <TextField
           fullWidth
-          label="Name"
+          className="users-filter-name"
+          label={i18next.t('admin.users.columns.name', 'Name')}
           value={filter.name ?? ''}
           onChange={(e) => setFilter({ ...filter, name: e.target.value })}
         />
@@ -88,9 +92,9 @@ export function Users() {
   const renderRow = (user: IUser) => {
     const userTypeLabel = user.userType === UserType.Admin ? 'Admin' : 'User';
     return [
-      <TableCell key="avatar"><Avatar alt={user.name || user.email} src={user.picture} /></TableCell>,
+      <TableCell key="avatar"><UserDisplay user={user} size="small" /></TableCell>,
       <TableCell key="email">{user.email}</TableCell>,
-      <TableCell key="name">{user.name ?? user.preferredUsername ?? '-'}</TableCell>,
+      <TableCell key="name"><UserDisplay user={user} showAvatar={false} /></TableCell>,
       <TableCell key="type"><Chip label={userTypeLabel} color={user.userType === UserType.Admin ? 'primary' : 'default'} /></TableCell>,
       <TableCell key="status"><Chip label={user.enabled ? i18next.t('common.active','active') : i18next.t('common.inactive','inactive')} color={user.enabled ? 'success' : 'default'} /></TableCell>,
       <TableCell key="created">{new Date(user.createdAt).toLocaleString('de-CH')}</TableCell>,
@@ -128,9 +132,18 @@ export function Users() {
   };
 
   return (
+    <div className="users-page-root">
     <ItemList<IUser, IUserFilterOption>
-      title="Users"
-      columns={["","Email","Name","Type","Status","Created","Updated"]}
+      title={i18next.t('admin.users.title', 'Users')}
+      columns={[
+        i18next.t('admin.users.columns.avatar', ''),
+        i18next.t('admin.users.columns.email', 'Email'),
+        i18next.t('admin.users.columns.name', 'Name'),
+        i18next.t('admin.users.columns.type', 'Type'),
+        i18next.t('admin.users.columns.status', 'Status'),
+        i18next.t('admin.users.columns.created', 'Created'),
+        i18next.t('admin.users.columns.updated', 'Updated'),
+      ]}
       initialFilter={initialFilter}
       rowsPerPage={10}
       fetch={fetchAdapter}
@@ -142,5 +155,6 @@ export function Users() {
       items={users}
       count={count}
     />
+    </div>
   );
 }
