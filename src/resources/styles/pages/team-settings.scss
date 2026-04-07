@@ -1,0 +1,74 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.team-settings-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.team-settings-section {
+  padding: 20px 24px;
+  background: var(--palette-background-paper);
+  border: 1px solid var(--palette-divider);
+  border-radius: 8px;
+}
+
+.team-settings-section-title {
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.team-settings-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  @include mobile-only {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.team-settings-field {
+  margin-bottom: 16px;
+}
+
+.team-settings-members-search {
+  margin-bottom: 12px;
+  max-width: 400px;
+
+  @include mobile-only {
+    max-width: 100%;
+  }
+}
+
+.team-settings-member-item {
+  border-bottom: 1px solid var(--palette-divider);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.team-settings-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.team-settings-danger-section {
+  border-color: var(--palette-error-main);
+}
+
+.team-settings-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  @include mobile-only {
+    flex-direction: column;
+  }
+}

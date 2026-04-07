@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Alert, Avatar, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, InputAdornment, List, ListItem, ListItemAvatar, ListItemText, MenuItem, Paper, Switch, TextField, Typography } from '@mui/material';
+import { Alert, Avatar, Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Divider, FormControlLabel, InputAdornment, MenuItem, Paper, Switch, TextField, Typography } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,7 @@ import { usePermission } from '../../hooks/usePermission';
 import { ITeamUser, UserType } from '../../store/types';
 import VolleyGoalsAPI from '../../services/backend.api';
 import i18next from 'i18next';
+import { UserDisplay } from '../../components/UserDisplay';
 
 type MemberEditForm = { role: string; status: string; };
 
@@ -141,8 +142,8 @@ export function TeamSettings() {
   };
 
   return (
-    <>
-    <Paper sx={{ borderRadius: 3 }}>
+    <Box className="team-settings-page">
+    <Paper className="team-settings-section" sx={{ borderRadius: 3 }}>
       <Box p={{ xs: 2, sm: 3 }}>
         <Typography variant="h5">{i18next.t('teamSettings.title', 'Team Settings')}</Typography>
 
@@ -214,7 +215,7 @@ export function TeamSettings() {
 
     {/* Section: Team Members (admin/trainer only) — separate Paper */}
     {canManageMembers && (
-      <Paper sx={{ mt: 2, borderRadius: 3 }}>
+      <Paper className="team-settings-section" sx={{ mt: 2, borderRadius: 3 }}>
         <Box p={{ xs: 2, sm: 3 }}>
           <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
             <Typography variant="h6">{i18next.t('teamSettings.members', 'Team Members')}</Typography>
@@ -227,6 +228,7 @@ export function TeamSettings() {
           <Box display="flex" gap={2} flexWrap="wrap" mb={2}>
             <TextField
               size="small"
+              className="team-settings-members-search"
               placeholder={i18next.t('teamSettings.searchMembers', 'Search members...')}
               value={memberSearch}
               onChange={(e) => setMemberSearch(e.target.value)}
@@ -258,35 +260,26 @@ export function TeamSettings() {
             {filteredMembers.map(m => (
               <Box
                 key={m.id}
+                className="team-settings-member-item"
                 display="flex"
                 alignItems="center"
                 gap={1.5}
                 px={2}
                 py={1.5}
                 sx={{
-                  border: '1px solid',
-                  borderColor: 'divider',
                   borderRadius: 2,
                   transition: 'background-color 0.15s',
                   '&:hover': { bgcolor: 'action.hover' },
                 }}
               >
-                <Avatar src={m.picture || undefined} alt={m.name || m.email} sx={{ width: 36, height: 36, flexShrink: 0 }}>
-                  {!m.picture && (m.name ? m.name[0] : m.email[0])}
-                </Avatar>
                 <Box flex={1} minWidth={0}>
                   <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
-                    <Typography variant="body2" fontWeight={500} noWrap>
-                      {m.name || m.preferredUsername || m.email}
-                    </Typography>
+                    <UserDisplay user={m} size="small" />
                     <Chip label={m.role} size="small" />
                     <Chip label={m.status} size="small" color={m.status === 'active' ? 'success' : 'default'} />
                   </Box>
-                  {m.name && (
-                    <Typography variant="caption" color="text.secondary">{m.email}</Typography>
-                  )}
                 </Box>
-                <Box display="flex" gap={1} flexShrink={0}>
+                <Box className="team-settings-actions" flexShrink={0}>
                   <Button
                     size="small"
                     variant="outlined"
@@ -362,6 +355,6 @@ export function TeamSettings() {
           <Button variant="contained" color="error" onClick={onRemoveMember} disabled={actionLoading}>{i18next.t('members.remove', 'Remove')}</Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
 }
