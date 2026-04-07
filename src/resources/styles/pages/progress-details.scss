@@ -1,0 +1,66 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+.progress-details-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1000px;
+}
+
+.progress-details-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+
+  @include mobile-only {
+    flex-direction: column;
+  }
+}
+
+.progress-details-title {
+  font-weight: 600;
+}
+
+.progress-details-author {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.progress-details-author-label {
+  font-size: 0.75rem;
+  color: var(--palette-text-secondary);
+}
+
+.progress-details-section {
+  padding: 16px;
+  background: var(--palette-background-paper);
+  border: 1px solid var(--palette-divider);
+  border-radius: 8px;
+}
+
+.progress-details-section-title {
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.progress-details-entry-item {
+  border: 1px solid var(--palette-divider);
+  border-radius: 6px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.progress-details-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+
+  @include mobile-only {
+    flex-direction: column;
+  }
+}

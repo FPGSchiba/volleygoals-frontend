@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { formatDateTime } from '../../utils/dateTime';
-import { Avatar, Box, Button, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Rating, TextField, Typography } from '@mui/material';
+import { Box, Button, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Rating, TextField, Typography } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
@@ -14,6 +14,7 @@ import { usePermission } from '../../hooks/usePermission';
 import { useTeamStore } from '../../store/teams';
 import { CommentType, GoalStatus } from '../../store/types';
 import { CommentSection } from '../../components/CommentSection';
+import { UserDisplay } from '../../components/UserDisplay';
 import i18next from 'i18next';
 
 type EditForm = { summary: string; details: string; };
@@ -40,7 +41,6 @@ export function ProgressDetails() {
   const teamMembers = useTeamStore((s) => s.teamMembers) || [];
 
   const canEdit = usePermission('progress_reports:write');
-  const canDelete = usePermission('progress_reports:delete');
 
   const seasonId = currentReport?.seasonId
     || location.state?.seasonId
@@ -75,12 +75,6 @@ export function ProgressDetails() {
       fetchTeamMembers(teamId, { limit: 100 } as any).catch(() => {});
     }
   }, [teamId]);
-
-  const resolveAuthor = (id: string): string => {
-    if (currentUser?.id === id) return currentUser.name || currentUser.preferredUsername || currentUser.email || id;
-    const member = teamMembers.find(m => m.id === id);
-    return member?.name || member?.preferredUsername || member?.email || id;
-  };
 
   const isAuthor = currentReport?.authorId === currentUser?.id;
   const canModify = isAuthor || canEdit;
@@ -145,9 +139,9 @@ export function ProgressDetails() {
   if (!currentReport) {
     return (
       <Paper>
-        <Box p={2}>
-          <Typography variant="h5">{i18next.t('progress.detailsTitle', 'Progress Report Details')}</Typography>
-          <Typography>Loading...</Typography>
+        <Box p={2} className="progress-details-page">
+          <Typography variant="h5" className="progress-details-title">{i18next.t('progress.detailsTitle', 'Progress Report Details')}</Typography>
+          <Typography>{i18next.t('common.loading', 'Loading...')}</Typography>
         </Box>
       </Paper>
     );
@@ -155,28 +149,39 @@ export function ProgressDetails() {
 
   return (
     <Paper>
-      <Box p={2}>
+      <Box p={2} className="progress-details-page">
         <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/progress')}>
           {i18next.t('common.back', 'Back')}
         </Button>
-        <Typography variant="h5" mt={1}>{i18next.t('progress.detailsTitle', 'Progress Report Details')}</Typography>
 
-        <Box mt={2}>
-          <Typography variant="h6">{currentReport.summary}</Typography>
-          <Box display="flex" alignItems="center" gap={1} mt={1}>
-            <Avatar src={(currentReport.authorPicture ?? undefined) || teamMembers.find(m => m.id === currentReport.authorId)?.picture || undefined} sx={{ width: 24, height: 24 }}>
-              {(currentReport.authorName || resolveAuthor(currentReport.authorId))[0]}
-            </Avatar>
-            <Typography variant="body2">{currentReport.authorName || resolveAuthor(currentReport.authorId)}</Typography>
-            <Typography variant="caption" color="text.secondary">{formatDateTime(currentReport.createdAt)}</Typography>
+        <Box className="progress-details-header">
+          <Box>
+            <Typography variant="h5" className="progress-details-title">{i18next.t('progress.detailsTitle', 'Progress Report Details')}</Typography>
+            <Box className="progress-details-author">
+              <Typography className="progress-details-author-label">
+                {i18next.t('progress.author', 'Author')}
+              </Typography>
+              <UserDisplay
+                user={{
+                  name: currentReport?.authorName,
+                  picture: currentReport?.authorPicture ?? undefined,
+                }}
+                fallbackId={currentReport?.authorId}
+              />
+            </Box>
           </Box>
+          <Typography variant="caption" color="text.secondary">{formatDateTime(currentReport.createdAt)}</Typography>
+        </Box>
+
+        <Box className="progress-details-section">
+          <Typography variant="h6" className="progress-details-title">{currentReport.summary}</Typography>
           {currentReport.details && (
             <Typography mt={1}>{currentReport.details}</Typography>
           )}
         </Box>
 
         {canModify && (
-          <Box mt={2} display="flex" gap={1}>
+          <Box className="progress-details-actions">
             <Button variant="outlined" onClick={openEdit} disabled={actionLoading}>{i18next.t('progress.edit', 'Edit')}</Button>
             <Button variant="contained" color="error" onClick={() => setDeleteOpen(true)} disabled={actionLoading}>{i18next.t('progress.delete', 'Delete')}</Button>
           </Box>
@@ -184,8 +189,8 @@ export function ProgressDetails() {
 
         {/* Overall notes — visually distinct from per-goal entries */}
         {currentReport.overallDetails && (
-          <Box mt={2} p={2} sx={{ borderLeft: 3, borderColor: 'primary.main', bgcolor: 'action.hover', borderRadius: 1 }}>
-            <Typography variant="subtitle2" color="primary" mb={0.5}>
+          <Box className="progress-details-section" sx={{ borderLeft: 3, borderColor: 'primary.main', bgcolor: 'action.hover' }}>
+            <Typography variant="subtitle2" color="primary" mb={0.5} className="progress-details-section-title">
               {i18next.t('progress.overallDetails', 'Overall Notes')}
             </Typography>
             <Typography variant="body2">{currentReport.overallDetails}</Typography>
@@ -194,13 +199,13 @@ export function ProgressDetails() {
 
         {/* Per-entry cards */}
         {(currentReport.progress ?? []).length > 0 && (
-          <Box mt={3}>
-            <Typography variant="subtitle1" fontWeight={600} mb={1}>{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
+          <Box className="progress-details-section">
+            <Typography variant="subtitle1" className="progress-details-section-title">{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
             {(currentReport.progress ?? []).map((entry) => {
               const goal = goals.find(g => g.id === entry.goalId);
               const isExpanded = expandedEntries.has(entry.id);
               return (
-                <Box key={entry.id} mb={1} border={1} borderColor="divider" borderRadius={1} overflow="hidden">
+                <Box key={entry.id} className="progress-details-entry-item">
                   {/* Header row */}
                   <Box display="flex" alignItems="center" gap={1} px={2} py={1} sx={{ cursor: 'pointer' }} onClick={() => toggleEntryExpand(entry.id)}>
                     <Typography variant="body2" flex={1}>{goal?.title || entry.goalId}</Typography>
