@@ -5,6 +5,7 @@ import App from './App';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { GlobalStyles } from "@mui/material";
 import {Amplify} from "aws-amplify";
+import { useSettingsStore } from './store/settings';
 
 // Configure Amplify from environment variables
 Amplify.configure({
@@ -41,19 +42,12 @@ export const ThemeToggleContext = createContext({
 export const useThemeToggle = () => useContext(ThemeToggleContext);
 
 const Root = () => {
-  const [mode, setMode] = useState<'dark' | 'light'>(() => {
-    try {
-      const stored = localStorage.getItem('theme');
-      if (stored === 'dark' || stored === 'light') return stored;
-    } catch {}
-    const prefersDark = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    return prefersDark ? 'dark' : 'light';
-  });
+  const storedTheme = useSettingsStore.getState().theme;
+  const [mode, setMode] = useState<'dark' | 'light'>(storedTheme);
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem('theme')) return;
-    } catch {}
+    const persisted = localStorage.getItem('vg-settings');
+    if (persisted) return;
 
     if (typeof window === 'undefined' || !window.matchMedia) return;
     const mql = window.matchMedia('(prefers-color-scheme: dark)');
@@ -127,7 +121,7 @@ const Root = () => {
   const toggleTheme = () => {
     setMode((prevMode) => {
       const next = prevMode === 'dark' ? 'light' : 'dark';
-      try { localStorage.setItem('theme', next); } catch {}
+      useSettingsStore.getState().setTheme(next);
       return next;
     });
   };
