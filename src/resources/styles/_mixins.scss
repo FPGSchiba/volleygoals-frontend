@@ -1,0 +1,30 @@
+// src/resources/styles/_mixins.scss
+@use 'variables' as *;
+
+// Respond to mobile-only viewport (< 600px)
+@mixin mobile-only {
+  @media (max-width: #{$bp-sm - 1px}) {
+    @content;
+  }
+}
+
+// Respond from tablet width and above (>= 600px)
+@mixin tablet-up {
+  @media (min-width: $bp-sm) {
+    @content;
+  }
+}
+
+// Respond from desktop width and above (>= 960px)
+@mixin desktop-up {
+  @media (min-width: $bp-md) {
+    @content;
+  }
+}
+
+// Respond from wide desktop and above (>= 1280px)
+@mixin wide-up {
+  @media (min-width: $bp-lg) {
+    @content;
+  }
+}
