@@ -103,7 +103,9 @@ export function GoalActivityChart({ points, goalNames, onEntryClick }: GoalActiv
         />
         <Scatter
           data={points}
-          shape={(props: any) => <ActivityDot {...props} onEntryClick={onEntryClick} />}
+          shape={(props: { cx?: number; cy?: number; payload?: ScatterPoint }) =>
+            <ActivityDot {...props} onEntryClick={onEntryClick} />
+          }
         />
       </ScatterChart>
     </ResponsiveContainer>
