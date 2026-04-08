@@ -9,7 +9,7 @@ const mockReports = [
   {
     id: 'report-1',
     authorId: 'user-1',
-    reportDate: '2025-03-01T00:00:00Z',
+    createdAt: '2025-03-01T00:00:00Z',
     summary: 'Good week',
     progress: [
       { id: 'entry-1', goalId: 'goal-1', rating: 4, details: 'Improved' },
@@ -20,7 +20,7 @@ const mockReports = [
 
 describe('buildGoalActivityScatterData', () => {
   it('maps each progress entry to a scatter point', () => {
-    const { points, goalNames } = buildGoalActivityScatterData(mockReports as any, mockGoals as any);
+    const { points, goalNames } = buildGoalActivityScatterData(mockReports, mockGoals);
 
     expect(points).toHaveLength(2);
     expect(goalNames).toEqual(['Serve accuracy', 'Jump height']);
@@ -46,17 +46,26 @@ describe('buildGoalActivityScatterData', () => {
     const reportsWithUnknownGoal = [
       {
         id: 'report-2',
-        reportDate: '2025-03-05T00:00:00Z',
+        createdAt: '2025-03-05T00:00:00Z',
         progress: [{ id: 'e-1', goalId: 'unknown-goal', rating: 3 }],
       },
     ];
-    const { points } = buildGoalActivityScatterData(reportsWithUnknownGoal as any, mockGoals as any);
+    const { points } = buildGoalActivityScatterData(reportsWithUnknownGoal, mockGoals);
     expect(points).toHaveLength(0);
   });
 
   it('returns empty arrays when there are no reports', () => {
-    const { points, goalNames } = buildGoalActivityScatterData([], mockGoals as any);
+    const { points, goalNames } = buildGoalActivityScatterData([], mockGoals);
     expect(points).toHaveLength(0);
     expect(goalNames).toEqual(['Serve accuracy', 'Jump height']);
+  });
+
+  it('treats a rating of exactly 3 as on track', () => {
+    const reports = [{
+      id: 'r-3', createdAt: '2025-04-01T00:00:00Z',
+      progress: [{ id: 'e-3', goalId: 'goal-1', rating: 3 }],
+    }];
+    const { points } = buildGoalActivityScatterData(reports, mockGoals);
+    expect(points[0].isOnTrack).toBe(true);
   });
 });

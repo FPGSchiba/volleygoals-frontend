@@ -77,7 +77,7 @@ export interface ScatterPoint {
 export function buildGoalActivityScatterData(
   reports: Array<{
     id: string;
-    reportDate: string;
+    createdAt: string;
     progress?: Array<{ id: string; goalId: string; rating: number; details?: string }>;
   }>,
   goals: Array<{ id: string; title: string }>,
@@ -87,7 +87,7 @@ export function buildGoalActivityScatterData(
   const points: ScatterPoint[] = [];
 
   for (const report of reports) {
-    const x = new Date(report.reportDate).getTime();
+    const x = new Date(report.createdAt).getTime();
     for (const entry of report.progress ?? []) {
       const y = goalIndexMap.get(entry.goalId);
       if (y === undefined) continue;
