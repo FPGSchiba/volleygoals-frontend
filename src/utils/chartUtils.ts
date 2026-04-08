@@ -63,3 +63,45 @@ export function buildProgressChartData(
 
   return { data, chartGoals };
 }
+
+export interface ScatterPoint {
+  x: number;         // report date as Unix timestamp (ms)
+  y: number;         // index into goalNames array
+  rating: number;    // 1–5
+  progressId: string;
+  reportId: string;
+  goalName: string;
+  isOnTrack: boolean; // rating >= 3
+}
+
+export function buildGoalActivityScatterData(
+  reports: Array<{
+    id: string;
+    reportDate: string;
+    progress?: Array<{ id: string; goalId: string; rating: number; details?: string }>;
+  }>,
+  goals: Array<{ id: string; title: string }>,
+): { points: ScatterPoint[]; goalNames: string[] } {
+  const goalIndexMap = new Map(goals.map((g, i) => [g.id, i]));
+  const goalNames = goals.map((g) => g.title);
+  const points: ScatterPoint[] = [];
+
+  for (const report of reports) {
+    const x = new Date(report.reportDate).getTime();
+    for (const entry of report.progress ?? []) {
+      const y = goalIndexMap.get(entry.goalId);
+      if (y === undefined) continue;
+      points.push({
+        x,
+        y,
+        rating: entry.rating,
+        progressId: entry.id,
+        reportId: report.id,
+        goalName: goalNames[y],
+        isOnTrack: entry.rating >= 3,
+      });
+    }
+  }
+
+  return { points, goalNames };
+}
