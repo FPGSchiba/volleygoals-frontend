@@ -1,12 +1,15 @@
 import React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import { useNavigate } from 'react-router-dom';
+import i18next from 'i18next';
 import AddIcon from '@mui/icons-material/Add';
 import { GoalActivityChart } from './GoalActivityChart';
 import { EntryDrawer, EntryDrawerEntry } from './EntryDrawer';
 import { buildGoalActivityScatterData } from '../../utils/chartUtils';
+import { formatDate } from '../../utils/dateTime';
 import { useProgressReportStore } from '../../store/progressReports';
 import { useGoalStore } from '../../store/goals';
 
@@ -32,7 +35,7 @@ export function PersonalProgressView({
   const goals = goalList.goals;
 
   React.useEffect(() => {
-    fetchReports(seasonId, authorId ? { authorId } : ({} as any)).catch(() => {});
+    fetchReports(seasonId, authorId ? { authorId, limit: 100, sortOrder: 'desc' } : { limit: 100, sortOrder: 'desc' }).catch(() => {});
     fetchGoals(teamId, { limit: 100 } as any).catch(() => {});
   }, [seasonId, teamId, authorId]);
 
@@ -74,40 +77,40 @@ export function PersonalProgressView({
         )}
       </Box>
 
-      <GoalActivityChart
-        points={points}
-        goalNames={goalNames}
-        onEntryClick={handleEntryClick}
-      />
+      <Paper className="progress-chart-section" variant="outlined" sx={{ p: 2, mb: 3 }}>
+        <GoalActivityChart
+          points={points}
+          goalNames={goalNames}
+          onEntryClick={handleEntryClick}
+        />
+      </Paper>
 
-      <Box sx={{ mt: 3 }}>
-        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+      <Paper className="progress-reports-section" variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle2" color="text.secondary" className="progress-reports-title" gutterBottom>
           Reports
         </Typography>
-        {reportList.reports.map((report) => (
-          <Box
-            key={report.id}
-            sx={{
-              p: 1.5,
-              mb: 1,
-              border: 1,
-              borderColor: 'divider',
-              borderRadius: 1,
-              cursor: 'pointer',
-              '&:hover': { bgcolor: 'action.hover' },
-            }}
-            onClick={() => navigate(`/progress/${report.id}`)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && navigate(`/progress/${report.id}`)}
-          >
-            <Typography variant="body2" fontWeight="medium">{report.summary}</Typography>
-            <Typography variant="caption" color="text.secondary">
-              {new Date(report.createdAt).toLocaleDateString()}
-            </Typography>
-          </Box>
-        ))}
-      </Box>
+        {reportList.reports.length === 0 ? (
+          <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
+            {i18next.t('progress.chart.noReports', 'No reports yet this season.')}
+          </Typography>
+        ) : (
+          reportList.reports.map((report) => (
+            <Box
+              key={report.id}
+              className="progress-report-item"
+              onClick={() => navigate(`/progress/${report.id}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && navigate(`/progress/${report.id}`)}
+            >
+              <Typography variant="body2" className="progress-report-item-summary">{report.summary}</Typography>
+              <Typography variant="caption" color="text.secondary" className="progress-report-item-date">
+                {formatDate(report.createdAt)}
+              </Typography>
+            </Box>
+          ))
+        )}
+      </Paper>
 
       <EntryDrawer
         entry={selectedEntry}

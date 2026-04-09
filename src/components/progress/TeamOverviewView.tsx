@@ -35,7 +35,7 @@ export function TeamOverviewView({
   const [search, setSearch] = React.useState('');
 
   React.useEffect(() => {
-    void Promise.resolve(fetchReports(seasonId, {})).catch(() => {});
+    void Promise.resolve(fetchReports(seasonId, { limit: 100 })).catch(() => {});
   }, [seasonId]);
 
   const reportCountByAuthor = React.useMemo(() => {
@@ -84,7 +84,7 @@ export function TeamOverviewView({
 
           return (
             <Grid key={member.id} item xs={12} sm={6} md={4}>
-              <Card>
+              <Card variant="outlined">
                 <CardActionArea onClick={() => onMemberSelect(member.id)}>
                   <CardContent>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 1.5 }}>

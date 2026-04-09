@@ -565,7 +565,12 @@
       "selectSeason": "Wählen Sie eine Saison, um den Fortschrittsgraphen anzuzeigen.",
       "manageReports": "Berichte verwalten",
       "rating": "Bewertung"
-    }
+    },
+    "chart": {
+      "clickToOpen": "Zum Öffnen klicken",
+      "noReports": "Noch keine Berichte für diese Saison."
+    },
+    "selectMember": "Wählen Sie ein Mitglied aus der Liste oben aus, um dessen Fortschritt anzuzeigen."
   },
   "members": {
     "title": "Teammitglieder",

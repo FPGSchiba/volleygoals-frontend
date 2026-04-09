@@ -105,6 +105,6 @@ describe('GoalActivityChart', () => {
         onEntryClick={jest.fn()}
       />,
     );
-    expect(screen.getByText(/no progress entries/i)).toBeInTheDocument();
+    expect(screen.getByText(/no progress data/i)).toBeInTheDocument();
   });
 });

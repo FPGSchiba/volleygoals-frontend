@@ -2,6 +2,7 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
 import MenuItem from '@mui/material/MenuItem';
+import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import { useProgressReportPermissions } from '../../hooks/useProgressReportPermissions';
@@ -79,72 +80,82 @@ export function Progress() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 3 }}>
-      {/* Season selector */}
-      <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-        <Typography variant="h5" fontWeight={600} sx={{ flex: 1 }}>
-          {i18next.t('progress.title', 'Progress Reports')}
-        </Typography>
-        <TextField
-          select
-          size="small"
-          value={selectedSeasonId ?? ''}
-          label={i18next.t('user.goals.selectSeason', 'Season')}
-          onChange={(e) => setSelectedSeasonId(e.target.value)}
-          sx={{ minWidth: 200 }}
-          disabled={seasons.length === 0}
-        >
-          {seasons.map((s) => (
-            <MenuItem key={s.id} value={s.id}>
-              {s.name}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Box>
-
-      <ContextSwitcher
-        canParticipate={canParticipate}
-        canOversee={canOversee}
-        value={viewMode}
-        onChange={setViewMode}
-        members={members}
-      />
-
-      {!selectedSeasonId ? (
-        <Box sx={{ py: 6, textAlign: 'center' }}>
-          <Typography color="text.secondary">
-            {i18next.t('progress.graph.selectSeason', 'Select a season to view progress.')}
+      <Paper className="progress-page" sx={{ p: 3 }}>
+        {/* Season selector */}
+        <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
+          <Typography variant="h5" fontWeight={600} sx={{ flex: 1 }}>
+            {i18next.t('progress.title', 'Progress Reports')}
           </Typography>
+          <TextField
+            select
+            size="small"
+            value={selectedSeasonId ?? ''}
+            label={i18next.t('user.goals.selectSeason', 'Season')}
+            onChange={(e) => setSelectedSeasonId(e.target.value)}
+            sx={{ minWidth: 200 }}
+            disabled={seasons.length === 0}
+          >
+            {seasons.map((s) => (
+              <MenuItem key={s.id} value={s.id}>
+                {s.name}
+              </MenuItem>
+            ))}
+          </TextField>
         </Box>
-      ) : (
-        <Box>
-          {isPersonal && (
-            <PersonalProgressView
-              teamId={teamId}
-              seasonId={selectedSeasonId}
-              canParticipate={canParticipate}
-            />
-          )}
 
-          {isTeam && (
-            <TeamOverviewView
-              teamId={teamId}
-              seasonId={selectedSeasonId}
-              members={members}
-              onMemberSelect={(memberId) => setViewMode(memberId)}
-            />
-          )}
+        <ContextSwitcher
+          canParticipate={canParticipate}
+          canOversee={canOversee}
+          value={viewMode}
+          onChange={setViewMode}
+          members={members}
+        />
 
-          {isMember && selectedMember && (
-            <MemberProgressView
-              memberId={selectedMember.id}
-              memberName={selectedMember.name}
-              teamId={teamId}
-              seasonId={selectedSeasonId}
-              onBack={() => setViewMode('team')}
-            />
-          )}
-        </Box>
-      )}
+        {!selectedSeasonId ? (
+          <Box sx={{ py: 6, textAlign: 'center' }}>
+            <Typography color="text.secondary">
+              {i18next.t('progress.graph.selectSeason', 'Select a season to view progress.')}
+            </Typography>
+          </Box>
+        ) : (
+          <Box sx={{ mt: 2 }}>
+            {isPersonal && (
+              <PersonalProgressView
+                teamId={teamId}
+                seasonId={selectedSeasonId}
+                canParticipate={canParticipate}
+              />
+            )}
+
+            {isTeam && (
+              <TeamOverviewView
+                teamId={teamId}
+                seasonId={selectedSeasonId}
+                members={members}
+                onMemberSelect={(memberId) => setViewMode(memberId)}
+              />
+            )}
+
+            {isMember && !selectedMember && (
+              <Box sx={{ py: 6, textAlign: 'center' }}>
+                <Typography color="text.secondary">
+                  {i18next.t('progress.selectMember', 'Select a member from the list above to view their progress.')}
+                </Typography>
+              </Box>
+            )}
+
+            {isMember && selectedMember && (
+              <MemberProgressView
+                memberId={selectedMember.id}
+                memberName={selectedMember.name}
+                teamId={teamId}
+                seasonId={selectedSeasonId}
+                onBack={() => setViewMode('team')}
+              />
+            )}
+          </Box>
+        )}
+      </Paper>
     </Container>
   );
 }
