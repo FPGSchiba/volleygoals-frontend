@@ -27,7 +27,9 @@ interface DotProps {
 
 function ActivityDot({ cx = 0, cy = 0, payload, onEntryClick }: DotProps) {
   if (!payload) return null;
-  const color = payload.isOnTrack ? '#1976d2' : '#e67e22';
+  const color = payload.isOnTrack
+    ? 'var(--palette-primary-main)'
+    : 'var(--palette-warning-main)';
   return (
     <g
       onClick={() => onEntryClick(payload.progressId, payload.reportId)}
