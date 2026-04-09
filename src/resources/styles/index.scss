@@ -39,6 +39,7 @@ body {
   @include meta.load-css("pages/goals");
   @include meta.load-css("pages/goal-details");
   @include meta.load-css("pages/season-details");
+  @include meta.load-css("pages/progress");
   @include meta.load-css("pages/progress-details");
   @include meta.load-css("pages/progress-creation");
   @include meta.load-css("pages/dashboard");

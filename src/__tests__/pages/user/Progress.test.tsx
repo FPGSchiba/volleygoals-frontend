@@ -15,9 +15,15 @@ jest.mock('../../../store/goals', () => { const m: any = jest.fn((s?: any) => s 
 import { useGoalStore } from '../../../store/goals';
 jest.mock('../../../store/teams', () => { const m: any = jest.fn((s?: any) => s ? s({}) : {}); m.getState = () => ({}); return { __esModule: true, useTeamStore: m }; });
 import { useTeamStore } from '../../../store/teams';
+jest.mock('../../../hooks/usePermission', () => ({
+  usePermission: jest.fn((p: string) => p === 'individual_goals:write'),
+}));
+
 jest.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: any) => <div>{children}</div>,
   LineChart: () => <div data-testid="line-chart" />,
+  ScatterChart: ({ children }: any) => <div data-testid="scatter-chart">{children}</div>,
+  Scatter: () => null,
   Line: () => null,
   XAxis: () => null,
   YAxis: () => null,
@@ -55,16 +61,16 @@ describe('Progress', () => {
     expect(screen.getByText('Progress Reports')).toBeInTheDocument();
   });
 
-  it('renders Create Report button', () => {
+  it('renders New Report button when user can participate', () => {
     setup();
     render(<Progress />);
-    expect(screen.getByText('Create Progress Report')).toBeInTheDocument();
+    expect(screen.getByText('New Report')).toBeInTheDocument();
   });
 
-  it('navigates to create page on button click', () => {
+  it('navigates to create page on New Report button click', () => {
     setup();
     render(<Progress />);
-    screen.getByText('Create Progress Report').click();
+    screen.getByText('New Report').click();
     expect(mockNavigate).toHaveBeenCalledWith('/progress/create');
   });
 

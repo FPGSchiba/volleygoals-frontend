@@ -571,7 +571,12 @@
       "selectSeason": "Select a season to view the progress graph.",
       "manageReports": "Manage Reports",
       "rating": "Rating"
-    }
+    },
+    "chart": {
+      "clickToOpen": "Click to open",
+      "noReports": "No reports yet this season."
+    },
+    "selectMember": "Select a member from the list above to view their progress."
   },
   "members": {
     "title": "Team Members",
