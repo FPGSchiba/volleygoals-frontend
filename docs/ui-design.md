@@ -51,6 +51,17 @@
 | Members | Member rows with activity bar, role/status badges, invited rows dimmed |
 | Invites | Status filter chips, invite rows with Resend/Revoke actions on pending only |
 
+## Dialog / Modal Design
+
+**Option A — Elevated panel with crimson top border:**
+- `border-top: 3px solid #C41E3A`, `border-radius: 14px`, `border: 1px solid <border>`
+- Background: `bg-paper`; shadow: `0 24px 48px rgba(0,0,0,0.7)` dark / `rgba(0,0,0,0.18)` light
+- Header: `border-bottom: 1px solid <border>`; title 15px/800; close button right (opacity 0.4)
+- Body: fields with `bg-subtle` background, 10px uppercase muted labels
+- Footer: right-aligned Cancel (ghost) + primary button, `border-top: 1px solid <border>`
+- Backdrop: `rgba(0,0,0,0.85)` dark / `rgba(0,0,0,0.25)` light + `backdrop-filter: blur(2px)`
+- Width: `320px` max, `90vw` mobile
+
 ## Navigation Shell
 
 Structurally unchanged. Cosmetic token updates only (rail bg, icon colours, active highlight).

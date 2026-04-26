@@ -211,7 +211,33 @@ Minor cosmetic updates to match new tokens (rail background, icon colours, activ
 
 ---
 
-## 8. Out of Scope
+## 8. Implementation Constraints
+
+- **MUI `sx` props** are acceptable for MUI-specific layout concerns (flex, gap, padding on MUI components) and stay as-is.
+- **All custom visual styles** (colours, borders, hover states, shadows, responsive layout) go in SCSS — not inline styles or `sx`.
+- **No hardcoded colour values in SCSS** — use `var(--palette-*)` CSS variables exclusively.
+- **All dialog/modal fields must be validated** using `react-hook-form` rules or Zod schemas. No UUID input fields anywhere in forms.
+- **`useSettingsStore`** uses Zustand persist middleware — no raw `localStorage` calls outside the store.
+
+---
+
+## 9. Dialog / Modal Design
+
+**Approved style: Option A — Elevated panel with crimson top border.**
+
+- **Top border:** `3px solid #C41E3A` — the only accent element on the dialog, making it instantly identifiable
+- **Background:** `bg-paper` (`#1a1a1a` dark / `#ffffff` light)
+- **Border:** `1px solid <border>`, `border-radius: 14px`
+- **Box shadow:** `0 24px 48px rgba(0,0,0,0.7)` dark / `0 24px 48px rgba(0,0,0,0.18)` light
+- **Header:** `border-bottom: 1px solid <border>`, padding `16px 18px 12px`; title 15px weight 800; close button at right (opacity 0.4)
+- **Body:** padding `0 18px 16px`, gap `10px` between fields; field labels 10px weight 700 uppercase `text-muted`; inputs use `bg-subtle` background, `border` border-color, `border-radius: 7px`
+- **Footer:** `border-top: 1px solid <border>`, padding `12px 18px`; flex row, right-aligned; Cancel (ghost) + primary action button
+- **Backdrop:** `rgba(0,0,0,0.85)` dark / `rgba(0,0,0,0.25)` light, with `backdrop-filter: blur(2px)` on the overlay
+- Dialog width: `320px` max, responsive to `90vw` on mobile
+
+---
+
+## 10. Out of Scope
 
 - Tenant administration pages
 - User administration pages  
