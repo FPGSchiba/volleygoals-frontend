@@ -160,12 +160,23 @@ Shown below the grid: `Rating: [1][2][3][4][5]` with labelled cells matching the
 ### 6.3 Goal Details
 - **Two-column layout:** left (description, mini heatmap, comments) · right (meta panel)
 - **Mini heatmap:** all entries for this goal across time, linear row of cells, summary stats below (count, avg, latest)
-- **Meta panel fields:** Owner, Type, Status, Seasons (list of pills), Created, Last entry
+- **Meta panel fields:** Owner, Type, Status, Created, Last entry, Seasons
+- **Seasons field:** season pills (accent colour, rounded) listing all seasons this goal belongs to. Below the pills, Trainers see a compact inline "Add to season…" dropdown + "Add" button. Removing a season association uses an ✕ on the pill (Trainer-only, visible on hover).
 - **Actions:** Edit (ghost) + Add Entry (primary) in the page header
 
-### 6.4 Seasons
+### 6.4 Seasons (list)
 - **Active season hero card:** "Active Season" green label, season name (20px/900), 4 stat counters, progress bar + percentage, "View Goals" (primary) + "View Reports" (ghost) buttons
 - **Past seasons list:** season row with icon, name, date range, goal/report count meta, mini progress bar, completion status badge
+- Each row is clickable and navigates to Season Details
+
+### 6.4a Season Details
+- **Back nav:** `← Back to Seasons`
+- **Eyebrow:** `Season`
+- **Page title:** season name
+- **Header actions:** Edit Season (ghost) — opens inline edit or dialog for name/status/dates (Trainer-only)
+- **Two-column layout:**
+  - **Left — Goals panel:** lists all goals currently tagged to this season, each as a row with goal name, type + status meta, and an ✕ remove button (Trainer-only). Below the list: "Add a goal to this season…" dropdown + "Add" button (Trainer-only).
+  - **Right — Meta panel:** Status badge, Start date, End date, goal count, report count, completion percentage with progress bar
 
 ### 6.5 Progress Reports
 - **Header:** page title + season chip selector (right) + "New Report" primary button

@@ -43,8 +43,9 @@
 |---|---|
 | Dashboard | 5-col stat grid (all numbers in accent), heatmap panel, activity feed, season progress strip |
 | Goals | Search + New Goal toolbar, status/type/season filter chips, goal rows with season tags |
-| Goal Details | Two-column: content left, meta panel right; mini heatmap, comments |
-| Seasons | Active season hero card + past seasons list with mini progress bars |
+| Goal Details | Two-column: content left, meta panel right; mini heatmap, comments; Seasons row with pills + Trainer add/remove |
+| Seasons | Active season hero card + past seasons list with mini progress bars; rows navigate to Season Details |
+| Season Details | Two-column: left = goals list with Trainer add/remove; right = meta panel (status, dates, counts, completion bar) |
 | Progress Reports | Season chip + context switcher chips; heatmap replaces scatter chart; report rows |
 | Progress Creation | Season chip, summary/notes fields, goal rating cells (numbered 1–5, heatmap colours) |
 | Progress Details | Report summary as title, expandable goal entry rows, comments |
