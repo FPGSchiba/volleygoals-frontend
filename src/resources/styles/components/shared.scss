@@ -1,0 +1,253 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
+/* ── Back navigation ── */
+.vg-back-nav {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--vg-text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 20px;
+  user-select: none;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  &:hover { color: var(--palette-text-primary); }
+}
+
+/* ── Eyebrow label ── */
+.vg-eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--vg-text-muted);
+  margin-bottom: 4px;
+}
+
+/* ── Page title ── */
+.vg-page-title {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: var(--palette-text-primary);
+  line-height: 1.1;
+  margin-bottom: 0;
+}
+
+/* ── Panel / card ── */
+.vg-panel {
+  border-radius: 11px;
+  border: 1px solid var(--vg-border);
+  background: var(--palette-background-paper);
+  padding: 16px;
+}
+
+.vg-panel-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--vg-text-muted);
+  margin-bottom: 12px;
+}
+
+/* ── Stat card ── */
+.vg-stat-card {
+  border-radius: 11px;
+  border: 1px solid var(--vg-border);
+  background: var(--palette-background-paper);
+  padding: 16px;
+}
+.vg-stat-num {
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--palette-primary-main);
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.vg-stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--vg-text-muted);
+  margin-top: 4px;
+}
+
+/* ── Filter chip ── */
+.vg-chip {
+  height: 28px;
+  border-radius: 7px;
+  padding: 0 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--vg-border);
+  background: var(--palette-background-paper);
+  color: var(--vg-text-muted);
+  user-select: none;
+  white-space: nowrap;
+  font-family: inherit;
+  &:hover { color: var(--palette-text-primary); border-color: var(--vg-border-strong); }
+  &--active {
+    background: var(--vg-chip-active-bg);
+    border-color: var(--vg-chip-active-border);
+    color: var(--palette-primary-main);
+  }
+}
+
+/* ── Row item ── */
+.vg-row-item {
+  border-radius: 11px;
+  border: 1px solid var(--vg-border);
+  background: var(--palette-background-paper);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.15s;
+  &:hover { border-color: var(--vg-row-hover-border); }
+}
+
+/* ── Badge ── */
+.vg-badge {
+  padding: 2px 8px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  display: inline-flex;
+  align-items: center;
+}
+.vg-badge--open    { background: var(--vg-status-open-bg);     color: var(--vg-status-open-text); }
+.vg-badge--progress{ background: var(--vg-status-progress-bg); color: var(--vg-status-progress-text); }
+.vg-badge--done    { background: var(--vg-status-done-bg);     color: var(--vg-status-done-text); }
+.vg-badge--muted   { background: var(--vg-status-muted-bg);    color: var(--vg-text-muted); }
+.vg-badge--trainer { background: var(--vg-trainer-badge-bg);   color: var(--palette-primary-main); }
+
+/* ── Meta row (detail pages) ── */
+.vg-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 8px 0;
+  font-size: 11px;
+  & + & { border-top: 1px solid var(--vg-border); }
+}
+.vg-meta-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--vg-text-muted);
+  flex-shrink: 0;
+}
+.vg-meta-value {
+  color: var(--palette-text-primary);
+  font-size: 12px;
+  text-align: right;
+  flex: 1;
+  margin-left: 8px;
+}
+
+/* ── Two-column detail layout ── */
+.vg-two-col {
+  display: grid;
+  grid-template-columns: 1fr 256px;
+  gap: 12px;
+  @include mobile-only { grid-template-columns: 1fr; }
+}
+
+/* ── Dialog (Option A) ── */
+.vg-dialog-paper {
+  border-top: 3px solid var(--palette-primary-main) !important;
+  border-radius: 14px !important;
+}
+
+/* ── Season pill ── */
+.vg-season-pill {
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  background: var(--vg-season-pill-bg);
+  border: 1px solid var(--vg-season-pill-border);
+  color: var(--palette-primary-main);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Progress bar ── */
+.vg-prog-track {
+  height: 5px;
+  border-radius: 3px;
+  background: var(--vg-border);
+  overflow: hidden;
+}
+.vg-prog-fill {
+  height: 100%;
+  background: var(--palette-primary-main);
+  border-radius: 3px;
+}
+
+/* ── Activity bar (Members) ── */
+.vg-activity-bar { width: 60px; flex-shrink: 0; }
+.vg-activity-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--vg-border);
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+.vg-activity-fill { height: 100%; background: var(--palette-primary-main); border-radius: 2px; }
+.vg-activity-label { font-size: 9px; font-weight: 600; color: var(--palette-primary-main); }
+
+/* ── Avatar circle ── */
+.vg-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+/* ── Chevron ── */
+.vg-chevron { font-size: 14px; color: var(--vg-text-muted); flex-shrink: 0; }
+
+/* ── Heatmap cell focus ring ── */
+.vg-heatmap-cell--rated:focus-visible {
+  outline: 2px solid var(--palette-primary-main);
+  outline-offset: 2px;
+  border-radius: 5px;
+}
+
+/* ── Toolbar row ── */
+.vg-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+/* ── Chip row ── */
+.vg-chip-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}

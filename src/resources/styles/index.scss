@@ -24,6 +24,7 @@ body {
   @include meta.load-css("components/navigation");
   @include meta.load-css("components/notification");
   @include meta.load-css("components/itemlist");
+  @include meta.load-css("components/shared");
 
   // Pages — user
   @include meta.load-css("pages/login");
