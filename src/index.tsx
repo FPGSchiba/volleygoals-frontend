@@ -74,45 +74,21 @@ const Root = () => {
       createTheme({
         palette: {
           mode: mode,
-          primary: {
-            main: '#C41E3A', // Red from logo
-          },
-          secondary: {
-            main: '#000000', // Black from logo
-          },
+          primary: { main: '#C41E3A' },
+          secondary: { main: '#000000' },
           ...(mode === 'dark' ? {
-            text: {
-              primary: '#ffffff',
-              secondary: '#b0b0b0'
-            },
-            background: {
-              default: '#0a0a0a',
-              paper: '#1a1a1a'
-            },
-            divider: '#333333',
+            text: { primary: '#ffffff', secondary: '#aaaaaa' },
+            background: { default: '#0d0d0d', paper: '#1a1a1a' },
+            divider: '#252525',
           } : {
-            text: {
-              primary: '#000000',
-              secondary: '#666666'
-            },
-            background: {
-              default: '#ffffff',
-              paper: '#f8f8f8'
-            },
-            divider: '#e0e0e0',
+            text: { primary: '#111111', secondary: '#555555' },
+            background: { default: '#f2f2f2', paper: '#ffffff' },
+            divider: '#e4e4e4',
           }),
-          success: {
-            main: '#4caf50',
-          },
-          error: {
-            main: '#C41E3A', // Using logo red for errors
-          },
-          warning: {
-            main: '#ff9800',
-          },
-          info: {
-            main: '#2196f3',
-          },
+          success: { main: '#4caf50' },
+          error: { main: '#C41E3A' },
+          warning: { main: '#ff9800' },
+          info: { main: '#2196f3' },
         },
       }),
     [mode]
@@ -143,6 +119,32 @@ const Root = () => {
             '--palette-error-main': t.palette.error.main,
             '--palette-warning-main': t.palette.warning.main,
             '--palette-info-main': t.palette.info.main,
+            '--vg-bg-subtle': t.palette.mode === 'dark' ? '#141414' : '#fafafa',
+            '--vg-border': t.palette.mode === 'dark' ? '#252525' : '#e4e4e4',
+            '--vg-border-strong': t.palette.mode === 'dark' ? '#2a2a2a' : '#dddddd',
+            '--vg-text-muted': t.palette.mode === 'dark' ? '#555555' : '#aaaaaa',
+            '--vg-text-disabled': t.palette.mode === 'dark' ? '#333333' : '#cccccc',
+            '--vg-rail-bg': t.palette.mode === 'dark' ? '#161616' : '#e8e8e8',
+            '--vg-rail-border': t.palette.mode === 'dark' ? '#222222' : '#dddddd',
+            '--vg-accent': '#C41E3A',
+            '--vg-chip-active-bg': 'rgba(196,30,58,0.15)',
+            '--vg-chip-active-border': 'rgba(196,30,58,0.30)',
+            '--vg-row-hover-border': 'rgba(196,30,58,0.25)',
+            '--vg-season-pill-bg': 'rgba(196,30,58,0.10)',
+            '--vg-season-pill-border': 'rgba(196,30,58,0.25)',
+            '--vg-trainer-badge-bg': 'rgba(196,30,58,0.12)',
+            '--vg-status-open-bg': 'rgba(255,152,0,0.12)',
+            '--vg-status-open-text': '#f09800',
+            '--vg-status-progress-bg': 'rgba(33,150,243,0.12)',
+            '--vg-status-progress-text': '#2196f3',
+            '--vg-status-done-bg': 'rgba(76,175,80,0.12)',
+            '--vg-status-done-text': '#4caf50',
+            '--vg-status-muted-bg': 'rgba(128,128,128,0.10)',
+            '--vg-r1-bg': '#fce4e9', '--vg-r1-text': '#6b1323',
+            '--vg-r2-bg': '#f4a0b0', '--vg-r2-text': '#5a0e1c',
+            '--vg-r3-bg': '#e05575', '--vg-r3-text': '#ffffff',
+            '--vg-r4-bg': '#c4283e', '--vg-r4-text': '#ffffff',
+            '--vg-r5-bg': '#8b0000', '--vg-r5-text': '#ffffff',
           },
         })} />
         <App />
