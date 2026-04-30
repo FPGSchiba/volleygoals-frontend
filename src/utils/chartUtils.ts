@@ -105,3 +105,73 @@ export function buildGoalActivityScatterData(
 
   return { points, goalNames };
 }
+
+export const HEATMAP_RATING_COLORS: Record<number, { bg: string; text: string }> = {
+  1: { bg: '#fce4e9', text: '#6b1323' },
+  2: { bg: '#f4a0b0', text: '#5a0e1c' },
+  3: { bg: '#e05575', text: '#ffffff' },
+  4: { bg: '#c4283e', text: '#ffffff' },
+  5: { bg: '#8b0000', text: '#ffffff' },
+};
+
+export interface HeatmapCell {
+  date: string;
+  rating: 1 | 2 | 3 | 4 | 5;
+  progressId: string;
+  reportId: string;
+}
+
+export interface HeatmapRow {
+  goalId: string;
+  goalName: string;
+  cells: Record<string, HeatmapCell>;
+}
+
+export interface HeatmapData {
+  rows: HeatmapRow[];
+  dateColumns: string[];
+}
+
+export function buildHeatmapData(
+  reports: Array<{
+    id: string;
+    createdAt: string;
+    progress?: Array<{ id: string; goalId: string; rating: number }>;
+  }>,
+  goals: Array<{ id: string; title: string }>,
+  maxColumns?: number,
+): HeatmapData {
+  const goalMap = new Map(goals.map(g => [g.id, g.title]));
+  const rowMap = new Map<string, HeatmapRow>();
+  const dateSet = new Set<string>();
+
+  for (const report of reports) {
+    const date = report.createdAt.substring(0, 10);
+    for (const entry of report.progress ?? []) {
+      if (!goalMap.has(entry.goalId)) continue;
+      dateSet.add(date);
+      if (!rowMap.has(entry.goalId)) {
+        rowMap.set(entry.goalId, {
+          goalId: entry.goalId,
+          goalName: goalMap.get(entry.goalId)!,
+          cells: {},
+        });
+      }
+      const r = Math.min(5, Math.max(1, Math.round(entry.rating))) as 1 | 2 | 3 | 4 | 5;
+      rowMap.get(entry.goalId)!.cells[date] = {
+        date,
+        rating: r,
+        progressId: entry.id,
+        reportId: report.id,
+      };
+    }
+  }
+
+  let dateColumns = Array.from(dateSet).sort();
+  if (maxColumns !== undefined && dateColumns.length > maxColumns) {
+    dateColumns = dateColumns.slice(dateColumns.length - maxColumns);
+  }
+
+  const rows = goals.filter(g => rowMap.has(g.id)).map(g => rowMap.get(g.id)!);
+  return { rows, dateColumns };
+}
