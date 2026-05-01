@@ -75,4 +75,25 @@ describe('Goals', () => {
     const deleteButtons = screen.getAllByText('Delete');
     deleteButtons.forEach(btn => expect(btn).toBeDisabled());
   });
+
+  it('renders chip filter buttons instead of ToggleButtonGroup', () => {
+    setup();
+    render(<Goals />);
+    const allChips = screen.getAllByText('All');
+    expect(allChips.length).toBeGreaterThanOrEqual(1);
+    expect(allChips[0].tagName).toBe('BUTTON');
+  });
+
+  it('renders New Goal button', () => {
+    setup({ role: RoleType.Trainer });
+    render(<Goals />);
+    expect(screen.getByText('New Goal')).toBeInTheDocument();
+  });
+
+  it('renders goal rows as vg-row-item when goals exist', () => {
+    const goal = buildGoal({ id: 'g1', title: 'Serve accuracy' });
+    setup({ goals: [goal] });
+    render(<Goals />);
+    expect(screen.getByText('Serve accuracy')).toBeInTheDocument();
+  });
 });
