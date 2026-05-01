@@ -4,60 +4,95 @@
 .season-details-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 1000px;
+  padding-bottom: 24px;
+  max-width: 1100px;
 }
 
 .season-details-header {
   display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.season-details-goal-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-
-  @include mobile-only {
-    flex-direction: column;
-    align-items: flex-start;
-  }
+  padding: 9px 0;
+  border-bottom: 1px solid var(--vg-border);
+  &:last-of-type { border-bottom: none; }
 }
 
-.season-details-title {
+.season-details-goal-name {
+  font-size: 12px;
   font-weight: 600;
+  color: var(--palette-text-primary);
 }
 
-.season-details-meta {
+.season-details-goal-meta {
+  font-size: 10px;
+  color: var(--vg-text-muted);
+  margin-top: 2px;
+}
+
+.season-details-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--vg-text-muted);
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  &:hover { color: var(--palette-error-main); }
+}
+
+.season-details-add-row {
   display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
   align-items: center;
+  gap: 8px;
+  margin-top: 12px;
 }
 
-.season-details-section {
-  padding: 16px;
-  background: var(--palette-background-paper);
-  border: 1px solid var(--palette-divider);
+.season-details-add-select {
+  flex: 1;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid var(--vg-border);
+  background: var(--vg-bg-subtle);
+  color: var(--vg-text-muted);
+  font-size: 11px;
+  font-family: inherit;
+  padding: 0 10px;
+  &:focus { outline: none; border-color: var(--palette-primary-main); }
+}
+
+.season-details-add-btn {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 7px;
+  border: none;
+  background: var(--palette-primary-main);
+  color: var(--palette-common-white, #fff);
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  &:disabled { opacity: 0.5; cursor: default; }
+}
+
+.season-details-edit-btn {
+  background: none;
+  border: 1px solid var(--vg-border);
   border-radius: 8px;
-}
-
-.season-details-section-title {
+  height: 30px;
+  padding: 0 13px;
+  font-size: 11px;
   font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.season-details-goal-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  border-bottom: 1px solid var(--palette-divider);
-
-  &:last-child {
-    border-bottom: none;
-  }
-}
-
-.season-details-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  color: var(--vg-text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  &:hover { color: var(--palette-text-primary); border-color: var(--vg-border-strong); }
 }

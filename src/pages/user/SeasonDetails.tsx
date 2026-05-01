@@ -1,71 +1,67 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Box, Typography, Paper, TextField, MenuItem, IconButton, Chip, Button } from '@mui/material';
-import ClearIcon from '@mui/icons-material/Clear';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { Controller, useForm } from 'react-hook-form';
 import { useSeasonStore } from '../../store/seasons';
 import { useGoalStore } from '../../store/goals';
 import { useCognitoUserStore } from '../../store/cognitoUser';
 import { ISeason, SeasonStatus, RoleType } from '../../store/types';
 import i18next from 'i18next';
 
+type SeasonEditForm = { name: string; startDate: string; endDate: string; status: SeasonStatus | '' };
+
+function statusBadgeClass(s: SeasonStatus) {
+  if (s === SeasonStatus.Active) return 'vg-badge vg-badge--done';
+  if (s === SeasonStatus.Planned) return 'vg-badge vg-badge--progress';
+  return 'vg-badge vg-badge--muted';
+}
+
 export function SeasonDetails() {
   const { seasonId } = useParams<{ seasonId: string }>();
   const navigate = useNavigate();
 
-  const getSeason = useSeasonStore((s) => s.getSeason);
-  const updateSeason = useSeasonStore((s) => s.updateSeason);
-  const [season, setSeason] = useState<ISeason | null>(null);
+  const getSeason = useSeasonStore(s => s.getSeason);
+  const updateSeason = useSeasonStore(s => s.updateSeason);
+  const seasons = useSeasonStore(s => s.seasonList.seasons);
 
-  const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
+  // Initialize from store list immediately (sync) so tests and fast renders work,
+  // then refresh via getSeason in the background for fresh data.
+  const [season, setSeason] = useState<ISeason | null>(
+    () => seasons.find(s => s.id === seasonId) ?? null,
+  );
+
+  const selectedTeam = useCognitoUserStore(s => s.selectedTeam);
   const teamId = selectedTeam?.team?.id || '';
-
-  const fetchGoals = useGoalStore((s) => s.fetchGoals);
-  const goals = useGoalStore((s) => s.goalList.goals);
-
-  const tagGoalToSeason = useGoalStore((s) => s.tagGoalToSeason);
-  const untagGoalFromSeason = useGoalStore((s) => s.untagGoalFromSeason);
-
   const userRole = selectedTeam?.role;
   const canEdit = userRole === RoleType.Admin || userRole === RoleType.Trainer;
 
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [draftName, setDraftName] = useState('');
-  const [draftStartDate, setDraftStartDate] = useState('');
-  const [draftEndDate, setDraftEndDate] = useState('');
-  const [draftStatus, setDraftStatus] = useState<SeasonStatus | ''>('');
+  const fetchGoals = useGoalStore(s => s.fetchGoals);
+  const goals = useGoalStore(s => s.goalList.goals);
+  const fetchSeasonGoals = useGoalStore(s => s.fetchSeasonGoals);
+  const seasonGoals = useGoalStore(s => s.seasonGoals);
+  const tagGoalToSeason = useGoalStore(s => s.tagGoalToSeason);
+  const untagGoalFromSeason = useGoalStore(s => s.untagGoalFromSeason);
 
   useEffect(() => {
     if (seasonId) {
-      setLoading(true);
-      getSeason(seasonId).then((res) => {
-        setSeason(res);
-        setLoading(false);
-      });
+      getSeason(seasonId).then(res => { if (res) setSeason(res); });
     }
-  }, [seasonId]);
+  }, [seasonId, getSeason]);
 
   useEffect(() => {
-    if (teamId) {
-      fetchGoals(teamId, {});
-    }
-  }, [teamId]);
-
-  const fetchSeasonGoals = useGoalStore((s) => s.fetchSeasonGoals);
-  const seasonGoals = useGoalStore((s) => s.seasonGoals);
+    if (teamId) fetchGoals(teamId, {});
+  }, [teamId, fetchGoals]);
 
   useEffect(() => {
-    if (teamId && seasonId) {
-      fetchSeasonGoals(teamId, seasonId);
-    }
-  }, [teamId, seasonId, goals]);
-
-  const handleTag = async (goalId: string) => {
-    if (!teamId || !seasonId || !goalId) return;
-    await tagGoalToSeason(teamId, goalId, seasonId);
-    fetchSeasonGoals(teamId, seasonId);
-  };
+    if (teamId && seasonId) fetchSeasonGoals(teamId, seasonId);
+  }, [teamId, seasonId, fetchSeasonGoals]);
 
   const handleUntag = async (goalId: string) => {
     if (!teamId || !seasonId) return;
@@ -73,162 +69,250 @@ export function SeasonDetails() {
     fetchSeasonGoals(teamId, seasonId);
   };
 
-  const handleSaveSeason = async () => {
+  const [addGoalId, setAddGoalId] = useState('');
+  const handleTag = async () => {
+    if (!addGoalId || !teamId || !seasonId) return;
+    await tagGoalToSeason(teamId, addGoalId, seasonId);
+    fetchSeasonGoals(teamId, seasonId);
+    setAddGoalId('');
+  };
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const { control, handleSubmit, reset } = useForm<SeasonEditForm>({
+    defaultValues: { name: '', startDate: '', endDate: '', status: '' },
+  });
+
+  useEffect(() => {
+    if (!season) return;
+    reset({
+      name: season.name || '',
+      startDate: season.startDate?.substring(0, 10) ?? '',
+      endDate: season.endDate?.substring(0, 10) ?? '',
+      status: season.status || '',
+    });
+  }, [season, reset]);
+
+  const onEdit = async (data: SeasonEditForm) => {
     if (!season || !canEdit) return;
     setSaving(true);
     try {
       await updateSeason(
         season.id,
-        draftName,
-        draftStartDate ? new Date(draftStartDate).toISOString() : undefined,
-        draftEndDate ? new Date(draftEndDate).toISOString() : undefined,
-        (draftStatus as SeasonStatus) || undefined,
+        data.name,
+        data.startDate ? new Date(data.startDate).toISOString() : undefined,
+        data.endDate ? new Date(data.endDate).toISOString() : undefined,
+        (data.status as SeasonStatus) || undefined,
       );
       const refreshed = await getSeason(season.id);
       if (refreshed) setSeason(refreshed);
+      setEditOpen(false);
     } finally {
       setSaving(false);
     }
   };
 
-  useEffect(() => {
-    if (!season) return;
-    setDraftName(season.name || '');
-    setDraftStartDate(season.startDate ? season.startDate.substring(0, 10) : '');
-    setDraftEndDate(season.endDate ? season.endDate.substring(0, 10) : '');
-    setDraftStatus(season.status || '');
-  }, [season]);
+  const untaggedGoals = goals.filter(g => !seasonGoals.some(sg => sg.id === g.id));
 
-  if (loading || !season) {
+  if (!season) {
     return (
-      <Paper className="season-details-section">
-        <Box p={2}>
-          <Box className="season-details-header">
-            <IconButton onClick={() => navigate('/seasons')} size="small">
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography variant="h5" className="season-details-title">
-              {i18next.t('seasonDetails.title', 'Season Details')}
-            </Typography>
-          </Box>
-          <Typography mt={2}>{i18next.t('common.loading', 'Loading...')}</Typography>
-        </Box>
-      </Paper>
+      <Box sx={{ p: 3 }}>
+        <Typography>{i18next.t('common.loading', 'Loading…')}</Typography>
+      </Box>
     );
   }
 
   return (
-    <Box className="season-details-page">
-      <Box className="season-details-header">
-        <Box display="flex" alignItems="center" gap={1}>
-          <IconButton onClick={() => navigate('/seasons')} size="small">
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h5" className="season-details-title">
-            {i18next.t('seasonDetails.title', 'Season Details')}
-          </Typography>
-        </Box>
-        <Box className="season-details-meta">
-          <Chip
-            label={season.status}
-            color={
-              season.status === SeasonStatus.Active
-                ? 'success'
-                : season.status === SeasonStatus.Planned
-                  ? 'primary'
-                  : 'default'
-            }
-          />
-        </Box>
-      </Box>
+    <Box className="season-details-page" sx={{ p: { xs: 2, sm: 3 } }}>
+      <button className="vg-back-nav" onClick={() => navigate('/seasons')}>
+        ← {i18next.t('seasonDetails.backToSeasons', 'Back to Seasons')}
+      </button>
 
-      <Paper className="season-details-section">
-        <Typography variant="subtitle1" className="season-details-section-title">
-          {i18next.t('seasonDetails.infoSection', 'Season Info')}
-        </Typography>
-        <Box display="flex" flexDirection="column" gap={2}>
-          <TextField
-            fullWidth
-            label={i18next.t('user.seasons.form.name', 'Name')}
-            value={draftName}
-            onChange={(e) => setDraftName(e.target.value)}
-            disabled={!canEdit || saving}
-          />
-          <TextField
-            select
-            size="small"
-            label={i18next.t('user.seasons.form.status', 'Status')}
-            value={draftStatus}
-            onChange={(e) => setDraftStatus(e.target.value as SeasonStatus)}
-            disabled={!canEdit || saving}
-          >
-            <MenuItem value={SeasonStatus.Planned}>{i18next.t('user.seasons.status.planned', 'Planned')}</MenuItem>
-            <MenuItem value={SeasonStatus.Active}>{i18next.t('user.seasons.status.active', 'Active')}</MenuItem>
-            <MenuItem value={SeasonStatus.Completed}>{i18next.t('user.seasons.status.completed', 'Completed')}</MenuItem>
-            <MenuItem value={SeasonStatus.Archived}>{i18next.t('user.seasons.status.archived', 'Archived')}</MenuItem>
-          </TextField>
-          <Box display="flex" gap={2}>
-            <TextField
-              fullWidth
-              type="date"
-              label={i18next.t('user.seasons.form.startDate', 'Start Date')}
-              InputLabelProps={{ shrink: true }}
-              value={draftStartDate}
-              onChange={(e) => setDraftStartDate(e.target.value)}
-              disabled={!canEdit || saving}
-            />
-            <TextField
-              fullWidth
-              type="date"
-              label={i18next.t('user.seasons.form.endDate', 'End Date')}
-              InputLabelProps={{ shrink: true }}
-              value={draftEndDate}
-              onChange={(e) => setDraftEndDate(e.target.value)}
-              disabled={!canEdit || saving}
-            />
-          </Box>
-        </Box>
-
+      <div className="season-details-header">
+        <div>
+          <div className="vg-eyebrow">{i18next.t('seasonDetails.eyebrow', 'Season')}</div>
+          <div className="vg-page-title">{season.name}</div>
+        </div>
         {canEdit && (
-          <Box mt={2} className="season-details-actions">
-            <Button variant="contained" onClick={handleSaveSeason} disabled={saving}>
-              {i18next.t('common.save', 'Save')}
-            </Button>
-          </Box>
+          <button className="season-details-edit-btn" onClick={() => setEditOpen(true)}>
+            {i18next.t('common.edit', 'Edit Season')}
+          </button>
         )}
-      </Paper>
+      </div>
 
-      <Paper className="season-details-section">
-        <Typography variant="subtitle1" className="season-details-section-title">
-          {i18next.t('seasonDetails.associatedGoals', 'Associated Goals')}
-        </Typography>
-        {seasonGoals.map(g => (
-          <Box key={g.id} className="season-details-goal-item">
-            <Typography variant="body2">{g.title}</Typography>
-            {canEdit && (
-              <IconButton size="small" onClick={() => handleUntag(g.id)}>
-                <ClearIcon fontSize="small" />
-              </IconButton>
+      <div className="vg-two-col">
+        {/* Left — goals panel */}
+        <div>
+          <div className="vg-panel">
+            <div className="vg-panel-title">{i18next.t('seasonDetails.associatedGoals', 'Goals in this Season')}</div>
+
+            {seasonGoals.map(g => (
+              <div key={g.id} className="season-details-goal-row">
+                <div>
+                  <div className="season-details-goal-name">{g.title}</div>
+                  <div className="season-details-goal-meta">{g.goalType} · {g.status}</div>
+                </div>
+                {canEdit && (
+                  <button
+                    className="season-details-remove-btn"
+                    onClick={() => handleUntag(g.id)}
+                    title={i18next.t('seasonDetails.removeGoal', 'Remove')}
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {seasonGoals.length === 0 && (
+              <Typography sx={{ fontSize: 12, color: 'var(--vg-text-muted)', py: 2 }}>
+                {i18next.t('seasonDetails.noGoals', 'No goals tagged to this season yet.')}
+              </Typography>
             )}
+
+            {canEdit && (
+              <div className="season-details-add-row">
+                <select
+                  className="season-details-add-select"
+                  value={addGoalId}
+                  onChange={e => setAddGoalId(e.target.value)}
+                  disabled={untaggedGoals.length === 0}
+                >
+                  <option value="">{i18next.t('seasonDetails.addGoalPlaceholder', 'Add a goal to this season…')}</option>
+                  {untaggedGoals.map(g => <option key={g.id} value={g.id}>{g.title}</option>)}
+                </select>
+                <button className="season-details-add-btn" onClick={handleTag} disabled={!addGoalId}>
+                  + {i18next.t('common.add', 'Add')}
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right — meta panel */}
+        <div>
+          <div className="vg-panel">
+            <div className="vg-panel-title">{i18next.t('seasonDetails.info', 'Season Info')}</div>
+            <div className="vg-meta-row">
+              <span className="vg-meta-label">{i18next.t('user.seasons.form.status', 'Status')}</span>
+              <span className="vg-meta-value">
+                <span className={statusBadgeClass(season.status)}>{season.status}</span>
+              </span>
+            </div>
+            <div className="vg-meta-row">
+              <span className="vg-meta-label">{i18next.t('user.seasons.form.startDate', 'Start')}</span>
+              <span className="vg-meta-value">
+                {season.startDate
+                  ? new Date(season.startDate).toLocaleDateString(i18next.language || undefined)
+                  : '—'}
+              </span>
+            </div>
+            <div className="vg-meta-row">
+              <span className="vg-meta-label">{i18next.t('user.seasons.form.endDate', 'End')}</span>
+              <span className="vg-meta-value">
+                {season.endDate
+                  ? new Date(season.endDate).toLocaleDateString(i18next.language || undefined)
+                  : '—'}
+              </span>
+            </div>
+            <div className="vg-meta-row">
+              <span className="vg-meta-label">{i18next.t('seasonDetails.goalCount', 'Goals')}</span>
+              <span className="vg-meta-value">{seasonGoals.length}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Edit Dialog */}
+      <Dialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ className: 'vg-dialog-paper' }}
+      >
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+          {i18next.t('seasonDetails.editTitle', 'Edit Season')}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <TextField
+                  fullWidth
+                  size="small"
+                  label={i18next.t('user.seasons.form.name', 'Name')}
+                  {...field}
+                />
+              )}
+            />
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  select
+                  fullWidth
+                  size="small"
+                  label={i18next.t('user.seasons.form.status', 'Status')}
+                  {...field}
+                >
+                  <MenuItem value={SeasonStatus.Planned}>{i18next.t('user.seasons.status.planned', 'Planned')}</MenuItem>
+                  <MenuItem value={SeasonStatus.Active}>{i18next.t('user.seasons.status.active', 'Active')}</MenuItem>
+                  <MenuItem value={SeasonStatus.Completed}>{i18next.t('user.seasons.status.completed', 'Completed')}</MenuItem>
+                  <MenuItem value={SeasonStatus.Archived}>{i18next.t('user.seasons.status.archived', 'Archived')}</MenuItem>
+                </TextField>
+              )}
+            />
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Controller
+                name="startDate"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    fullWidth
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    label={i18next.t('user.seasons.form.startDate', 'Start Date')}
+                    {...field}
+                  />
+                )}
+              />
+              <Controller
+                name="endDate"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    fullWidth
+                    type="date"
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                    label={i18next.t('user.seasons.form.endDate', 'End Date')}
+                    {...field}
+                  />
+                )}
+              />
+            </Box>
           </Box>
-        ))}
-        {canEdit && (
-          <Box mt={2} maxWidth={300}>
-            <TextField
-              select
-              size="small"
-              fullWidth
-              label={i18next.t('seasonDetails.tagGoal', 'Tag goal to this season')}
-              value=""
-              onChange={(e) => { if (e.target.value) handleTag(e.target.value); }}
-            >
-              {goals
-                .filter(g => !seasonGoals.some(sg => sg.id === g.id))
-                .map(g => <MenuItem key={g.id} value={g.id}>{g.title}</MenuItem>)}
-            </TextField>
-          </Box>
-        )}
-      </Paper>
+        </DialogContent>
+        <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
+          <button className="vg-chip" onClick={() => setEditOpen(false)}>
+            {i18next.t('common.cancel', 'Cancel')}
+          </button>
+          <button
+            className="vg-chip vg-chip--active"
+            onClick={handleSubmit(onEdit)}
+            disabled={saving}
+            style={{ height: 30, borderRadius: 7, padding: '0 14px' }}
+          >
+            {i18next.t('common.save', 'Save')}
+          </button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
