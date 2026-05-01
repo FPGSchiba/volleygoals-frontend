@@ -217,6 +217,9 @@ export function GoalDetails() {
               {i18next.t('goalDetails.delete', 'Delete')}
             </button>
           )}
+          <button className="vg-chip vg-chip--active" onClick={() => navigate('/progress/create')}>
+            + {i18next.t('goalDetails.addEntry', 'Entry')}
+          </button>
         </div>
       </div>
 
@@ -227,26 +230,6 @@ export function GoalDetails() {
             <div className="vg-panel-title">{i18next.t('goalDetails.description', 'Description')}</div>
             <div className="goal-details-description">{currentGoal.description || '—'}</div>
           </div>
-
-          {canModify && editOpen && (
-            <div className="vg-panel" style={{ marginBottom: 12 }}>
-              <div className="vg-panel-title">{i18next.t('goalDetails.editGoal', 'Edit Goal')}</div>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-                <Controller name="title" control={control} rules={{ required: true }} render={({ field }) => (
-                  <TextField fullWidth size="small" label={i18next.t('user.goals.form.title', 'Title')} {...field} />
-                )} />
-                <Controller name="status" control={control} render={({ field }) => (
-                  <TextField select fullWidth size="small" label={i18next.t('goalDetails.status', 'Status')} {...field}>
-                    {Object.entries(STATUS_LABELS).map(([v, l]) => <MenuItem key={v} value={v}>{l}</MenuItem>)}
-                  </TextField>
-                )} />
-                <Controller name="description" control={control} render={({ field }) => (
-                  <TextField fullWidth multiline minRows={4} size="small"
-                    label={i18next.t('user.goals.form.description', 'Description')} {...field} />
-                )} />
-              </Box>
-            </div>
-          )}
 
           <div className="vg-panel" style={{ marginBottom: 12 }}>
             <div className="vg-panel-title">{i18next.t('goalDetails.progressHistory', 'Progress History')}</div>
@@ -338,6 +321,44 @@ export function GoalDetails() {
           </div>
         </div>
       </div>
+
+      {/* Edit Goal Dialog */}
+      {canModify && (
+        <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm"
+          keepMounted
+          PaperProps={{ className: 'vg-dialog-paper' }}>
+          <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+            {i18next.t('goalDetails.editGoal', 'Edit Goal')}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+              <Controller name="title" control={control} rules={{ required: true }} render={({ field }) => (
+                <TextField fullWidth size="small" label={i18next.t('user.goals.form.title', 'Title')} {...field} />
+              )} />
+              <Controller name="status" control={control} render={({ field }) => (
+                <TextField select fullWidth size="small" label={i18next.t('goalDetails.status', 'Status')} {...field}>
+                  {Object.entries(STATUS_LABELS).map(([v, l]) => <MenuItem key={v} value={v}>{l}</MenuItem>)}
+                </TextField>
+              )} />
+              <Controller name="description" control={control} render={({ field }) => (
+                <TextField fullWidth multiline minRows={4} size="small"
+                  label={i18next.t('user.goals.form.description', 'Description')} {...field} />
+              )} />
+            </Box>
+          </DialogContent>
+          <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5, justifyContent: 'space-between' }}>
+            {canDelete && (
+              <button className="vg-chip" onClick={() => { setEditOpen(false); setDeleteOpen(true); }}
+                style={{ color: 'var(--palette-error-main)', borderColor: 'var(--palette-error-main)' }}>
+                {i18next.t('goalDetails.delete', 'Delete')}
+              </button>
+            )}
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <button className="vg-chip" onClick={() => setEditOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</button>
+            </Box>
+          </DialogActions>
+        </Dialog>
+      )}
 
       {/* Delete Confirmation Dialog */}
       <Dialog
