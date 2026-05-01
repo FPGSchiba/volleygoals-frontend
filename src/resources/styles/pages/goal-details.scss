@@ -4,62 +4,93 @@
 .goal-details-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 900px;
+  padding-bottom: 24px;
+  max-width: 1100px;
 }
 
 .goal-details-header {
   display: flex;
   align-items: flex-start;
-  gap: 16px;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-}
-
-.goal-details-avatar {
-  flex-shrink: 0;
-}
-
-.goal-details-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.goal-details-title {
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.goal-details-meta {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-top: 8px;
-}
-
-.goal-details-meta-item {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.goal-details-meta-label {
-  font-size: 0.75rem;
-  color: var(--palette-text-secondary);
 }
 
 .goal-details-actions {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
-
-  @include mobile-only {
-    flex-direction: column;
-  }
+  align-items: center;
+  flex-shrink: 0;
 }
 
-.goal-details-section {
-  padding: 16px;
+.goal-details-description {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--palette-text-secondary);
+}
+
+.goal-details-heatmap-stats {
+  display: flex;
+  gap: 20px;
+  margin-top: 12px;
+}
+
+.goal-details-heatmap-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.goal-details-heatmap-stat-num {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--palette-primary-main);
+}
+
+.goal-details-heatmap-stat-label {
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--vg-text-muted);
+}
+
+.goal-details-season-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
+.goal-details-tag-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  justify-content: flex-end;
+}
+
+.goal-details-tag-select {
+  height: 26px;
+  border-radius: 6px;
+  border: 1px solid var(--vg-border);
   background: var(--palette-background-paper);
-  border: 1px solid var(--palette-divider);
-  border-radius: 8px;
+  color: var(--vg-text-muted);
+  font-size: 10px;
+  font-family: inherit;
+  padding: 0 8px;
+  &:focus { outline: none; border-color: var(--palette-primary-main); }
+}
+
+.goal-details-tag-btn {
+  height: 26px;
+  border-radius: 6px;
+  border: none;
+  background: var(--palette-primary-main);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 0 10px;
+  cursor: pointer;
+  font-family: inherit;
 }

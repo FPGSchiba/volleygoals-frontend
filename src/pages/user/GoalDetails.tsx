@@ -1,112 +1,137 @@
-import React, { useRef, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import {
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
-  MenuItem,
-  Paper,
-  TextField,
-  Typography,
-} from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Controller, useForm } from "react-hook-form";
-import { useGoalStore } from "../../store/goals";
-import { useSeasonStore } from "../../store/seasons";
-import { useCognitoUserStore } from "../../store/cognitoUser";
-import { usePermission } from "../../hooks/usePermission";
-import { useTeamStore } from "../../store/teams";
-import { CommentType, GoalStatus, GoalType, IGoal } from "../../store/types";
-import { CommentSection } from "../../components/CommentSection";
-import { UserDisplay } from "../../components/UserDisplay";
-import i18next from "i18next";
+import React, { useMemo, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
+import { Controller, useForm } from 'react-hook-form';
+import { useGoalStore } from '../../store/goals';
+import { useSeasonStore } from '../../store/seasons';
+import { useProgressReportStore } from '../../store/progressReports';
+import { useCognitoUserStore } from '../../store/cognitoUser';
+import { usePermission } from '../../hooks/usePermission';
+import { useTeamStore } from '../../store/teams';
+import { CommentType, GoalStatus, GoalType, IGoal } from '../../store/types';
+import { CommentSection } from '../../components/CommentSection';
+import { GoalHeatmap } from '../../components/progress/GoalHeatmap';
+import { EntryDrawer, EntryDrawerEntry } from '../../components/progress/EntryDrawer';
+import { buildHeatmapData } from '../../utils/chartUtils';
+import i18next from 'i18next';
 
-type EditForm = { title: string; description: string; status: GoalStatus | ""; ownerId: string };
+type EditForm = { title: string; description: string; status: GoalStatus | '' };
+
+const STATUS_LABELS: Record<GoalStatus, string> = {
+  [GoalStatus.Open]: 'Open',
+  [GoalStatus.InProgress]: 'In Progress',
+  [GoalStatus.Completed]: 'Completed',
+  [GoalStatus.Archived]: 'Archived',
+};
 
 export function GoalDetails() {
   const { goalId } = useParams<{ goalId: string }>();
   const navigate = useNavigate();
 
-  const currentGoal = useGoalStore((s) => s.currentGoal);
-  const getGoal = useGoalStore((s) => s.getGoal);
-  const updateGoal = useGoalStore((s) => s.updateGoal);
-  const deleteGoal = useGoalStore((s) => s.deleteGoal);
-  const fetchGoalSeasons = useGoalStore((s) => s.fetchGoalSeasons);
-  const goalSeasons = useGoalStore((s) => s.goalSeasons);
-  const tagGoalToSeason = useGoalStore((s) => s.tagGoalToSeason);
-  const untagGoalFromSeason = useGoalStore((s) => s.untagGoalFromSeason);
+  const currentGoal = useGoalStore(s => s.currentGoal);
+  const getGoal = useGoalStore(s => s.getGoal);
+  const updateGoal = useGoalStore(s => s.updateGoal);
+  const deleteGoal = useGoalStore(s => s.deleteGoal);
+  const fetchGoalSeasons = useGoalStore(s => s.fetchGoalSeasons);
+  const goalSeasons = useGoalStore(s => s.goalSeasons);
+  const tagGoalToSeason = useGoalStore(s => s.tagGoalToSeason);
+  const untagGoalFromSeason = useGoalStore(s => s.untagGoalFromSeason);
 
-  const seasons = useSeasonStore((s) => s.seasonList.seasons);
-  const fetchSeasons = useSeasonStore((s) => s.fetchSeasons);
-  const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
-  const getTeam = useTeamStore((s) => s.getTeam);
-  const currentTeamSettings = useTeamStore((s) => s.currentTeamSettings);
+  const seasons = useSeasonStore(s => s.seasonList.seasons);
+  const fetchSeasons = useSeasonStore(s => s.fetchSeasons);
+  const fetchReports = useProgressReportStore(s => s.fetchReports);
+  const reports = useProgressReportStore(s => s.reportList.reports) || [];
+  const selectedTeam = useCognitoUserStore(s => s.selectedTeam);
+  const teamId = selectedTeam?.team?.id || '';
+  const getTeam = useTeamStore(s => s.getTeam);
+  const currentTeamSettings = useTeamStore(s => s.currentTeamSettings);
 
-  const teamId = selectedTeam?.team?.id || "";
+  const canWriteTeam = usePermission('team_goals:write');
+  const canWriteIndividual = usePermission('individual_goals:write');
+  const canDeleteTeam = usePermission('team_goals:delete');
+  const canDeleteIndividual = usePermission('individual_goals:delete');
 
-  const canWriteTeam = usePermission("team_goals:write");
-  const canWriteIndividual = usePermission("individual_goals:write");
-  const canDeleteTeam = usePermission("team_goals:delete");
-  const canDeleteIndividual = usePermission("individual_goals:delete");
+  const canEditGoal = (g: IGoal) => g.goalType === GoalType.Team ? canWriteTeam : canWriteIndividual;
+  const canDeleteGoal = (g: IGoal) => g.goalType === GoalType.Team ? canDeleteTeam : canDeleteIndividual;
 
-  const canEditGoal = (g: IGoal) =>
-    g.goalType === GoalType.Team ? canWriteTeam : canWriteIndividual;
-  const canDeleteGoal = (g: IGoal) =>
-    g.goalType === GoalType.Team ? canDeleteTeam : canDeleteIndividual;
+  const canModify = currentGoal ? canEditGoal(currentGoal) : false;
+  const canDelete = currentGoal ? canDeleteGoal(currentGoal) : false;
 
   React.useEffect(() => {
-    if (teamId) fetchSeasons(teamId, { teamId });
-  }, [teamId]);
+    if (teamId) {
+      fetchSeasons(teamId, { teamId });
+      getTeam(teamId).catch(() => {});
+    }
+  }, [teamId, fetchSeasons, getTeam]);
 
   React.useEffect(() => {
     if (goalId && teamId) {
       getGoal(teamId, goalId);
       fetchGoalSeasons(teamId, goalId);
+      const activeSeason = seasons.find(s => s.status === 'active');
+      if (activeSeason) {
+        fetchReports(activeSeason.id, { limit: 100 } as any).catch(() => {});
+      }
     }
-  }, [goalId, teamId]);
+  }, [goalId, teamId, seasons, getGoal, fetchGoalSeasons, fetchReports]);
 
-  React.useEffect(() => {
-    if (teamId) getTeam(teamId).catch(() => {});
-  }, [teamId]);
+  const heatmapData = useMemo(() => {
+    if (!currentGoal) return { rows: [], dateColumns: [] };
+    return buildHeatmapData(reports, [{ id: currentGoal.id, title: currentGoal.title }]);
+  }, [reports, currentGoal]);
 
-  const canModify = currentGoal ? canEditGoal(currentGoal) : false;
-  const canDelete = currentGoal ? canDeleteGoal(currentGoal) : false;
+  const entries = heatmapData.rows[0]?.cells ? Object.values(heatmapData.rows[0].cells) : [];
+  const avgRating = entries.length > 0
+    ? (entries.reduce((s, e) => s + e.rating, 0) / entries.length).toFixed(1)
+    : '—';
+  const latestRating = entries.length > 0
+    ? [...entries].sort((a, b) => b.date.localeCompare(a.date))[0].rating
+    : '—';
 
+  const [selectedEntry, setSelectedEntry] = useState<EntryDrawerEntry | null>(null);
+  const handleCellClick = (progressId: string, reportId: string) => {
+    const report = reports.find(r => r.id === reportId);
+    if (!report) return;
+    const entry = report.progress?.find(p => p.id === progressId);
+    if (!entry) return;
+    setSelectedEntry({
+      id: entry.id,
+      goalId: entry.goalId,
+      goalName: currentGoal?.title ?? '',
+      rating: entry.rating,
+      details: entry.details,
+      reportId: report.id,
+      reportDate: report.createdAt,
+    });
+  };
+
+  const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [tagSeasonId, setTagSeasonId] = useState('');
 
   const { control, handleSubmit, reset } = useForm<EditForm>({
-    defaultValues: { title: "", description: "", status: "", ownerId: "" },
+    defaultValues: { title: '', description: '', status: '' },
   });
 
   React.useEffect(() => {
     if (!currentGoal) return;
-    reset({
-      title: currentGoal.title,
-      description: currentGoal.description,
-      status: currentGoal.status,
-      ownerId: currentGoal.ownerId,
-    });
+    reset({ title: currentGoal.title, description: currentGoal.description, status: currentGoal.status });
   }, [currentGoal, reset]);
 
   const onEdit = async (data: EditForm) => {
     if (!currentGoal || !teamId || !canModify) return;
     setActionLoading(true);
     try {
-      await updateGoal(
-        teamId,
-        currentGoal.id,
-        data.title || undefined,
-        data.description || undefined,
-        (data.status as GoalStatus) || undefined,
-        data.ownerId || undefined,
-      );
+      await updateGoal(teamId, currentGoal.id, data.title || undefined, data.description || undefined, (data.status as GoalStatus) || undefined);
+      setEditOpen(false);
     } finally {
       setActionLoading(false);
     }
@@ -117,239 +142,234 @@ export function GoalDetails() {
     setActionLoading(true);
     try {
       await deleteGoal(teamId, currentGoal.id);
-      navigate("/goals");
+      navigate('/goals');
     } finally {
       setActionLoading(false);
     }
   };
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const handlePictureUpload = async (_file: File) => {
-    // NOTE: uploadGoalAvatar API method not yet available; picture upload is a no-op
-    setActionLoading(false);
+  const handleTag = async () => {
+    if (!tagSeasonId || !goalId || !teamId) return;
+    await tagGoalToSeason(teamId, goalId, tagSeasonId);
+    fetchGoalSeasons(teamId, goalId);
+    setTagSeasonId('');
   };
+
+  const handleUntag = async (seasonId: string) => {
+    if (!goalId || !teamId) return;
+    await untagGoalFromSeason(teamId, goalId, seasonId);
+    fetchGoalSeasons(teamId, goalId);
+  };
+
+  const taggedSeasonIds = new Set(goalSeasons.map((t: any) => t.seasonId || t));
+  const untaggedSeasons = seasons.filter(s => !taggedSeasonIds.has(s.id));
+  const taggedSeasonNames = seasons.filter(s => taggedSeasonIds.has(s.id));
+
+  const settings = currentTeamSettings;
+  const commentsEnabled = currentGoal
+    ? (currentGoal.goalType === GoalType.Team
+        ? (settings?.allowTeamGoalComments ?? false)
+        : (settings?.allowIndividualGoalComments ?? false))
+    : false;
 
   if (!currentGoal) {
     return (
-      <Paper>
-        <Box p={2}>
-          <Box display="flex" alignItems="center" gap={1}>
-            <IconButton onClick={() => navigate("/goals")} size="small">
-              <ArrowBackIcon />
-            </IconButton>
-            <Typography variant="h5">
-              {i18next.t("goalDetails.title", "Goal Details")}
-            </Typography>
-          </Box>
-          <Typography mt={2}>Loading...</Typography>
-        </Box>
-      </Paper>
+      <Box sx={{ p: 3 }}>
+        <Typography>Loading...</Typography>
+      </Box>
     );
   }
 
-  const settings = currentTeamSettings;
-  const commentsEnabled =
-    currentGoal.goalType === GoalType.Team
-      ? (settings?.allowTeamGoalComments ?? false)
-      : (settings?.allowIndividualGoalComments ?? false);
-
   return (
-    <Paper className="goal-details-page">
-      <Box p={2}>
-        <Box className="goal-details-header" display="flex" alignItems="center" gap={1}>
-          <IconButton onClick={() => navigate("/goals")} size="small">
-            <ArrowBackIcon />
-          </IconButton>
-          <Typography variant="h5">
-            {i18next.t("goalDetails.title", "Goal Details")}
-          </Typography>
-        </Box>
-        <Box mt={2}>
-          <form id="goal-details-form" onSubmit={handleSubmit(onEdit)}>
-            <Box display="flex" flexDirection="column" gap={2}>
-              <Controller
-                name="title"
-                control={control}
-                rules={{ required: true }}
-                render={({ field }) => (
-                  <TextField
-                    fullWidth
-                    label={i18next.t("user.goals.form.title", "Title")}
-                    disabled={!canModify || actionLoading}
-                    {...field}
-                  />
-                )}
-              />
+    <Box className="goal-details-page" sx={{ p: { xs: 2, sm: 3 } }}>
+      <button className="vg-back-nav" onClick={() => navigate('/goals')}>
+        {i18next.t('goalDetails.backToGoals', 'Back to Goals')}
+      </button>
 
-              <Box display="flex" gap={1}>
-                <Chip label={currentGoal.goalType} />
-                <Controller
-                  name="status"
-                  control={control}
-                  render={({ field }) => (
-                    <TextField
-                      select
-                      size="small"
-                      label={i18next.t("goalDetails.status", "Status")}
-                      disabled={!canModify || actionLoading}
-                      {...field}
-                    >
-                      <MenuItem value={GoalStatus.Open}>{i18next.t("user.goals.status.open", "Open")}</MenuItem>
-                      <MenuItem value={GoalStatus.InProgress}>{i18next.t("user.goals.status.inProgress", "In Progress")}</MenuItem>
-                      <MenuItem value={GoalStatus.Completed}>{i18next.t("user.goals.status.completed", "Completed")}</MenuItem>
-                      <MenuItem value={GoalStatus.Archived}>{i18next.t("user.goals.status.archived", "Archived")}</MenuItem>
-                    </TextField>
+      {/* Header */}
+      <div className="goal-details-header">
+        <div>
+          <div className="vg-eyebrow">{i18next.t('goalDetails.eyebrow', 'Goal')}</div>
+          <div className="vg-page-title">{currentGoal.title}</div>
+        </div>
+        <div className="goal-details-actions">
+          {canModify && (
+            <button className="vg-chip" onClick={() => setEditOpen(true)}>
+              {i18next.t('common.edit', 'Edit')}
+            </button>
+          )}
+          {canModify && (
+            <button
+              className="vg-chip vg-chip--active"
+              onClick={handleSubmit(onEdit)}
+              disabled={actionLoading}
+            >
+              {i18next.t('common.save', 'Save')}
+            </button>
+          )}
+          {canDelete && (
+            <button
+              className="vg-chip"
+              onClick={() => setDeleteOpen(true)}
+              disabled={actionLoading}
+              style={{ color: 'var(--palette-error-main)', borderColor: 'var(--palette-error-main)' }}
+            >
+              {i18next.t('goalDetails.delete', 'Delete')}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="vg-two-col">
+        {/* Left column */}
+        <div>
+          <div className="vg-panel" style={{ marginBottom: 12 }}>
+            <div className="vg-panel-title">{i18next.t('goalDetails.description', 'Description')}</div>
+            <div className="goal-details-description">{currentGoal.description || '—'}</div>
+          </div>
+
+          {canModify && editOpen && (
+            <div className="vg-panel" style={{ marginBottom: 12 }}>
+              <div className="vg-panel-title">{i18next.t('goalDetails.editGoal', 'Edit Goal')}</div>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+                <Controller name="title" control={control} rules={{ required: true }} render={({ field }) => (
+                  <TextField fullWidth size="small" label={i18next.t('user.goals.form.title', 'Title')} {...field} />
+                )} />
+                <Controller name="status" control={control} render={({ field }) => (
+                  <TextField select fullWidth size="small" label={i18next.t('goalDetails.status', 'Status')} {...field}>
+                    {Object.entries(STATUS_LABELS).map(([v, l]) => <MenuItem key={v} value={v}>{l}</MenuItem>)}
+                  </TextField>
+                )} />
+                <Controller name="description" control={control} render={({ field }) => (
+                  <TextField fullWidth multiline minRows={4} size="small"
+                    label={i18next.t('user.goals.form.description', 'Description')} {...field} />
+                )} />
+              </Box>
+            </div>
+          )}
+
+          <div className="vg-panel" style={{ marginBottom: 12 }}>
+            <div className="vg-panel-title">{i18next.t('goalDetails.progressHistory', 'Progress History')}</div>
+            <GoalHeatmap
+              data={heatmapData}
+              onCellClick={handleCellClick}
+              showGoalLabels={false}
+              showDateHeaders={true}
+              showLegend={true}
+            />
+            <div className="goal-details-heatmap-stats">
+              {[
+                { label: i18next.t('goalDetails.entries', 'Entries'), value: entries.length },
+                { label: i18next.t('goalDetails.avgRating', 'Avg Rating'), value: avgRating },
+                { label: i18next.t('goalDetails.latest', 'Latest'), value: latestRating },
+              ].map(s => (
+                <div key={s.label} className="goal-details-heatmap-stat">
+                  <span className="goal-details-heatmap-stat-num">{s.value}</span>
+                  <span className="goal-details-heatmap-stat-label">{s.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="vg-panel">
+            <div className="vg-panel-title">{i18next.t('goalDetails.comments', 'Comments')}</div>
+            <CommentSection
+              targetId={currentGoal.id}
+              commentType={CommentType.Goal}
+              enabled={commentsEnabled}
+              allowFileUploads={settings?.allowFileUploads}
+            />
+          </div>
+        </div>
+
+        {/* Right column — meta panel */}
+        <div>
+          <div className="vg-panel">
+            <div className="vg-panel-title">{i18next.t('goalDetails.details', 'Details')}</div>
+            <div className="vg-meta-row">
+              <span className="vg-meta-label">{i18next.t('goalDetails.status', 'Status')}</span>
+              <span className="vg-meta-value">{STATUS_LABELS[currentGoal.status] ?? currentGoal.status}</span>
+            </div>
+            <div className="vg-meta-row">
+              <span className="vg-meta-label">{i18next.t('goalDetails.type', 'Type')}</span>
+              <span className="vg-meta-value">{currentGoal.goalType}</span>
+            </div>
+            <div className="vg-meta-row">
+              <span className="vg-meta-label">{i18next.t('goalDetails.created', 'Created')}</span>
+              <span className="vg-meta-value">{new Date(currentGoal.createdAt).toLocaleDateString()}</span>
+            </div>
+            <div className="vg-meta-row" style={{ alignItems: 'flex-start' }}>
+              <span className="vg-meta-label">{i18next.t('goalDetails.seasons', 'Seasons')}</span>
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, marginLeft: 8 }}>
+                <div className="goal-details-season-pills">
+                  {taggedSeasonNames.map(s => (
+                    <span key={s.id} className="vg-season-pill">
+                      {s.name}
+                      {canModify && (
+                        <button
+                          onClick={() => handleUntag(s.id)}
+                          style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'inherit', padding: 0, fontSize: 10, marginLeft: 2 }}
+                          aria-label={`Remove ${s.name}`}
+                        >✕</button>
+                      )}
+                    </span>
+                  ))}
+                  {taggedSeasonNames.length === 0 && (
+                    <span style={{ fontSize: 11, color: 'var(--vg-text-muted)' }}>—</span>
                   )}
-                />
-              </Box>
-
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    fullWidth
-                    multiline
-                    minRows={4}
-                    label={i18next.t("user.goals.form.description", "Description")}
-                    disabled={!canModify || actionLoading}
-                    {...field}
-                  />
+                </div>
+                {canModify && untaggedSeasons.length > 0 && (
+                  <div className="goal-details-tag-row">
+                    <select
+                      className="goal-details-tag-select"
+                      value={tagSeasonId}
+                      onChange={e => setTagSeasonId(e.target.value)}
+                    >
+                      <option value="">{i18next.t('goalDetails.addToSeason', 'Add to season...')}</option>
+                      {untaggedSeasons.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                    <button className="goal-details-tag-btn" onClick={handleTag} disabled={!tagSeasonId}>
+                      + {i18next.t('common.add', 'Add')}
+                    </button>
+                  </div>
                 )}
-              />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-              <Box className="goal-details-meta-item" display="flex" alignItems="center" gap={1}>
-                <Typography className="goal-details-meta-label" variant="caption">
-                  {i18next.t("goalDetails.owner", "Owner")}
-                </Typography>
-                <UserDisplay user={currentGoal?.owner} fallbackId={currentGoal?.ownerId} />
-                {canModify && (
-                  <Controller
-                    name="ownerId"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        size="small"
-                        label={i18next.t("goalDetails.ownerId", "Owner ID")}
-                        disabled={actionLoading}
-                        {...field}
-                      />
-                    )}
-                  />
-                )}
-              </Box>
-            </Box>
-          </form>
-
-          {currentGoal.picture && (
-            <Box mt={1}>
-              <img src={currentGoal.picture} alt="goal" style={{ maxWidth: 200, maxHeight: 200 }} />
-            </Box>
-          )}
-        </Box>
-
-        {(canModify || canDelete) && (
-          <Box className="goal-details-actions" mt={2} display="flex" gap={1} flexWrap="wrap">
-            {canModify && (
-              <>
-                <Button
-                  variant="outlined"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={actionLoading}
-                >
-                  {i18next.t("goalDetails.uploadPicture", "Upload Picture")}
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) handlePictureUpload(f);
-                  }}
-                />
-                <Button type="submit" form="goal-details-form" variant="contained" disabled={actionLoading}>
-                  {i18next.t("common.save", "Save")}
-                </Button>
-              </>
-            )}
-            {canDelete && (
-              <Button
-                variant="contained"
-                color="error"
-                onClick={() => setDeleteOpen(true)}
-                disabled={actionLoading}
-              >
-                {i18next.t("goalDetails.delete", "Delete")}
-              </Button>
-            )}
-          </Box>
-        )}
-
-        <Box className="goal-details-section" mt={2}>
-          <Typography variant="subtitle1">{i18next.t("goalDetails.seasons", "Seasons")}</Typography>
-          {goalSeasons && goalSeasons.map((tag: any) => {
-            const seasonId = tag.seasonId || tag;
-            const season = seasons.find(s => s.id === seasonId);
-            const displayName = season ? season.name : seasonId;
-            return (
-              <Box key={seasonId} display="flex" alignItems="center" gap={1} mt={0.5}>
-                <Typography variant="body2">{displayName}</Typography>
-                {currentGoal && canEditGoal(currentGoal) && (
-                  <IconButton size="small" onClick={() => untagGoalFromSeason(teamId, goalId!, seasonId)}>
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
-                )}
-              </Box>
-            );
-          })}
-          {currentGoal && canEditGoal(currentGoal) && (
-            <Box mt={1} maxWidth={300}>
-              <TextField
-                select
-                size="small"
-                fullWidth
-                label={i18next.t("goalDetails.tagToSeason", "Tag to season")}
-                value=""
-                onChange={(e) => { if (e.target.value) tagGoalToSeason(teamId, goalId!, e.target.value); }}
-              >
-                {seasons
-                  .filter(s => !goalSeasons.some((t: any) => (t.seasonId || t) === s.id))
-                  .map(s => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)
-                }
-              </TextField>
-            </Box>
-          )}
-        </Box>
-
-        <Box mt={4}>
-          <CommentSection
-            targetId={currentGoal.id}
-            commentType={CommentType.Goal}
-            enabled={commentsEnabled}
-            allowFileUploads={settings?.allowFileUploads}
-          />
-        </Box>
-      </Box>
-
-      {/* Delete Dialog */}
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-        <DialogTitle>{i18next.t("goalDetails.deleteGoal", "Delete Goal")}</DialogTitle>
+      {/* Delete Confirmation Dialog */}
+      <Dialog
+        open={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        maxWidth="xs"
+        PaperProps={{ className: 'vg-dialog-paper' }}
+      >
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+          {i18next.t('goalDetails.deleteGoal', 'Delete Goal')}
+        </DialogTitle>
         <DialogContent>
-          <Typography>
-            {i18next.t("goalDetails.deleteConfirm", "Are you sure you want to delete this goal?")}
+          <Typography sx={{ mt: 1, fontSize: 12 }}>
+            {i18next.t('goalDetails.deleteConfirm', 'Are you sure you want to delete this goal?')}
           </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)}>
-            {i18next.t("common.cancel", "Cancel")}
-          </Button>
-          <Button variant="contained" color="error" onClick={onDelete} disabled={actionLoading}>
-            {i18next.t("common.delete", "Delete")}
-          </Button>
+        <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
+          <button className="vg-chip" onClick={() => setDeleteOpen(false)}>
+            {i18next.t('common.cancel', 'Cancel')}
+          </button>
+          <button
+            className="vg-chip"
+            onClick={onDelete}
+            disabled={actionLoading}
+            style={{ background: 'var(--palette-error-main)', color: '#fff', borderColor: 'var(--palette-error-main)', height: 30, borderRadius: 7, padding: '0 14px' }}
+          >
+            {i18next.t('common.delete', 'Delete')}
+          </button>
         </DialogActions>
       </Dialog>
-    </Paper>
+
+      <EntryDrawer entry={selectedEntry} onClose={() => setSelectedEntry(null)} readonly={true} />
+    </Box>
   );
 }
