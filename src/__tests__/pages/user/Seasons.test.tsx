@@ -33,7 +33,7 @@ describe('Seasons', () => {
   it('renders seasons page title', () => {
     setup();
     render(<Seasons />);
-    // 'Seasons' appears as both the page heading and the ItemList title
+    // 'Seasons' appears in both the vg-eyebrow and vg-page-title
     const headings = screen.getAllByText('Seasons');
     expect(headings.length).toBeGreaterThanOrEqual(1);
   });
