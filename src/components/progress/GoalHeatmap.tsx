@@ -17,7 +17,7 @@ const CELL_SIZE = 26;
 const GAP = 3;
 
 const formatDate = (date: string) =>
-  new Intl.DateTimeFormat('de-CH', { month: 'short', day: 'numeric' }).format(new Date(date));
+  new Intl.DateTimeFormat(i18next.language || undefined, { month: 'short', day: 'numeric' }).format(new Date(date));
 
 export function GoalHeatmap({
   data,

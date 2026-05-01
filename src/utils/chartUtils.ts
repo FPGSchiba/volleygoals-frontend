@@ -158,12 +158,15 @@ export function buildHeatmapData(
         });
       }
       const r = Math.min(5, Math.max(1, Math.round(entry.rating))) as 1 | 2 | 3 | 4 | 5;
-      rowMap.get(entry.goalId)!.cells[date] = {
-        date,
-        rating: r,
-        progressId: entry.id,
-        reportId: report.id,
-      };
+      const existing = rowMap.get(entry.goalId)!.cells[date];
+      if (!existing || r >= existing.rating) {
+        rowMap.get(entry.goalId)!.cells[date] = {
+          date,
+          rating: r,
+          progressId: entry.id,
+          reportId: report.id,
+        };
+      }
     }
   }
 

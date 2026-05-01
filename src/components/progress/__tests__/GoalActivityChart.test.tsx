@@ -6,36 +6,6 @@ import { GoalActivityChart } from '../GoalActivityChart';
 // Recharts renders SVG — suppress ResizeObserver errors in jsdom
 global.ResizeObserver = class { observe() {} unobserve() {} disconnect() {} };
 
-// Mock Recharts so jsdom renders the chart children (including custom shapes)
-jest.mock('recharts', () => {
-  const React = require('react');
-  return {
-    ResponsiveContainer: ({ children }: any) => (
-      <div style={{ width: 800, height: 400 }}>{children}</div>
-    ),
-    ScatterChart: ({ children }: any) => <svg>{children}</svg>,
-    Scatter: ({ data, shape }: any) => (
-      <g>
-        {(data ?? []).map((point: any, i: number) =>
-          React.createElement('g', { key: i },
-            shape({ cx: 50 + i * 100, cy: 50 + i * 40, payload: point })
-          )
-        )}
-      </g>
-    ),
-    XAxis: ({ tickFormatter }: any) => <g className="x-axis" />,
-    YAxis: ({ ticks, tickFormatter }: any) => (
-      <g className="y-axis">
-        {(ticks ?? []).map((tick: number) => (
-          <text key={tick}>{tickFormatter(tick)}</text>
-        ))}
-      </g>
-    ),
-    CartesianGrid: () => <g />,
-    Tooltip: () => null,
-  };
-});
-
 const mockGoalNames = ['Serve accuracy', 'Jump height'];
 const mockPoints = [
   {
