@@ -37,6 +37,7 @@ export function Goals() {
   const fetchGoals = useGoalStore(s => s.fetchGoals);
   const createGoal = useGoalStore(s => s.createGoal);
   const deleteGoal = useGoalStore(s => s.deleteGoal);
+  const fetchSeasonGoals = useGoalStore(s => s.fetchSeasonGoals);
   const goals = useGoalStore(s => s.goalList.goals) || [];
   const fetchSeasons = useSeasonStore(s => s.fetchSeasons);
   const seasons = useSeasonStore(s => s.seasonList.seasons) || [];
@@ -62,17 +63,19 @@ export function Goals() {
   const [statusFilter, setStatusFilter] = useState<GoalStatus | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<GoalType | 'all'>('all');
   const [selectedSeasonIds, setSelectedSeasonIds] = useState<Set<string>>(new Set());
+  // Local cache: seasonId → Set of goalIds (populated lazily on season chip click)
+  const [goalIdsBySeason, setGoalIdsBySeason] = useState<Map<string, Set<string>>>(new Map());
 
   const filteredGoals = useMemo(() => goals.filter(g => {
     if (searchQuery && !g.title?.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (statusFilter !== 'all' && g.status !== statusFilter) return false;
     if (typeFilter !== 'all' && g.goalType !== typeFilter) return false;
     if (selectedSeasonIds.size > 0) {
-      const goalSeasons: string[] = (g as any).seasons?.map((t: any) => t.seasonId || t) ?? [];
-      if (!goalSeasons.some(sid => selectedSeasonIds.has(sid))) return false;
+      const inAnySeason = [...selectedSeasonIds].some(sid => goalIdsBySeason.get(sid)?.has(g.id));
+      if (!inAnySeason) return false;
     }
     return true;
-  }), [goals, searchQuery, statusFilter, typeFilter, selectedSeasonIds]);
+  }), [goals, searchQuery, statusFilter, typeFilter, selectedSeasonIds, goalIdsBySeason]);
 
   const [createOpen, setCreateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -117,12 +120,19 @@ export function Goals() {
     }
   };
 
-  const toggleSeason = (id: string) =>
+  const toggleSeason = (id: string) => {
     setSelectedSeasonIds(prev => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
+    if (!goalIdsBySeason.has(id) && teamId) {
+      fetchSeasonGoals(teamId, id).then(() => {
+        const snapshot = useGoalStore.getState().seasonGoals;
+        setGoalIdsBySeason(prev => new Map(prev).set(id, new Set(snapshot.map(g => g.id))));
+      }).catch(() => {});
+    }
+  };
 
   const statusChips: Array<{ label: string; value: GoalStatus | 'all' }> = [
     { label: i18next.t('common.all', 'All'), value: 'all' },
