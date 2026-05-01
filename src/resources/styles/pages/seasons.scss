@@ -1,23 +1,72 @@
+@use '../variables' as *;
+@use '../mixins' as *;
+
 .seasons-page {
-  .item-list {
-    .item-list-title {
-      font-weight: 600;
-    }
-
-    .item-list-create-button {
-      margin-left: 8px;
-    }
-
-    .item-list-table {
-      .item-list-no-items {
-        text-align: center;
-      }
-    }
-  }
-
-  &.seasons-page-paper {
-    border-radius: 15px;
-    width: 100%;
-  }
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
 }
 
+.seasons-hero-card {
+  border-radius: 11px;
+  border: 1px solid var(--vg-border);
+  background: var(--palette-background-paper);
+  padding: 20px 24px;
+  margin-bottom: 12px;
+}
+
+.seasons-hero-name {
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.6px;
+  color: var(--palette-text-primary);
+  margin-bottom: 8px;
+}
+
+.seasons-hero-stats {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.seasons-hero-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.seasons-list-title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--vg-text-muted);
+  margin-bottom: 8px;
+  margin-top: 4px;
+}
+
+.seasons-row-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--palette-text-primary);
+}
+
+.seasons-row-dates {
+  font-size: 10px;
+  color: var(--vg-text-muted);
+  margin-top: 2px;
+}
+
+.seasons-row-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.seasons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
