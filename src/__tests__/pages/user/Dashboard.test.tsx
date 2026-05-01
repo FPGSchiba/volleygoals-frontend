@@ -19,6 +19,12 @@ jest.mock('../../../services/backend.api', () => ({
   __esModule: true,
   default: { getSeasonStats: jest.fn().mockResolvedValue({}), setToken: jest.fn() },
 }));
+jest.mock('../../../components/progress/GoalHeatmap', () => ({
+  GoalHeatmap: () => <div data-testid="goal-heatmap" />,
+}));
+jest.mock('../../../components/progress/EntryDrawer', () => ({
+  EntryDrawer: () => null,
+}));
 jest.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: any) => <div>{children}</div>,
   LineChart: () => <div data-testid="line-chart" />,
@@ -39,6 +45,18 @@ jest.mock('react-router-dom', () => ({
 beforeEach(() => {
   jest.clearAllMocks();
 });
+
+function setup(opts: { hasActiveSeason?: boolean; seasonName?: string } = {}) {
+  const { hasActiveSeason = false, seasonName = 'Spring 2025' } = opts;
+  const seasons = hasActiveSeason
+    ? [buildSeason({ status: SeasonStatus.Active, name: seasonName })]
+    : [];
+  setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
+  setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons, count: seasons.length, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
+  setupMockStore(useGoalStore as any, mockGoalState());
+  setupMockStore(useActivityStore as any, mockActivityState());
+  setupMockStore(useProgressReportStore as any, mockProgressReportState());
+}
 
 describe('Dashboard', () => {
   it('renders dashboard title', () => {
@@ -63,7 +81,7 @@ describe('Dashboard', () => {
     render(<Dashboard />);
     expect(screen.getByText('Open Goals')).toBeInTheDocument();
     expect(screen.getByText('In Progress')).toBeInTheDocument();
-    expect(screen.getByText('Completed Goals')).toBeInTheDocument();
+    expect(screen.getByText('Completed')).toBeInTheDocument();
     expect(screen.getByText('Progress Reports')).toBeInTheDocument();
     expect(screen.getByText('Team Members')).toBeInTheDocument();
   });
@@ -100,5 +118,21 @@ describe('Dashboard', () => {
 
     render(<Dashboard />);
     expect(screen.getByText('No recent activity.')).toBeInTheDocument();
+  });
+
+  it('renders five stat cards', () => {
+    setup({ hasActiveSeason: true });
+    render(<Dashboard />);
+    expect(screen.getByText(/open goals/i)).toBeInTheDocument();
+    expect(screen.getByText(/in progress/i)).toBeInTheDocument();
+    expect(screen.getByText(/completed/i)).toBeInTheDocument();
+    expect(screen.getByText(/progress reports/i)).toBeInTheDocument();
+    expect(screen.getByText(/team members/i)).toBeInTheDocument();
+  });
+
+  it('renders eyebrow with active season name', () => {
+    setup({ hasActiveSeason: true, seasonName: 'Spring 2025' });
+    render(<Dashboard />);
+    expect(screen.getByText(/spring 2025/i)).toBeInTheDocument();
   });
 });
