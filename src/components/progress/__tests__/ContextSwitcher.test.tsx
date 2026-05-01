@@ -65,7 +65,7 @@ describe('ContextSwitcher', () => {
     expect(onChange).toHaveBeenCalledWith('personal');
   });
 
-  it('shows member autocomplete when Member button is active', async () => {
+  it('shows member chips when Member button is active', async () => {
     render(
       <ContextSwitcher
         canParticipate={true}
@@ -75,6 +75,16 @@ describe('ContextSwitcher', () => {
         members={mockMembers}
       />,
     );
-    expect(screen.getByPlaceholderText(/search member/i)).toBeInTheDocument();
+    expect(screen.getByText('Anna Müller')).toBeInTheDocument();
+    expect(screen.getByText('Bob Klein')).toBeInTheDocument();
+  });
+
+  it('renders chip buttons instead of MUI ToggleButton', () => {
+    render(
+      <ContextSwitcher canParticipate canOversee value="personal" onChange={jest.fn()} members={[]} />
+    );
+    const myProgress = screen.getByText(/my progress/i);
+    expect(myProgress.tagName).toBe('BUTTON');
+    expect(myProgress.className).toContain('vg-chip');
   });
 });

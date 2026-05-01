@@ -74,9 +74,9 @@ describe('Progress', () => {
     expect(mockNavigate).toHaveBeenCalledWith('/progress/create');
   });
 
-  it('renders season selector', () => {
+  it('renders season chip', () => {
     setup();
     render(<Progress />);
-    expect(screen.getByLabelText('Season')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'S1' })).toBeInTheDocument();
   });
 });
