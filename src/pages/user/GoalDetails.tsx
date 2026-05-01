@@ -71,16 +71,17 @@ export function GoalDetails() {
     }
   }, [teamId, fetchSeasons, getTeam]);
 
+  const activeSeasonId = seasons.find(s => s.status === 'active')?.id;
+
   React.useEffect(() => {
     if (goalId && teamId) {
       getGoal(teamId, goalId);
       fetchGoalSeasons(teamId, goalId);
-      const activeSeason = seasons.find(s => s.status === 'active');
-      if (activeSeason) {
-        fetchReports(activeSeason.id, { limit: 100 } as any).catch(() => {});
+      if (activeSeasonId) {
+        fetchReports(activeSeasonId, { limit: 100 } as any).catch(() => {});
       }
     }
-  }, [goalId, teamId, seasons, getGoal, fetchGoalSeasons, fetchReports]);
+  }, [goalId, teamId, activeSeasonId, getGoal, fetchGoalSeasons, fetchReports]);
 
   const heatmapData = useMemo(() => {
     if (!currentGoal) return { rows: [], dateColumns: [] };
@@ -161,7 +162,7 @@ export function GoalDetails() {
     fetchGoalSeasons(teamId, goalId);
   };
 
-  const taggedSeasonIds = new Set(goalSeasons.map((t: any) => t.seasonId || t));
+  const taggedSeasonIds = new Set(goalSeasons.map(t => t.seasonId));
   const untaggedSeasons = seasons.filter(s => !taggedSeasonIds.has(s.id));
   const taggedSeasonNames = seasons.filter(s => taggedSeasonIds.has(s.id));
 
@@ -355,6 +356,10 @@ export function GoalDetails() {
             )}
             <Box sx={{ display: 'flex', gap: 1 }}>
               <button className="vg-chip" onClick={() => setEditOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</button>
+              <button className="vg-chip vg-chip--active" onClick={handleSubmit(onEdit)} disabled={actionLoading}
+                style={{ height: 30, borderRadius: 7, padding: '0 14px' }}>
+                {i18next.t('common.save', 'Save')}
+              </button>
             </Box>
           </DialogActions>
         </Dialog>
