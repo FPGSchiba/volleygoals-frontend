@@ -183,7 +183,7 @@ export function GoalDetails() {
   return (
     <Box className="goal-details-page" sx={{ p: { xs: 2, sm: 3 } }}>
       <button className="vg-back-nav" onClick={() => navigate('/goals')}>
-        {i18next.t('goalDetails.backToGoals', 'Back to Goals')}
+        ← {i18next.t('goalDetails.backToGoals', 'Back to Goals')}
       </button>
 
       {/* Header */}
