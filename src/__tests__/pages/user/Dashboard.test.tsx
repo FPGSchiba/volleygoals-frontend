@@ -25,16 +25,6 @@ jest.mock('../../../components/progress/GoalHeatmap', () => ({
 jest.mock('../../../components/progress/EntryDrawer', () => ({
   EntryDrawer: () => null,
 }));
-jest.mock('recharts', () => ({
-  ResponsiveContainer: ({ children }: any) => <div>{children}</div>,
-  LineChart: () => <div data-testid="line-chart" />,
-  Line: () => null,
-  XAxis: () => null,
-  YAxis: () => null,
-  CartesianGrid: () => null,
-  Tooltip: () => null,
-  Legend: () => null,
-}));
 
 const mockNavigate = jest.fn();
 jest.mock('react-router-dom', () => ({

@@ -43,7 +43,7 @@ export function Dashboard() {
       fetchActivity(teamId, { limit: 7 }).catch(() => {});
       fetchGoals(teamId, { limit: 100 } as any);
     }
-  }, [teamId]);
+  }, [teamId, fetchSeasons, fetchActivity, fetchGoals]);
 
   const activeSeason = seasons.find(s => s.status === SeasonStatus.Active);
 
@@ -55,7 +55,7 @@ export function Dashboard() {
         .then(r => { if (r.stats) setSeasonStats(r.stats as ISeasonStats); })
         .catch(() => {});
     }
-  }, [activeSeason?.id]);
+  }, [activeSeason?.id, fetchReports]);
 
   const ownGoals = goals.filter(g => g.ownerId === currentUser?.id);
   const ownReports = useMemo(() => {
