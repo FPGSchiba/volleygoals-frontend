@@ -1,7 +1,6 @@
 import React from 'react';
 import { render, screen } from '../../test-utils';
 import { SeasonDetails } from '../../../pages/user/SeasonDetails';
-import { setupMockStore, mockCognitoUserState } from '../../mocks/stores';
 import { buildSeason, buildGoal } from '../../mocks/factories';
 import { RoleType, SeasonStatus, TeamMemberStatus } from '../../../store/types';
 

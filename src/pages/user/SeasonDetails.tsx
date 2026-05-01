@@ -157,6 +157,7 @@ export function SeasonDetails() {
                     className="season-details-remove-btn"
                     onClick={() => handleUntag(g.id)}
                     title={i18next.t('seasonDetails.removeGoal', 'Remove')}
+                    aria-label={i18next.t('seasonDetails.removeGoal', 'Remove')}
                   >
                     ✕
                   </button>
@@ -196,7 +197,9 @@ export function SeasonDetails() {
             <div className="vg-meta-row">
               <span className="vg-meta-label">{i18next.t('user.seasons.form.status', 'Status')}</span>
               <span className="vg-meta-value">
-                <span className={statusBadgeClass(season.status)}>{season.status}</span>
+                <span className={statusBadgeClass(season.status)}>
+                  {i18next.t(`user.seasons.status.${season.status}`, season.status)}
+                </span>
               </span>
             </div>
             <div className="vg-meta-row">
