@@ -47,6 +47,30 @@ describe('ProgressDetails', () => {
     return;
   }
 
+  it('renders report summary as page title', () => {
+    const report = buildProgressReport({ id: 'p1', seasonId: 's1', summary: 'Great training session' });
+    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
+    setupMockStore(useProgressReportStore as any, mockProgressReportState({ currentReport: report }));
+    setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
+    setupMockStore(useGoalStore as any, mockGoalState());
+    setupMockStore(useTeamStore as any, mockTeamState());
+
+    render(<ProgressDetails />);
+    expect(screen.getByText('Great training session')).toBeInTheDocument();
+  });
+
+  it('renders back nav link', () => {
+    const report = buildProgressReport({ id: 'p1', seasonId: 's1' });
+    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
+    setupMockStore(useProgressReportStore as any, mockProgressReportState({ currentReport: report }));
+    setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
+    setupMockStore(useGoalStore as any, mockGoalState());
+    setupMockStore(useTeamStore as any, mockTeamState());
+
+    render(<ProgressDetails />);
+    expect(screen.getByText(/back to progress/i)).toBeInTheDocument();
+  });
+
   it('shows loading when no current report', () => {
     setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
     setupMockStore(useProgressReportStore as any, mockProgressReportState({ currentReport: undefined }));

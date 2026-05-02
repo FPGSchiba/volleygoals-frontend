@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { formatDateTime } from '../../utils/dateTime';
-import { Box, Button, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Paper, Rating, TextField, Typography } from '@mui/material';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import Box from '@mui/material/Box';
+import Collapse from '@mui/material/Collapse';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Controller, useForm } from 'react-hook-form';
 import { useProgressReportStore } from '../../store/progressReports';
 import { useGoalStore } from '../../store/goals';
@@ -12,113 +15,82 @@ import { useSeasonStore } from '../../store/seasons';
 import { useCognitoUserStore } from '../../store/cognitoUser';
 import { usePermission } from '../../hooks/usePermission';
 import { useTeamStore } from '../../store/teams';
-import { CommentType, GoalStatus } from '../../store/types';
+import { CommentType } from '../../store/types';
 import { CommentSection } from '../../components/CommentSection';
 import { UserDisplay } from '../../components/UserDisplay';
+import { HEATMAP_RATING_COLORS } from '../../utils/chartUtils';
+import { formatDateTime } from '../../utils/dateTime';
 import i18next from 'i18next';
 
-type EditForm = { summary: string; details: string; };
+type EditForm = { summary: string; details: string };
 
 export function ProgressDetails() {
   const { progressId } = useParams<{ progressId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const currentReport = useProgressReportStore((s) => s.currentReport);
-  const getReport = useProgressReportStore((s) => s.getReport);
-  const updateReport = useProgressReportStore((s) => s.updateReport);
-  const deleteReport = useProgressReportStore((s) => s.deleteReport);
+  const currentReport = useProgressReportStore(s => s.currentReport);
+  const getReport = useProgressReportStore(s => s.getReport);
+  const updateReport = useProgressReportStore(s => s.updateReport);
+  const deleteReport = useProgressReportStore(s => s.deleteReport);
 
-  const fetchGoals = useGoalStore((s) => s.fetchGoals);
-  const goals = useGoalStore((s) => s.goalList.goals);
-  const fetchSeasons = useSeasonStore((s) => s.fetchSeasons);
-  const seasons = useSeasonStore((s) => s.seasonList.seasons);
-  const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
-  const currentUser = useCognitoUserStore((s) => s.user);
-  const currentTeamSettings = useTeamStore((s) => s.currentTeamSettings);
-  const getTeam = useTeamStore((s) => s.getTeam);
-  const fetchTeamMembers = useTeamStore((s) => s.fetchTeamMembers);
-  const teamMembers = useTeamStore((s) => s.teamMembers) || [];
-
+  const fetchGoals = useGoalStore(s => s.fetchGoals);
+  const goals = useGoalStore(s => s.goalList.goals);
+  const fetchSeasons = useSeasonStore(s => s.fetchSeasons);
+  const seasons = useSeasonStore(s => s.seasonList.seasons);
+  const selectedTeam = useCognitoUserStore(s => s.selectedTeam);
+  const currentUser = useCognitoUserStore(s => s.user);
+  const currentTeamSettings = useTeamStore(s => s.currentTeamSettings);
+  const getTeam = useTeamStore(s => s.getTeam);
+  const fetchTeamMembers = useTeamStore(s => s.fetchTeamMembers);
+  const teamMembers = useTeamStore(s => s.teamMembers) || [];
   const canEdit = usePermission('progress_reports:write');
+
+  const teamId = selectedTeam?.team?.id || '';
 
   const seasonId = currentReport?.seasonId
     || location.state?.seasonId
     || (seasons && seasons.length > 0
-      ? [...seasons].sort((a, b) =>
-          new Date(b.startDate || b.createdAt).getTime() - new Date(a.startDate || a.createdAt).getTime()
-        )[0]?.id
-      : undefined);
+        ? [...seasons].sort((a, b) => new Date(b.startDate || b.createdAt).getTime() - new Date(a.startDate || a.createdAt).getTime())[0]?.id
+        : undefined);
 
   React.useEffect(() => {
     if (progressId && seasonId && (!currentReport || currentReport.id !== progressId)) {
       getReport(seasonId, progressId);
     }
-  }, [progressId, seasonId]);
-
-  const teamId = selectedTeam?.team?.id;
-
-  React.useEffect(() => {
-    if (teamId) fetchGoals(teamId, {});
-  }, [teamId]);
-
-
-  React.useEffect(() => {
-    if (teamId && (!seasons || seasons.length === 0)) {
-      fetchSeasons(teamId, { teamId });
-    }
-  }, [teamId]);
+  }, [progressId, seasonId, getReport, currentReport]);
 
   React.useEffect(() => {
     if (teamId) {
+      fetchGoals(teamId, {});
       getTeam(teamId).catch(() => {});
-      fetchTeamMembers(teamId, { limit: 100 } as any).catch(() => {});
+      fetchTeamMembers(teamId, { limit: 100 }).catch(() => {});
     }
-  }, [teamId]);
+  }, [teamId, fetchGoals, getTeam, fetchTeamMembers]);
+
+  React.useEffect(() => {
+    if (teamId && (!seasons || seasons.length === 0)) fetchSeasons(teamId, { teamId });
+  }, [teamId, seasons, fetchSeasons]);
 
   const isAuthor = currentReport?.authorId === currentUser?.id;
   const canModify = isAuthor || canEdit;
 
-  const [expandedEntries, setExpandedEntries] = useState<Set<string>>(new Set());
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [editRatings, setEditRatings] = useState<Record<string, number>>({});
-  const [editEntryDetails, setEditEntryDetails] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState(false);
-
-  const toggleEntryExpand = (entryId: string) => {
-    setExpandedEntries(prev => {
-      const next = new Set(prev);
-      if (next.has(entryId)) next.delete(entryId);
-      else next.add(entryId);
-      return next;
-    });
-  };
+  const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
 
   const { control, handleSubmit, reset } = useForm<EditForm>({ defaultValues: { summary: '', details: '' } });
 
-  const openEdit = () => {
-    if (!currentReport) return;
-    reset({ summary: currentReport.summary, details: currentReport.details });
-    const ratingMap: Record<string, number> = {};
-    const detailsMap: Record<string, string> = {};
-    currentReport.progress?.forEach(p => {
-      ratingMap[p.goalId] = p.rating;
-      detailsMap[p.goalId] = p.details || '';
-    });
-    setEditRatings(ratingMap);
-    setEditEntryDetails(detailsMap);
-    setEditOpen(true);
-  };
+  React.useEffect(() => {
+    if (currentReport) reset({ summary: currentReport.summary || '', details: currentReport.details || '' });
+  }, [currentReport, reset]);
 
   const onEdit = async (data: EditForm) => {
     if (!currentReport || !seasonId) return;
     setActionLoading(true);
     try {
-      const progress = Object.entries(editRatings)
-        .filter(([, r]) => r > 0)
-        .map(([goalId, rating]) => ({ goalId, rating, details: editEntryDetails[goalId] || '' }));
-      await updateReport(seasonId, currentReport.id, { summary: data.summary, details: data.details, progress });
+      await updateReport(seasonId, currentReport.id, { summary: data.summary, details: data.details });
       setEditOpen(false);
     } finally {
       setActionLoading(false);
@@ -136,177 +108,163 @@ export function ProgressDetails() {
     }
   };
 
+  const season = seasons?.find(s => s.id === currentReport?.seasonId);
+  const authorMember = teamMembers.find(m => m.id === currentReport?.authorId);
+  const authorInitials = (authorMember?.name || authorMember?.preferredUsername || '?').substring(0, 2).toUpperCase();
+
   if (!currentReport) {
     return (
-      <Paper>
-        <Box p={2} className="progress-details-page">
-          <Typography variant="h5" className="progress-details-title">{i18next.t('progress.detailsTitle', 'Progress Report Details')}</Typography>
-          <Typography>{i18next.t('common.loading', 'Loading...')}</Typography>
-        </Box>
-      </Paper>
+      <Box sx={{ p: 3 }}>
+        <Typography>{i18next.t('common.loading', 'Loading...')}</Typography>
+      </Box>
     );
   }
 
   return (
-    <Paper>
-      <Box p={2} className="progress-details-page">
-        <Button startIcon={<ArrowBackIcon />} onClick={() => navigate('/progress')}>
-          {i18next.t('common.back', 'Back')}
-        </Button>
+    <Box className="progress-details-page" sx={{ p: { xs: 2, sm: 3 } }}>
+      <button className="vg-back-nav" onClick={() => navigate('/progress')}>
+        ← {i18next.t('progressDetails.backToProgress', 'Back to Progress')}
+      </button>
 
-        <Box className="progress-details-header">
-          <Box>
-            <Typography variant="h5" className="progress-details-title">{i18next.t('progress.detailsTitle', 'Progress Report Details')}</Typography>
-            <Box className="progress-details-author">
-              <Typography className="progress-details-author-label">
-                {i18next.t('progress.author', 'Author')}
-              </Typography>
-              <UserDisplay
-                user={{
-                  name: currentReport?.authorName,
-                  picture: currentReport?.authorPicture ?? undefined,
-                }}
-                fallbackId={currentReport?.authorId}
-              />
-            </Box>
-          </Box>
-          <Typography variant="caption" color="text.secondary">{formatDateTime(currentReport.createdAt)}</Typography>
-        </Box>
-
-        <Box className="progress-details-section">
-          <Typography variant="h6" className="progress-details-title">{currentReport.summary}</Typography>
-          {currentReport.details && (
-            <Typography mt={1}>{currentReport.details}</Typography>
-          )}
-        </Box>
-
+      {/* Header */}
+      <div className="progress-details-header">
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="vg-eyebrow">{i18next.t('progress.eyebrow', 'Progress Report')}</div>
+          <div className="vg-page-title" style={{ fontSize: 22, marginBottom: 0 }}>{currentReport.summary}</div>
+          <div className="progress-details-meta-row">
+            <div className="progress-details-author-chip">
+              <div className="progress-details-author-avatar">{authorInitials}</div>
+              <UserDisplay user={authorMember} fallbackId={currentReport.authorId} />
+            </div>
+            <span>{formatDateTime(currentReport.createdAt)}</span>
+            {season && <span>· {season.name}</span>}
+          </div>
+        </div>
         {canModify && (
-          <Box className="progress-details-actions">
-            <Button variant="outlined" onClick={openEdit} disabled={actionLoading}>{i18next.t('progress.edit', 'Edit')}</Button>
-            <Button variant="contained" color="error" onClick={() => setDeleteOpen(true)} disabled={actionLoading}>{i18next.t('progress.delete', 'Delete')}</Button>
-          </Box>
+          <div className="progress-details-actions">
+            <button className="vg-chip" onClick={() => setEditOpen(true)}>{i18next.t('common.edit', 'Edit')}</button>
+          </div>
         )}
+      </div>
 
-        {/* Overall notes — visually distinct from per-goal entries */}
-        {currentReport.overallDetails && (
-          <Box className="progress-details-section" sx={{ borderLeft: 3, borderColor: 'primary.main', bgcolor: 'action.hover' }}>
-            <Typography variant="subtitle2" color="primary" mb={0.5} className="progress-details-section-title">
-              {i18next.t('progress.overallDetails', 'Overall Notes')}
-            </Typography>
-            <Typography variant="body2">{currentReport.overallDetails}</Typography>
-          </Box>
-        )}
+      {/* Session notes */}
+      {currentReport.details && (
+        <div className="vg-panel" style={{ marginBottom: 12 }}>
+          <div className="vg-panel-title">{i18next.t('progress.details', 'Session Notes')}</div>
+          <Typography sx={{ fontSize: 12, color: 'var(--palette-text-secondary)', lineHeight: 1.7 }}>
+            {currentReport.details}
+          </Typography>
+        </div>
+      )}
 
-        {/* Per-entry cards */}
-        {(currentReport.progress ?? []).length > 0 && (
-          <Box className="progress-details-section">
-            <Typography variant="subtitle1" className="progress-details-section-title">{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
-            {(currentReport.progress ?? []).map((entry) => {
-              const goal = goals.find(g => g.id === entry.goalId);
-              const isExpanded = expandedEntries.has(entry.id);
-              return (
-                <Box key={entry.id} className="progress-details-entry-item">
-                  {/* Header row */}
-                  <Box display="flex" alignItems="center" gap={1} px={2} py={1} sx={{ cursor: 'pointer' }} onClick={() => toggleEntryExpand(entry.id)}>
-                    <Typography variant="body2" flex={1}>{goal?.title || entry.goalId}</Typography>
-                    <Rating value={entry.rating} readOnly size="small" />
-                    <Typography variant="caption" color="text.secondary">{entry.rating}/5</Typography>
-                    <IconButton size="small">
-                      {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-                    </IconButton>
+      {/* Goal ratings */}
+      {(currentReport.progress?.length ?? 0) > 0 && (
+        <div className="vg-panel" style={{ marginBottom: 12 }}>
+          <div className="vg-panel-title">{i18next.t('progress.goalRatings', 'Goal Ratings')}</div>
+          {currentReport.progress!.map(entry => {
+            const goal = goals.find(g => g.id === entry.goalId);
+            const colors = HEATMAP_RATING_COLORS[entry.rating] ?? { bg: '#eee', text: '#333' };
+            const expanded = expandedEntry === entry.id;
+            return (
+              <div key={entry.id}>
+                <div
+                  className="progress-details-entry-row"
+                  onClick={() => setExpandedEntry(expanded ? null : entry.id)}
+                >
+                  <div
+                    className="progress-details-rating-cell"
+                    style={{ background: colors.bg, color: colors.text }}
+                  >
+                    {entry.rating}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="progress-details-entry-goal">{goal?.title ?? entry.goalId}</div>
+                    {entry.details && (
+                      <div className="progress-details-entry-notes">{entry.details}</div>
+                    )}
+                  </div>
+                  <div className="progress-details-entry-expand">{expanded ? '▲' : '▼'}</div>
+                </div>
+                <Collapse in={expanded}>
+                  <Box sx={{ pl: '38px', pb: 1 }}>
+                    <CommentSection
+                      targetId={entry.id}
+                      commentType={CommentType.ProgressEntry}
+                      enabled={currentTeamSettings?.allowFileUploads ?? false}
+                      allowFileUploads={currentTeamSettings?.allowFileUploads}
+                      teamMembers={teamMembers}
+                    />
                   </Box>
+                </Collapse>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-                  {/* Collapsible body */}
-                  <Collapse in={isExpanded}>
-                    <Box px={2} pb={2}>
-                      {entry.details && (
-                        <Typography variant="body2" color="text.secondary" mb={1}>{entry.details}</Typography>
-                      )}
-                      <CommentSection
-                        targetId={entry.id}
-                        commentType={CommentType.ProgressEntry}
-                        enabled={true}
-                        allowFileUploads={currentTeamSettings?.allowFileUploads ?? false}
-                        teamMembers={teamMembers as any}
-                      />
-                    </Box>
-                  </Collapse>
-                </Box>
-              );
-            })}
-          </Box>
-        )}
-
-        {/* Report-level comments */}
-        <Box mt={4}>
-          <CommentSection
-            targetId={currentReport.id}
-            commentType={CommentType.ProgressReport}
-            enabled={true}
-            allowFileUploads={currentTeamSettings?.allowFileUploads ?? false}
-            teamMembers={teamMembers as any}
-          />
-        </Box>
-      </Box>
+      {/* Report-level comments */}
+      <div className="vg-panel">
+        <div className="vg-panel-title">{i18next.t('progressDetails.comments', 'Comments')}</div>
+        <CommentSection
+          targetId={currentReport.id}
+          commentType={CommentType.ProgressReport}
+          enabled={currentTeamSettings?.allowFileUploads ?? false}
+          allowFileUploads={currentTeamSettings?.allowFileUploads}
+          teamMembers={teamMembers}
+        />
+      </div>
 
       {/* Edit Dialog */}
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{i18next.t('progress.detailsTitle', 'Edit Progress Report')}</DialogTitle>
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="sm"
+        PaperProps={{ className: 'vg-dialog-paper' }}>
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+          {i18next.t('progressDetails.editReport', 'Edit Report')}
+        </DialogTitle>
         <DialogContent>
-          <form id="progress-edit-form" onSubmit={handleSubmit(onEdit)}>
-            <Box mt={1} display="flex" flexDirection="column" gap={2}>
-              <Controller name="summary" control={control} rules={{ required: true }} render={({ field }) => (
-                <TextField fullWidth label={i18next.t('progress.summary', 'Summary')} {...field} />
-              )} />
-              <Controller name="details" control={control} rules={{ required: true }} render={({ field }) => (
-                <TextField fullWidth multiline rows={4} label={i18next.t('progress.details', 'Details')} {...field} />
-              )} />
-              {goals.length > 0 && (
-                <Box>
-                  <Typography variant="subtitle2">{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
-                  {goals.filter(g => g.status === GoalStatus.Open || g.status === GoalStatus.InProgress).map((g) => (
-                    <Box key={g.id} display="flex" flexDirection="column" gap={0.5} mt={1.5}>
-                      <Box display="flex" alignItems="center" gap={2}>
-                        <Typography style={{ minWidth: 200 }}>{g.title}</Typography>
-                        <Rating
-                          max={5}
-                          value={editRatings[g.id] || 0}
-                          onChange={(_, v) => setEditRatings(prev => ({ ...prev, [g.id]: v || 0 }))}
-                        />
-                      </Box>
-                      <TextField
-                        size="small"
-                        fullWidth
-                        multiline
-                        rows={2}
-                        label={i18next.t('progress.entryDetails', 'Notes')}
-                        value={editEntryDetails[g.id] || ''}
-                        onChange={(e) => setEditEntryDetails(prev => ({ ...prev, [g.id]: e.target.value }))}
-                      />
-                    </Box>
-                  ))}
-                </Box>
-              )}
-            </Box>
-          </form>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+            <Controller name="summary" control={control} rules={{ required: true }} render={({ field }) => (
+              <TextField fullWidth size="small" label={i18next.t('progress.summary', 'Summary')} {...field} />
+            )} />
+            <Controller name="details" control={control} render={({ field }) => (
+              <TextField fullWidth multiline rows={4} size="small"
+                label={i18next.t('progress.details', 'Session Notes')} {...field} />
+            )} />
+          </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</Button>
-          <Button type="submit" form="progress-edit-form" variant="contained" disabled={actionLoading}>{i18next.t('common.save', 'Save')}</Button>
+        <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5, justifyContent: 'space-between' }}>
+          <button className="vg-chip" onClick={() => { setEditOpen(false); setDeleteOpen(true); }}
+            style={{ color: 'var(--palette-error-main)', borderColor: 'var(--palette-error-main)' }}>
+            {i18next.t('common.delete', 'Delete')}
+          </button>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <button className="vg-chip" onClick={() => setEditOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</button>
+            <button className="vg-chip vg-chip--active" onClick={handleSubmit(onEdit)} disabled={actionLoading}
+              style={{ height: 30, borderRadius: 7, padding: '0 14px' }}>
+              {i18next.t('common.save', 'Save')}
+            </button>
+          </Box>
         </DialogActions>
       </Dialog>
 
       {/* Delete Dialog */}
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-        <DialogTitle>{i18next.t('progress.delete', 'Delete')}</DialogTitle>
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="xs"
+        PaperProps={{ className: 'vg-dialog-paper' }}>
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+          {i18next.t('progressDetails.deleteReport', 'Delete Report')}
+        </DialogTitle>
         <DialogContent>
-          <Typography>{i18next.t('progress.deleteConfirm', 'Are you sure you want to delete this progress report?')}</Typography>
+          <Typography sx={{ mt: 1, fontSize: 12 }}>
+            {i18next.t('progressDetails.deleteConfirm', 'Are you sure you want to delete this report?')}
+          </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</Button>
-          <Button variant="contained" color="error" onClick={onDelete} disabled={actionLoading}>{i18next.t('progress.delete', 'Delete')}</Button>
+        <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
+          <button className="vg-chip" onClick={() => setDeleteOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</button>
+          <button className="vg-chip" onClick={onDelete} disabled={actionLoading}
+            style={{ background: 'var(--palette-error-main)', color: '#fff', borderColor: 'var(--palette-error-main)', height: 30, borderRadius: 7, padding: '0 14px' }}>
+            {i18next.t('common.delete', 'Delete')}
+          </button>
         </DialogActions>
       </Dialog>
-    </Paper>
+    </Box>
   );
 }
