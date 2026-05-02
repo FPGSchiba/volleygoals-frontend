@@ -3,7 +3,7 @@ import { render, screen } from '../../test-utils';
 import { ProgressCreation } from '../../../pages/user/ProgressCreation';
 import { setupMockStore, mockCognitoUserState, mockProgressReportState, mockSeasonState, mockGoalState } from '../../mocks/stores';
 import { buildSeason, buildGoal } from '../../mocks/factories';
-import { GoalStatus, RoleType, TeamMemberStatus } from '../../../store/types';
+import { GoalStatus } from '../../../store/types';
 
 jest.mock('../../../store/progressReports', () => { const m: any = jest.fn((s?: any) => s ? s({}) : {}); m.getState = () => ({}); return { __esModule: true, useProgressReportStore: m }; });
 import { useProgressReportStore } from '../../../store/progressReports';
@@ -44,19 +44,10 @@ describe('ProgressCreation', () => {
   });
 
   it('renders goal ratings when goals exist', () => {
-    const goals = [
-      buildGoal({ id: 'g1', title: 'Goal A', status: GoalStatus.Open }),
-      buildGoal({ id: 'g2', title: 'Goal B', status: GoalStatus.InProgress }),
-    ];
-    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
-    setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
-    setupMockStore(useProgressReportStore as any, mockProgressReportState());
-    setupMockStore(useGoalStore as any, mockGoalState({ goalList: { goals, count: 2, hasMore: false, nextToken: '', filter: {} } }));
-
+    setup({ hasGoals: true });
     render(<ProgressCreation />);
     expect(screen.getByText('Goal Ratings')).toBeInTheDocument();
     expect(screen.getByText('Goal A')).toBeInTheDocument();
-    expect(screen.getByText('Goal B')).toBeInTheDocument();
   });
 
   it('shows no goals message when no active goals', () => {

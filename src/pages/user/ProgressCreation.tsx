@@ -8,7 +8,7 @@ import { useProgressReportStore } from '../../store/progressReports';
 import { useGoalStore } from '../../store/goals';
 import { useSeasonStore } from '../../store/seasons';
 import { useCognitoUserStore } from '../../store/cognitoUser';
-import { GoalStatus, ISeason } from '../../store/types';
+import { GoalStatus } from '../../store/types';
 import { HEATMAP_RATING_COLORS } from '../../utils/chartUtils';
 import i18next from 'i18next';
 
@@ -20,7 +20,7 @@ export function ProgressCreation() {
   const fetchGoals = useGoalStore(s => s.fetchGoals);
   const goals = useGoalStore(s => s.goalList.goals);
   const fetchSeasons = useSeasonStore(s => s.fetchSeasons);
-  const seasons = useSeasonStore(s => s.seasonList.seasons) || [] as ISeason[];
+  const seasons = useSeasonStore(s => s.seasonList.seasons) || [];
   const selectedTeam = useCognitoUserStore(s => s.selectedTeam);
   const teamId = selectedTeam?.team?.id || '';
 
@@ -28,6 +28,7 @@ export function ProgressCreation() {
   const [ratings, setRatings] = useState<Record<string, number>>({});
   const [goalNotes, setGoalNotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   React.useEffect(() => {
     if (teamId) {
@@ -51,12 +52,15 @@ export function ProgressCreation() {
   const onSubmit = async (data: ProgressForm) => {
     if (!selectedSeasonId) return;
     setLoading(true);
+    setSubmitError(null);
     try {
       const progress = Object.entries(ratings)
         .filter(([, r]) => r > 0)
         .map(([goalId, rating]) => ({ goalId, rating, details: goalNotes[goalId] || undefined }));
       const report = await createReport(selectedSeasonId, data.summary, data.details, progress);
       if (report) navigate('/progress');
+    } catch {
+      setSubmitError(i18next.t('progress.submitError', 'Failed to submit report. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -79,6 +83,7 @@ export function ProgressCreation() {
           {seasons.map(s => (
             <button
               key={s.id}
+              type="button"
               className={`vg-chip${selectedSeasonId === s.id ? ' vg-chip--active' : ''}`}
               onClick={() => setSelectedSeasonId(s.id)}
             >
@@ -146,6 +151,11 @@ export function ProgressCreation() {
           </Typography>
         )}
 
+        {submitError && (
+          <Typography sx={{ fontSize: 12, color: 'var(--palette-error-main)', mb: 1 }}>
+            {submitError}
+          </Typography>
+        )}
         <div className="progress-creation-actions">
           <button type="button" className="vg-chip" onClick={() => navigate('/progress')}>
             {i18next.t('common.cancel', 'Cancel')}
