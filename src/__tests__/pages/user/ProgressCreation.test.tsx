@@ -24,17 +24,23 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const setup = ({ hasGoals = false }: { hasGoals?: boolean } = {}) => {
+  const goals = hasGoals
+    ? [buildGoal({ id: 'g1', title: 'Goal A', status: GoalStatus.Open })]
+    : [];
+  setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
+  setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
+  setupMockStore(useProgressReportStore as any, mockProgressReportState());
+  setupMockStore(useGoalStore as any, mockGoalState({ goalList: { goals, count: goals.length, hasMore: false, nextToken: '', filter: {} } }));
+};
+
 describe('ProgressCreation', () => {
   it('renders form fields', () => {
-    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
-    setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
-    setupMockStore(useProgressReportStore as any, mockProgressReportState());
-    setupMockStore(useGoalStore as any, mockGoalState());
-
+    setup();
     render(<ProgressCreation />);
-    expect(screen.getByText('Create Progress Report')).toBeInTheDocument();
+    expect(screen.getByText('New Report')).toBeInTheDocument();
     expect(screen.getByLabelText('Summary')).toBeInTheDocument();
-    expect(screen.getByLabelText('Details')).toBeInTheDocument();
+    expect(screen.getByLabelText('Session Notes')).toBeInTheDocument();
   });
 
   it('renders goal ratings when goals exist', () => {
@@ -54,23 +60,22 @@ describe('ProgressCreation', () => {
   });
 
   it('shows no goals message when no active goals', () => {
-    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
-    setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
-    setupMockStore(useProgressReportStore as any, mockProgressReportState());
-    setupMockStore(useGoalStore as any, mockGoalState());
-
+    setup();
     render(<ProgressCreation />);
-    expect(screen.getByText('No goals available for this season.')).toBeInTheDocument();
+    expect(screen.getByText('No active goals available.')).toBeInTheDocument();
   });
 
-  it('renders create and cancel buttons', () => {
-    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
-    setupMockStore(useSeasonStore as any, mockSeasonState({ seasonList: { seasons: [buildSeason({ id: 's1' })], count: 1, hasMore: false, nextToken: '', filter: { teamId: '' } } }));
-    setupMockStore(useProgressReportStore as any, mockProgressReportState());
-    setupMockStore(useGoalStore as any, mockGoalState());
-
+  it('renders submit and cancel buttons', () => {
+    setup();
     render(<ProgressCreation />);
-    expect(screen.getByText('Create')).toBeInTheDocument();
+    expect(screen.getByText('Submit Report')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
+  });
+
+  it('renders numbered rating cells 1-5 instead of MUI Rating stars', () => {
+    setup({ hasGoals: true });
+    render(<ProgressCreation />);
+    const cells = screen.getAllByRole('button', { name: /rating cell/i });
+    expect(cells.length).toBeGreaterThanOrEqual(5);
   });
 });

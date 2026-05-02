@@ -4,59 +4,73 @@
 .progress-creation-page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  padding-bottom: 24px;
   max-width: 800px;
 }
 
 .progress-creation-header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
   flex-wrap: wrap;
-  gap: 8px;
 }
 
-.progress-creation-title {
-  font-weight: 600;
-}
-
-.progress-creation-section {
-  padding: 16px;
-  background: var(--palette-background-paper);
-  border: 1px solid var(--palette-divider);
-  border-radius: 8px;
-}
-
-.progress-creation-section-title {
-  font-weight: 600;
-  margin-bottom: 12px;
-}
-
-.progress-creation-field {
-  margin-bottom: 12px;
-}
-
-.progress-creation-goal-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid var(--palette-divider);
-  border-radius: 6px;
-  margin-top: 8px;
+.progress-creation-goal-row {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--vg-border);
+  &:last-child { border-bottom: none; }
 }
 
 .progress-creation-goal-title {
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--palette-text-primary);
+  margin-bottom: 8px;
+}
+
+.progress-creation-rating-row {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.progress-creation-rating-cell {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: var(--vg-bg-subtle);
+  color: var(--vg-text-muted);
+  font-family: inherit;
+  &:focus-visible { outline: 2px solid var(--palette-primary-main); outline-offset: 2px; }
+}
+
+.progress-creation-notes {
+  width: 100%;
+  border-radius: 7px;
+  border: 1px solid var(--vg-border);
+  background: var(--vg-bg-subtle);
+  color: var(--palette-text-primary);
+  font-size: 11px;
+  font-family: inherit;
+  padding: 7px 10px;
+  resize: vertical;
+  min-height: 40px;
+  &:focus { outline: none; border-color: var(--palette-primary-main); }
+  &::placeholder { color: var(--vg-text-muted); }
 }
 
 .progress-creation-actions {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
   justify-content: flex-end;
-
-  @include mobile-only {
-    flex-direction: column;
-  }
+  margin-top: 8px;
 }

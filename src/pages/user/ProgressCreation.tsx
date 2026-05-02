@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Box, Button, MenuItem, Paper, Rating, TextField, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Controller, useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useProgressReportStore } from '../../store/progressReports';
@@ -7,40 +9,40 @@ import { useGoalStore } from '../../store/goals';
 import { useSeasonStore } from '../../store/seasons';
 import { useCognitoUserStore } from '../../store/cognitoUser';
 import { GoalStatus, ISeason } from '../../store/types';
+import { HEATMAP_RATING_COLORS } from '../../utils/chartUtils';
 import i18next from 'i18next';
 
-type ProgressForm = { summary: string; details: string; };
+type ProgressForm = { summary: string; details: string };
 
 export function ProgressCreation() {
   const navigate = useNavigate();
-  const createReport = useProgressReportStore((s) => s.createReport);
-  const fetchGoals = useGoalStore((s) => s.fetchGoals);
-  const goals = useGoalStore((s) => s.goalList.goals);
-  const fetchSeasons = useSeasonStore((s) => s.fetchSeasons);
-  const seasons = useSeasonStore((s) => s.seasonList.seasons) || [] as ISeason[];
-  const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
+  const createReport = useProgressReportStore(s => s.createReport);
+  const fetchGoals = useGoalStore(s => s.fetchGoals);
+  const goals = useGoalStore(s => s.goalList.goals);
+  const fetchSeasons = useSeasonStore(s => s.fetchSeasons);
+  const seasons = useSeasonStore(s => s.seasonList.seasons) || [] as ISeason[];
+  const selectedTeam = useCognitoUserStore(s => s.selectedTeam);
   const teamId = selectedTeam?.team?.id || '';
 
   const [selectedSeasonId, setSelectedSeasonId] = React.useState<string | null>(null);
   const [ratings, setRatings] = useState<Record<string, number>>({});
-  const [goalDetails, setGoalDetails] = useState<Record<string, string>>({});
+  const [goalNotes, setGoalNotes] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
-    if (teamId) fetchSeasons(teamId, { teamId });
-  }, [teamId]);
+    if (teamId) {
+      fetchSeasons(teamId, { teamId });
+      fetchGoals(teamId, {});
+    }
+  }, [teamId, fetchSeasons, fetchGoals]);
 
   React.useEffect(() => {
     if (!seasons || seasons.length === 0) { setSelectedSeasonId(null); return; }
     const sorted = [...seasons].sort((a, b) =>
-      new Date(b.startDate || b.createdAt).getTime() - new Date(a.startDate || a.createdAt).getTime()
+      new Date(b.startDate || b.createdAt || '').getTime() - new Date(a.startDate || a.createdAt || '').getTime()
     );
     setSelectedSeasonId(prev => prev || sorted[0]?.id || null);
   }, [seasons]);
-
-  React.useEffect(() => {
-    if (teamId) fetchGoals(teamId, {});
-  }, [teamId]);
 
   const activeGoals = goals.filter(g => g.status === GoalStatus.Open || g.status === GoalStatus.InProgress);
 
@@ -51,8 +53,8 @@ export function ProgressCreation() {
     setLoading(true);
     try {
       const progress = Object.entries(ratings)
-        .filter(([, rating]) => rating > 0)
-        .map(([goalId, rating]) => ({ goalId, rating, details: goalDetails[goalId] || undefined }));
+        .filter(([, r]) => r > 0)
+        .map(([goalId, rating]) => ({ goalId, rating, details: goalNotes[goalId] || undefined }));
       const report = await createReport(selectedSeasonId, data.summary, data.details, progress);
       if (report) navigate('/progress');
     } finally {
@@ -60,68 +62,100 @@ export function ProgressCreation() {
     }
   };
 
+  const setRating = (goalId: string, rating: number) =>
+    setRatings(prev => ({ ...prev, [goalId]: prev[goalId] === rating ? 0 : rating }));
+
   return (
-    <Paper className="progress-creation-page">
-      <Box p={2}>
-        <Box className="progress-creation-header">
-          <Typography variant="h5" className="progress-creation-title">{i18next.t('progress.createTitle', 'Create Progress Report')}</Typography>
-        </Box>
-        <Box className="progress-creation-section" mt={2}>
-          <TextField
-            select size="small" value={selectedSeasonId ?? ''}
-            label={i18next.t('user.goals.selectSeason', 'Season')}
-            onChange={(e) => setSelectedSeasonId(e.target.value)}
-            style={{ minWidth: 240 }}
-          >
-            {seasons.map((s) => <MenuItem key={s.id} value={s.id}>{s.name}</MenuItem>)}
-          </TextField>
-        </Box>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Box className="progress-creation-section" mt={2} display="flex" flexDirection="column" gap={2}>
-            <Controller name="summary" control={control} rules={{ required: true }} render={({ field }) => (
-              <TextField fullWidth label={i18next.t('progress.summary', 'Summary')} className="progress-creation-field" {...field} />
+    <Box className="progress-creation-page" sx={{ p: { xs: 2, sm: 3 } }}>
+      <div className="progress-creation-header">
+        <div>
+          <div className="vg-eyebrow">{i18next.t('progress.eyebrow', 'Progress')}</div>
+          <div className="vg-page-title">{i18next.t('progress.createTitle', 'New Report')}</div>
+        </div>
+      </div>
+
+      {seasons.length > 0 && (
+        <div className="vg-chip-row" style={{ marginBottom: 16 }}>
+          {seasons.map(s => (
+            <button
+              key={s.id}
+              className={`vg-chip${selectedSeasonId === s.id ? ' vg-chip--active' : ''}`}
+              onClick={() => setSelectedSeasonId(s.id)}
+            >
+              {s.name}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="vg-panel" style={{ marginBottom: 12 }}>
+          <div className="vg-panel-title">{i18next.t('progress.reportPanel', 'Report')}</div>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+            <Controller name="summary" control={control} rules={{ required: true }} render={({ field, fieldState }) => (
+              <TextField fullWidth size="small" label={i18next.t('progress.summary', 'Summary')}
+                error={!!fieldState.error} {...field} />
             )} />
-            <Controller name="details" control={control} rules={{ required: true }} render={({ field }) => (
-              <TextField fullWidth multiline rows={4} label={i18next.t('progress.details', 'Details')} className="progress-creation-field" {...field} />
+            <Controller name="details" control={control} render={({ field }) => (
+              <TextField fullWidth multiline rows={3} size="small"
+                label={i18next.t('progress.details', 'Session Notes')} {...field} />
             )} />
-            {activeGoals.length > 0 && (
-              <Box>
-                <Typography variant="subtitle1" className="progress-creation-section-title">{i18next.t('progress.goalRatings', 'Goal Ratings')}</Typography>
-                {activeGoals.map((g) => (
-                  <Box key={g.id} className="progress-creation-goal-item">
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Typography className="progress-creation-goal-title" style={{ minWidth: 200 }}>{g.title}</Typography>
-                      <Rating
-                        max={5}
-                        value={ratings[g.id] || 0}
-                        onChange={(_, v) => setRatings(prev => ({ ...prev, [g.id]: v || 0 }))}
-                      />
-                    </Box>
-                    <TextField
-                      size="small"
-                      fullWidth
-                      placeholder={i18next.t('progress.entryDetailsPlaceholder', 'Notes for this goal (optional)')}
-                      value={goalDetails[g.id] || ''}
-                      onChange={(e) => setGoalDetails(prev => ({ ...prev, [g.id]: e.target.value }))}
-                    />
-                  </Box>
-                ))}
-              </Box>
-            )}
-            {activeGoals.length === 0 && selectedSeasonId && (
-              <Typography variant="body2" color="text.secondary">
-                {i18next.t('progress.noGoals', 'No goals available for this season.')}
-              </Typography>
-            )}
-            <Box className="progress-creation-actions">
-              <Button type="submit" variant="contained" disabled={loading || !selectedSeasonId}>
-                {i18next.t('common.create', 'Create')}
-              </Button>
-              <Button onClick={() => navigate('/progress')}>{i18next.t('common.cancel', 'Cancel')}</Button>
-            </Box>
           </Box>
-        </form>
-      </Box>
-    </Paper>
+        </div>
+
+        {activeGoals.length > 0 && (
+          <div className="vg-panel" style={{ marginBottom: 12 }}>
+            <div className="vg-panel-title">{i18next.t('progress.goalRatings', 'Goal Ratings')}</div>
+            {activeGoals.map(g => (
+              <div key={g.id} className="progress-creation-goal-row">
+                <div className="progress-creation-goal-title">{g.title}</div>
+                <div className="progress-creation-rating-row">
+                  {([1, 2, 3, 4, 5] as const).map(r => {
+                    const selected = ratings[g.id] === r;
+                    const colors = HEATMAP_RATING_COLORS[r];
+                    return (
+                      <button
+                        key={r}
+                        type="button"
+                        className="progress-creation-rating-cell"
+                        aria-label={`rating cell ${r}`}
+                        aria-pressed={selected}
+                        onClick={() => setRating(g.id, r)}
+                        style={selected ? { background: colors.bg, color: colors.text } : undefined}
+                      >
+                        {r}
+                      </button>
+                    );
+                  })}
+                </div>
+                <textarea
+                  className="progress-creation-notes"
+                  placeholder={i18next.t('progress.entryDetailsPlaceholder', 'Notes for this goal (optional)')}
+                  value={goalNotes[g.id] || ''}
+                  onChange={e => setGoalNotes(prev => ({ ...prev, [g.id]: e.target.value }))}
+                  rows={1}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {activeGoals.length === 0 && selectedSeasonId && (
+          <Typography sx={{ fontSize: 12, color: 'var(--vg-text-muted)', py: 3 }}>
+            {i18next.t('progress.noGoals', 'No active goals available.')}
+          </Typography>
+        )}
+
+        <div className="progress-creation-actions">
+          <button type="button" className="vg-chip" onClick={() => navigate('/progress')}>
+            {i18next.t('common.cancel', 'Cancel')}
+          </button>
+          <button type="submit" className="vg-chip vg-chip--active" disabled={loading || !selectedSeasonId}
+            style={{ height: 34, borderRadius: 8, padding: '0 18px' }}>
+            {i18next.t('progress.submit', 'Submit Report')}
+          </button>
+        </div>
+      </form>
+    </Box>
   );
 }
