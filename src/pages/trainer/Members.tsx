@@ -38,8 +38,9 @@ function initials(name: string): string {
 }
 
 function getReportCount(m: ITeamUser): number {
-  const extended = m as ITeamUser & { reportCount?: number };
-  return extended.reportCount ?? 0;
+  return typeof (m as Record<string, unknown>).reportCount === 'number'
+    ? (m as Record<string, unknown>).reportCount as number
+    : 0;
 }
 
 export function Members() {
@@ -59,6 +60,7 @@ export function Members() {
   const [editOpen, setEditOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<ITeamUser | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   const { control, handleSubmit, reset } = useForm<MemberEditForm>({
     defaultValues: { role: '', status: '' },
@@ -82,10 +84,13 @@ export function Members() {
   const onEdit = async (data: MemberEditForm) => {
     if (!currentMember || !teamId) return;
     setActionLoading(true);
+    setEditError(null);
     try {
       await VolleyGoalsAPI.updateMembership(currentMember.id, teamId, data.role, data.status);
       setEditOpen(false);
-      fetchTeamMembers(teamId, {});
+      await fetchTeamMembers(teamId, {});
+    } catch {
+      setEditError(i18next.t('members.saveError', 'Failed to save changes. Please try again.'));
     } finally {
       setActionLoading(false);
     }
@@ -193,7 +198,7 @@ export function Members() {
 
       <Dialog
         open={editOpen}
-        onClose={() => setEditOpen(false)}
+        onClose={() => { setEditOpen(false); setEditError(null); }}
         fullWidth
         maxWidth="sm"
         PaperProps={{ className: 'vg-dialog-paper' }}
@@ -217,8 +222,13 @@ export function Members() {
             )} />
           </div>
         </DialogContent>
+        {editError && (
+          <Typography sx={{ fontSize: 12, color: 'var(--palette-error-main)', px: 2.5, pb: 1 }}>
+            {editError}
+          </Typography>
+        )}
         <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
-          <button className="vg-chip" type="button" onClick={() => setEditOpen(false)}>
+          <button className="vg-chip" type="button" onClick={() => { setEditOpen(false); setEditError(null); }}>
             {i18next.t('common.cancel', 'Cancel')}
           </button>
           <button
