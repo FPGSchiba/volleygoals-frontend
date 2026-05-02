@@ -161,7 +161,7 @@ export function ProgressDetails() {
       {(currentReport.progress?.length ?? 0) > 0 && (
         <div className="vg-panel" style={{ marginBottom: 12 }}>
           <div className="vg-panel-title">{i18next.t('progress.goalRatings', 'Goal Ratings')}</div>
-          {currentReport.progress!.map(entry => {
+          {currentReport.progress?.map(entry => {
             const goal = goals.find(g => g.id === entry.goalId);
             const colors = HEATMAP_RATING_COLORS[entry.rating] ?? { bg: '#eee', text: '#333' };
             const expanded = expandedEntry === entry.id;
@@ -190,7 +190,7 @@ export function ProgressDetails() {
                     <CommentSection
                       targetId={entry.id}
                       commentType={CommentType.ProgressEntry}
-                      enabled={currentTeamSettings?.allowFileUploads ?? false}
+                      enabled={true}
                       allowFileUploads={currentTeamSettings?.allowFileUploads}
                       teamMembers={teamMembers}
                     />
@@ -208,7 +208,7 @@ export function ProgressDetails() {
         <CommentSection
           targetId={currentReport.id}
           commentType={CommentType.ProgressReport}
-          enabled={currentTeamSettings?.allowFileUploads ?? false}
+          enabled={true}
           allowFileUploads={currentTeamSettings?.allowFileUploads}
           teamMembers={teamMembers}
         />

@@ -27,26 +27,13 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => ({ state: { seasonId: 's1' } }),
 }));
 
-// Dynamically import to check if the component exists
-let ProgressDetails: any;
-try {
-  ProgressDetails = require('../../../pages/user/ProgressDetails').ProgressDetails;
-} catch {
-  ProgressDetails = null;
-}
+import { ProgressDetails } from '../../../pages/user/ProgressDetails';
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
 
 describe('ProgressDetails', () => {
-  if (!ProgressDetails) {
-    it('component exists', () => {
-      expect(ProgressDetails).toBeTruthy();
-    });
-    return;
-  }
-
   it('renders report summary as page title', () => {
     const report = buildProgressReport({ id: 'p1', seasonId: 's1', summary: 'Great training session' });
     setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
