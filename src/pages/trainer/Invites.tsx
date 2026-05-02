@@ -1,63 +1,71 @@
 import React, { useMemo, useState } from 'react';
-import { Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle, Grid, MenuItem, Paper, TableCell, TextField, ToggleButton, ToggleButtonGroup, Typography } from '@mui/material';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Controller, useForm } from 'react-hook-form';
-import { ItemList, FetchResult } from '../../components/ItemList';
 import { IInvite, RoleType } from '../../store/types';
-import { ITeamInviteFilterOption } from '../../services/types';
 import { useTeamStore } from '../../store/teams';
 import { useCognitoUserStore } from '../../store/cognitoUser';
 import { usePermission } from '../../hooks/usePermission';
+import { formatDateTime } from '../../utils/dateTime';
 import i18next from 'i18next';
 
-type InviteForm = { email: string; role: RoleType; message: string; };
+type InviteForm = { email: string; role: RoleType; message: string };
+type StatusFilter = 'all' | 'pending' | 'accepted' | 'revoked';
+
+function statusBadgeClass(status: string): string {
+  if (status === 'pending') return 'vg-badge vg-badge--open';
+  if (status === 'accepted') return 'vg-badge vg-badge--done';
+  return 'vg-badge vg-badge--muted';
+}
 
 export function Invites() {
-  const fetchTeamInvites = useTeamStore((s) => s.fetchTeamInvites);
-  const createInvite = useTeamStore((s) => s.createInvite);
-  const resendInvite = useTeamStore((s) => s.resendInvite);
-  const revokeInvite = useTeamStore((s) => s.revokeInvite);
-  const teamInvites = useTeamStore((s) => s.teamInvites);
+  const fetchTeamInvites = useTeamStore(s => s.fetchTeamInvites);
+  const createInvite = useTeamStore(s => s.createInvite);
+  const resendInvite = useTeamStore(s => s.resendInvite);
+  const revokeInvite = useTeamStore(s => s.revokeInvite);
+  const teamInvites = useTeamStore(s => s.teamInvites);
   const invites = teamInvites?.invites || [];
-  const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
+  const selectedTeam = useCognitoUserStore(s => s.selectedTeam);
   const teamId = selectedTeam?.team?.id || '';
-  const userRole = selectedTeam?.role as string | undefined;
   const canWrite = usePermission('invites:write');
-  const canManage = canWrite;
 
-  const [allowFetch, setAllowFetch] = React.useState<boolean>(!!selectedTeam);
-  React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);
+  React.useEffect(() => {
+    if (teamId) fetchTeamInvites(teamId, {});
+  }, [teamId, fetchTeamInvites]);
 
-  const [inviteCount, setInviteCount] = React.useState(0);
-  const [statusTab, setStatusTab] = React.useState<string>('pending');
-
-  const currentInitialFilter: ITeamInviteFilterOption = useMemo(
-    () => (statusTab ? { status: statusTab } : {}),
-    [statusTab]
-  );
-
-  const fetchAdapter = async (filter?: ITeamInviteFilterOption): Promise<FetchResult<IInvite>> => {
-    if (!teamId) return { items: [], count: 0 };
-    const result = await fetchTeamInvites(teamId, filter || {});
-    setInviteCount(result.count);
-    return { items: result.items, count: result.count };
-  };
-
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [createOpen, setCreateOpen] = useState(false);
   const [revokeOpen, setRevokeOpen] = useState(false);
   const [currentInvite, setCurrentInvite] = useState<IInvite | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const { control, handleSubmit, reset } = useForm<InviteForm>({
-    defaultValues: { email: '', role: RoleType.Member, message: '' }
+    defaultValues: { email: '', role: RoleType.Member, message: '' },
   });
+
+  const filteredInvites = useMemo(() => {
+    if (statusFilter === 'all') return invites;
+    return invites.filter(inv => (inv.status || 'pending') === statusFilter);
+  }, [invites, statusFilter]);
 
   const onCreate = async (data: InviteForm) => {
     if (!teamId) return;
     setActionLoading(true);
+    setCreateError(null);
     try {
       await createInvite(teamId, data.email, data.role, data.message, true);
       setCreateOpen(false);
       reset();
+      await fetchTeamInvites(teamId, {});
+    } catch {
+      setCreateError(i18next.t('invites.createError', 'Failed to send invite. Please try again.'));
     } finally {
       setActionLoading(false);
     }
@@ -69,139 +77,194 @@ export function Invites() {
     try {
       await revokeInvite(currentInvite.id, teamId);
       setRevokeOpen(false);
+      await fetchTeamInvites(teamId, {});
     } finally {
       setActionLoading(false);
     }
   };
 
-  const renderRow = (inv: IInvite) => [
-    <TableCell key="email">{inv.email}</TableCell>,
-    <TableCell key="role"><Chip label={inv.role} size="small" /></TableCell>,
-    <TableCell key="status"><Chip label={inv.status || 'pending'} size="small" /></TableCell>,
-    <TableCell key="expires">{new Intl.DateTimeFormat('de-CH', { dateStyle: 'short' }).format(new Date(inv.expiresAt))}</TableCell>,
-    <TableCell key="created">{new Intl.DateTimeFormat('de-CH', { dateStyle: 'short' }).format(new Date(inv.createdAt))}</TableCell>,
-  ];
-
-  const renderActions = (inv: IInvite): React.ReactElement[] => {
-    if (!canManage) return [];
-    const pending = inv.status === 'pending' || !inv.status;
-    if (!pending) return [];
-    return [
-      <Box key="actions" className="invites-list-actions">
-        <Button size="small" variant="outlined" onClick={() => resendInvite(inv.id)}>
-          {i18next.t('invites.resend', 'Resend')}
-        </Button>
-        <Button size="small" variant="contained" color="error" onClick={() => { setCurrentInvite(inv); setRevokeOpen(true); }}>
-          {i18next.t('invites.revoke', 'Revoke')}
-        </Button>
-      </Box>,
-    ];
-  };
-
-  const tabOptions = [
-    { value: '', label: i18next.t('invites.filterAll', 'All') },
-    { value: 'pending', label: i18next.t('invites.filterPending', 'Pending') },
-    { value: 'accepted', label: i18next.t('invites.filterAccepted', 'Accepted') },
-    { value: 'declined', label: i18next.t('invites.filterDeclined', 'Declined') },
+  const statusChips: Array<{ label: string; value: StatusFilter }> = [
+    { label: i18next.t('common.all', 'All'), value: 'all' },
+    { label: i18next.t('invites.status.pending', 'Pending'), value: 'pending' },
+    { label: i18next.t('invites.status.accepted', 'Accepted'), value: 'accepted' },
+    { label: i18next.t('invites.status.revoked', 'Revoked'), value: 'revoked' },
   ];
 
   return (
-    <Paper className="invites-page-root" sx={{ borderRadius: 3 }}>
-      <Box p={{ xs: 2, sm: 3 }}>
-        <Typography variant="h5">{i18next.t('invites.title', 'Invites')}</Typography>
-        <Box mt={1.5}>
-          <ToggleButtonGroup
-            size="small"
-            value={statusTab}
-            exclusive
-            onChange={(_, v) => { if (v !== null) setStatusTab(v); }}
-            sx={{ '& .MuiToggleButton-root': { borderRadius: 1.5, px: 1.5, py: 0.5, fontSize: 12 } }}
+    <Box className="invites-page" sx={{ p: { xs: 2, sm: 3 }, maxWidth: 900 }}>
+      <div className="invites-header">
+        <div>
+          <div className="vg-eyebrow">{invites.length} {i18next.t('invites.eyebrow', 'Invites')}</div>
+          <div className="vg-page-title">{i18next.t('invites.title', 'Invites')}</div>
+        </div>
+        {canWrite && (
+          <button
+            type="button"
+            className="vg-chip vg-chip--active"
+            onClick={() => { reset(); setCreateError(null); setCreateOpen(true); }}
+            style={{ height: 34, borderRadius: 8 }}
           >
-            {tabOptions.map(opt => (
-              <ToggleButton key={opt.value} value={opt.value}>{opt.label}</ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-        </Box>
-        <Box mt={2}>
-          {/* key={statusTab} forces ItemList to remount on tab change so it re-fetches with the new initialFilter */}
-          <ItemList<IInvite, ITeamInviteFilterOption>
-            key={statusTab}
-            title={i18next.t('invites.title', 'Invites')}
-            columns={[
-              i18next.t('invites.email', 'Email'),
-              i18next.t('invites.role', 'Role'),
-              i18next.t('invites.status', 'Status'),
-              i18next.t('invites.expiresAt', 'Expires'),
-              i18next.t('user.goals.columns.created', 'Created'),
-            ]}
-            initialFilter={currentInitialFilter}
-            rowsPerPage={10}
-            fetch={fetchAdapter}
-            initialFetchPaused={!allowFetch}
-            create={canManage ? () => { reset(); setCreateOpen(true); } : undefined}
-            renderFilterFields={(f, setF) => [
-              <Grid key="email">
-                <TextField fullWidth label={i18next.t('invites.email', 'Email')} value={f.email ?? ''} onChange={(e) => setF({ ...f, email: e.target.value })} />
-              </Grid>,
-              <Grid key="role">
-                <TextField select fullWidth label={i18next.t('invites.role', 'Role')} value={f.role ?? ''} onChange={(e) => setF({ ...f, role: e.target.value })}>
-                  <MenuItem value="">{i18next.t('admin.teams.filter.any', 'Any')}</MenuItem>
-                  <MenuItem value="admin">admin</MenuItem>
-                  <MenuItem value="trainer">trainer</MenuItem>
-                  <MenuItem value="member">member</MenuItem>
-                </TextField>
-              </Grid>,
-            ]}
-            renderRow={(item) => renderRow(item)}
-            renderActions={(item) => renderActions(item as IInvite)}
-            sortableFields={[]}
-            items={invites}
-            count={inviteCount}
-          />
-        </Box>
-      </Box>
+            {i18next.t('invites.sendInvite', 'Send Invite')}
+          </button>
+        )}
+      </div>
 
-      {/* Create Invite Dialog */}
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} fullWidth maxWidth="sm">
-        <DialogTitle>{i18next.t('invites.createTitle', 'Create Invite')}</DialogTitle>
+      <div className="vg-chip-row">
+        {statusChips.map(c => (
+          <button
+            key={c.value}
+            type="button"
+            className={`vg-chip${statusFilter === c.value ? ' vg-chip--active' : ''}`}
+            onClick={() => setStatusFilter(c.value)}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="invites-list">
+        {filteredInvites.map(inv => {
+          const status = inv.status || 'pending';
+          const isPending = status === 'pending';
+          return (
+            <div
+              key={inv.id}
+              className="vg-row-item"
+              style={{ opacity: isPending ? 1 : 0.7, cursor: 'default' }}
+            >
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="invites-row-email">{inv.email}</div>
+                <div className="invites-row-meta">
+                  <span>{i18next.t('invites.sent', 'Sent')} {formatDateTime(inv.createdAt)}</span>
+                </div>
+              </div>
+              <div className="invites-row-right">
+                <span className="vg-badge vg-badge--trainer">{inv.role}</span>
+                <span className={statusBadgeClass(status)}>{status}</span>
+                {isPending && canWrite && (
+                  <>
+                    <button
+                      type="button"
+                      className="vg-chip"
+                      style={{ height: 26, fontSize: 10 }}
+                      onClick={() => resendInvite(inv.id)}
+                    >
+                      {i18next.t('invites.resend', 'Resend')}
+                    </button>
+                    <button
+                      type="button"
+                      className="vg-chip"
+                      style={{ height: 26, fontSize: 10, color: 'var(--palette-error-main)', borderColor: 'var(--palette-error-main)' }}
+                      onClick={() => { setCurrentInvite(inv); setRevokeOpen(true); }}
+                    >
+                      {i18next.t('invites.revoke', 'Revoke')}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {filteredInvites.length === 0 && (
+          <Typography sx={{ fontSize: 12, color: 'var(--vg-text-muted)', py: 4, textAlign: 'center' }}>
+            {i18next.t('invites.empty', 'No invites.')}
+          </Typography>
+        )}
+      </div>
+
+      {/* Send Invite Dialog */}
+      <Dialog
+        open={createOpen}
+        onClose={() => { setCreateOpen(false); setCreateError(null); }}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ className: 'vg-dialog-paper' }}
+      >
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+          {i18next.t('invites.sendInvite', 'Send Invite')}
+        </DialogTitle>
         <DialogContent>
-          <form id="invite-create-form" onSubmit={handleSubmit(onCreate)}>
-            <Box className="invites-dialog-form" mt={1}>
-              <Controller name="email" control={control} rules={{ required: true, pattern: /^\S+@\S+\.\S+$/ }} render={({ field, fieldState }) => (
-                <TextField fullWidth label={i18next.t('invites.email', 'Email')} type="email" error={!!fieldState.error} {...field} />
-              )} />
-              <Controller name="role" control={control} render={({ field }) => (
-                <TextField select fullWidth label={i18next.t('invites.role', 'Role')} {...field}>
-                  {userRole === 'admin' && <MenuItem value={RoleType.Admin}>admin</MenuItem>}
-                  <MenuItem value={RoleType.Trainer}>trainer</MenuItem>
-                  <MenuItem value={RoleType.Member}>member</MenuItem>
-                </TextField>
-              )} />
-              <Controller name="message" control={control} render={({ field }) => (
-                <TextField fullWidth multiline rows={3} label={i18next.t('invites.message', 'Personal Message')} {...field} />
-              )} />
-            </Box>
-          </form>
+          <div className="invites-dialog-form">
+            <Controller
+              name="email"
+              control={control}
+              rules={{ required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ }}
+              render={({ field, fieldState }) => (
+                <TextField
+                  fullWidth
+                  size="small"
+                  label={i18next.t('invites.form.email', 'Email')}
+                  type="email"
+                  error={!!fieldState.error}
+                  {...field}
+                />
+              )}
+            />
+            <Controller name="role" control={control} render={({ field }) => (
+              <TextField select fullWidth size="small" label={i18next.t('invites.form.role', 'Role')} {...field}>
+                <MenuItem value={RoleType.Member}>{i18next.t('members.role.member', 'Member')}</MenuItem>
+                <MenuItem value={RoleType.Trainer}>{i18next.t('members.role.trainer', 'Trainer')}</MenuItem>
+              </TextField>
+            )} />
+            <Controller name="message" control={control} render={({ field }) => (
+              <TextField
+                fullWidth
+                multiline
+                rows={2}
+                size="small"
+                label={i18next.t('invites.form.message', 'Message (optional)')}
+                {...field}
+              />
+            )} />
+          </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreateOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</Button>
-          <Button type="submit" form="invite-create-form" variant="contained" disabled={actionLoading}>
-            {i18next.t('invites.create', 'Send Invite')}
-          </Button>
+        {createError && (
+          <Typography sx={{ fontSize: 12, color: 'var(--palette-error-main)', px: 2.5, pb: 1 }}>
+            {createError}
+          </Typography>
+        )}
+        <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
+          <button type="button" className="vg-chip" onClick={() => { setCreateOpen(false); setCreateError(null); }}>
+            {i18next.t('common.cancel', 'Cancel')}
+          </button>
+          <button
+            type="button"
+            className="vg-chip vg-chip--active"
+            onClick={handleSubmit(onCreate)}
+            disabled={actionLoading}
+            style={{ height: 30, borderRadius: 7, padding: '0 14px' }}
+          >
+            {i18next.t('invites.sendInvite', 'Send Invite')}
+          </button>
         </DialogActions>
       </Dialog>
 
       {/* Revoke Confirm Dialog */}
-      <Dialog open={revokeOpen} onClose={() => setRevokeOpen(false)}>
-        <DialogTitle>{i18next.t('invites.revoke', 'Revoke')}</DialogTitle>
+      <Dialog open={revokeOpen} onClose={() => setRevokeOpen(false)} maxWidth="xs"
+        PaperProps={{ className: 'vg-dialog-paper' }}>
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+          {i18next.t('invites.revokeTitle', 'Revoke Invite')}
+        </DialogTitle>
         <DialogContent>
-          <Typography>{i18next.t('invites.revokeConfirm', 'Revoke this invitation?')}</Typography>
+          <Typography sx={{ mt: 1, fontSize: 12 }}>
+            {i18next.t('invites.revokeConfirm', 'Revoke invite for')} <strong>{currentInvite?.email}</strong>?
+          </Typography>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setRevokeOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</Button>
-          <Button variant="contained" color="error" onClick={onRevoke} disabled={actionLoading}>{i18next.t('invites.revoke', 'Revoke')}</Button>
+        <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
+          <button type="button" className="vg-chip" onClick={() => setRevokeOpen(false)}>
+            {i18next.t('common.cancel', 'Cancel')}
+          </button>
+          <button
+            type="button"
+            className="vg-chip"
+            onClick={onRevoke}
+            disabled={actionLoading}
+            style={{ background: 'var(--palette-error-main)', color: '#fff', borderColor: 'var(--palette-error-main)', height: 30, borderRadius: 7, padding: '0 14px' }}
+          >
+            {i18next.t('invites.revoke', 'Revoke')}
+          </button>
         </DialogActions>
       </Dialog>
-    </Paper>
+    </Box>
   );
 }

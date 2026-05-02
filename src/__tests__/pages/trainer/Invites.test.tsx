@@ -28,4 +28,20 @@ describe('Invites (Trainer)', () => {
     render(<Invites />);
     expect(screen.getByText(/new@t.com/)).toBeInTheDocument();
   });
+
+  it('renders chip status filters', () => {
+    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
+    setupMockStore(useTeamStore as any, mockTeamState());
+    render(<Invites />);
+    expect(screen.getByText('Pending')).toBeInTheDocument();
+    expect(screen.getByText('Accepted')).toBeInTheDocument();
+    expect(screen.getByText('Revoked')).toBeInTheDocument();
+  });
+
+  it('renders Send Invite button', () => {
+    setupMockStore(useCognitoUserStore as any, mockCognitoUserState({ currentPermissions: ['invites:write'] }));
+    setupMockStore(useTeamStore as any, mockTeamState());
+    render(<Invites />);
+    expect(screen.getByText(/send invite/i)).toBeInTheDocument();
+  });
 });

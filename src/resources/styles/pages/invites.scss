@@ -1,39 +1,47 @@
 @use '../variables' as *;
 @use '../mixins' as *;
 
-.invites-page-root {
-  width: 100%;
+.invites-page {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 24px;
 }
 
-.invites-tab-bar {
-  margin-bottom: 16px;
+.invites-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
-.invites-filter-status {
-  min-width: 140px;
+.invites-list { display: flex; flex-direction: column; gap: 8px; }
 
-  @include mobile-only {
-    width: 100%;
-  }
+.invites-row-email {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--palette-text-primary);
+}
+
+.invites-row-meta {
+  font-size: 10px;
+  color: var(--vg-text-muted);
+  margin-top: 2px;
+  display: flex;
+  gap: 8px;
+}
+
+.invites-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .invites-dialog-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   padding-top: 8px;
-}
-
-.invites-dialog-send-email {
-  margin-top: 4px;
-}
-
-.invites-list-actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.invites-status-chip {
-  text-transform: capitalize;
 }
