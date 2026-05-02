@@ -15,6 +15,11 @@ if (!Members) try { Members = require('../../../pages/trainer/Members').default;
 
 beforeEach(() => jest.clearAllMocks());
 
+function setup(teamStateOverrides?: Record<string, any>) {
+  setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
+  setupMockStore(useTeamStore as any, mockTeamState(teamStateOverrides));
+}
+
 describe('Members (Trainer)', () => {
   if (!Members) {
     it('component exists', () => expect(Members).toBeTruthy());
@@ -22,11 +27,22 @@ describe('Members (Trainer)', () => {
   }
 
   it('renders member list', () => {
-    setupMockStore(useCognitoUserStore as any, mockCognitoUserState());
-    setupMockStore(useTeamStore as any, mockTeamState({
-      teamMembers: [buildTeamUser({ name: 'Alice', email: 'alice@t.com' })],
-    }));
+    setup({ teamMembers: [buildTeamUser({ name: 'Alice', email: 'alice@t.com' })] });
     render(<Members />);
     expect(screen.getByText('Alice')).toBeInTheDocument();
+  });
+
+  it('renders member rows as vg-row-item', () => {
+    const member = buildTeamUser({ name: 'Maria K.', email: 'maria@example.com' });
+    setup({ teamMembers: [member] });
+    render(<Members />);
+    expect(screen.getByText('Maria K.')).toBeInTheDocument();
+  });
+
+  it('renders filter chips for All, Trainers, Members', () => {
+    setup();
+    render(<Members />);
+    expect(screen.getByText('All')).toBeInTheDocument();
+    expect(screen.getByText('Trainers')).toBeInTheDocument();
   });
 });

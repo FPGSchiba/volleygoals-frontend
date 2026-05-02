@@ -1,65 +1,77 @@
 import React, { useMemo, useState } from 'react';
-import {
-  Box, Button, Chip, Dialog, DialogActions, DialogContent, DialogTitle,
-  Grid, MenuItem, Paper, TableCell, TextField, Typography,
-  InputAdornment, IconButton,
-} from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
-import ClearIcon from '@mui/icons-material/Clear';
+import Box from '@mui/material/Box';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import Typography from '@mui/material/Typography';
 import { Controller, useForm } from 'react-hook-form';
-import { ItemList, FetchResult } from '../../components/ItemList';
-import { UserDisplay } from '../../components/UserDisplay';
-import { ITeamUser } from '../../store/types';
-import { ITeamMemberFilterOption } from '../../services/types';
+import { ITeamUser, RoleType, TeamMemberStatus } from '../../store/types';
 import { useTeamStore } from '../../store/teams';
 import { useCognitoUserStore } from '../../store/cognitoUser';
 import { usePermission } from '../../hooks/usePermission';
 import VolleyGoalsAPI from '../../services/backend.api';
 import i18next from 'i18next';
 
-type MemberEditForm = { role: string; status: string; };
+type MemberEditForm = { role: string; status: string };
+type RoleFilter = 'all' | 'trainer' | 'member' | 'invited';
+
+const AVATAR_COLORS = [
+  '#C41E3A', '#2196f3', '#4caf50', '#ff9800', '#9c27b0', '#00bcd4', '#ff5722',
+];
+
+function avatarBg(name: string): string {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) {
+    h = (h * 31 + name.charCodeAt(i)) % AVATAR_COLORS.length;
+  }
+  return AVATAR_COLORS[Math.abs(h)];
+}
+
+function initials(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  return parts.length > 1
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : name.substring(0, 2).toUpperCase();
+}
+
+function getReportCount(m: ITeamUser): number {
+  const extended = m as ITeamUser & { reportCount?: number };
+  return extended.reportCount ?? 0;
+}
 
 export function Members() {
-  const fetchTeamMembers = useTeamStore((s) => s.fetchTeamMembers);
-  const teamMembers = useTeamStore((s) => s.teamMembers) || [];
-  const selectedTeam = useCognitoUserStore((s) => s.selectedTeam);
-  const currentUser = useCognitoUserStore((s) => s.user);
+  const fetchTeamMembers = useTeamStore(s => s.fetchTeamMembers);
+  const teamMembers = useTeamStore(s => s.teamMembers) || [];
+  const selectedTeam = useCognitoUserStore(s => s.selectedTeam);
+  const currentUser = useCognitoUserStore(s => s.user);
   const teamId = selectedTeam?.team?.id || '';
-  const userRole = selectedTeam?.role as string | undefined;
   const canWrite = usePermission('members:write');
-  const canManage = canWrite;
 
-  const [allowFetch, setAllowFetch] = React.useState<boolean>(!!selectedTeam);
-  React.useEffect(() => setAllowFetch(!!selectedTeam), [selectedTeam]);
+  React.useEffect(() => {
+    if (teamId) fetchTeamMembers(teamId, {});
+  }, [teamId, fetchTeamMembers]);
 
-  const [membersCount, setMembersCount] = React.useState(0);
-  const [memberSearch, setMemberSearch] = useState('');
-  const initialFilter: ITeamMemberFilterOption = useMemo(() => ({}), []);
-
-  // Client-side filtered members
-  const filteredMembers = useMemo(() => {
-    if (!memberSearch.trim()) return teamMembers;
-    const lower = memberSearch.toLowerCase();
-    return teamMembers.filter(m =>
-      (m.name || '').toLowerCase().includes(lower) ||
-      (m.preferredUsername || '').toLowerCase().includes(lower) ||
-      m.email.toLowerCase().includes(lower)
-    );
-  }, [teamMembers, memberSearch]);
-
-  const fetchAdapter = async (filter?: ITeamMemberFilterOption): Promise<FetchResult<ITeamUser>> => {
-    if (!teamId) return { items: [], count: 0 };
-    const result = await fetchTeamMembers(teamId, filter || {});
-    setMembersCount(result.count);
-    return { items: result.items, count: result.count };
-  };
-
+  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState<RoleFilter>('all');
   const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
   const [currentMember, setCurrentMember] = useState<ITeamUser | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const { control, handleSubmit, reset } = useForm<MemberEditForm>({ defaultValues: { role: '', status: '' } });
+  const { control, handleSubmit, reset } = useForm<MemberEditForm>({
+    defaultValues: { role: '', status: '' },
+  });
+
+  const filteredMembers = useMemo(() => teamMembers.filter(m => {
+    const q = search.toLowerCase();
+    if (q && !(m.name || '').toLowerCase().includes(q) && !m.email.toLowerCase().includes(q)) return false;
+    if (roleFilter === 'trainer' && m.role !== RoleType.Trainer) return false;
+    if (roleFilter === 'member' && m.role !== RoleType.Member) return false;
+    if (roleFilter === 'invited' && m.status !== TeamMemberStatus.Invited) return false;
+    return true;
+  }), [teamMembers, search, roleFilter]);
 
   const openEdit = (m: ITeamUser) => {
     setCurrentMember(m);
@@ -73,158 +85,153 @@ export function Members() {
     try {
       await VolleyGoalsAPI.updateMembership(currentMember.id, teamId, data.role, data.status);
       setEditOpen(false);
-      await fetchTeamMembers(teamId, {});
+      fetchTeamMembers(teamId, {});
     } finally {
       setActionLoading(false);
     }
   };
 
-  const onRemove = async () => {
-    if (!currentMember || !teamId) return;
-    setActionLoading(true);
-    try {
-      await VolleyGoalsAPI.deleteMembership(currentMember.id, teamId);
-      setDeleteOpen(false);
-      await fetchTeamMembers(teamId, {});
-    } finally {
-      setActionLoading(false);
-    }
-  };
+  const maxReports = Math.max(...teamMembers.map(m => getReportCount(m)), 1);
 
-  const renderRow = (m: ITeamUser) => [
-    <TableCell key="name"><UserDisplay user={m} size="small" /></TableCell>,
-    <TableCell key="email">{m.email}</TableCell>,
-    <TableCell key="role"><Chip label={m.role} size="small" /></TableCell>,
-    <TableCell key="status"><Chip label={m.status} size="small" color={m.status === 'active' ? 'success' : 'default'} /></TableCell>,
-    <TableCell key="joined">{m.joinedAt ? new Intl.DateTimeFormat('de-CH', { dateStyle: 'short' }).format(new Date(m.joinedAt)) : '-'}</TableCell>,
+  const roleChips: Array<{ label: string; value: RoleFilter }> = [
+    { label: i18next.t('common.all', 'All'), value: 'all' },
+    { label: i18next.t('members.filter.trainers', 'Trainers'), value: 'trainer' },
+    { label: i18next.t('members.filter.members', 'Members'), value: 'member' },
+    { label: i18next.t('members.filter.invited', 'Invited'), value: 'invited' },
   ];
 
-  const renderActions = (m: ITeamUser): React.ReactElement[] => {
-    if (!canManage) return [];
-    const isSelf = currentUser?.id === m.id;
-    return [
-      <Box key="actions" className="members-list-actions">
-        <Button size="small" variant="contained" onClick={() => openEdit(m)} disabled={isSelf || actionLoading}>
-          {i18next.t('common.edit', 'Edit')}
-        </Button>
-        {m.status !== 'removed' && (
-          <Button size="small" variant="contained" color="error" onClick={() => { setCurrentMember(m); setDeleteOpen(true); }}>
-            {i18next.t('members.remove', 'Remove')}
-          </Button>
-        )}
-      </Box>,
-    ];
-  };
-
   return (
-    <Paper className="members-page-root">
-      <Box p={{ xs: 2, sm: 3 }}>
-        <Typography variant="h5" className="members-page-title">{i18next.t('members.title', 'Team Members')}</Typography>
+    <Box className="members-page" sx={{ p: { xs: 2, sm: 3 }, maxWidth: 1000 }}>
+      <div className="members-header">
+        <div>
+          <div className="vg-eyebrow">
+            {teamMembers.length} {i18next.t('members.eyebrow', 'Members')}
+          </div>
+          <div className="vg-page-title">{i18next.t('members.title', 'Members')}</div>
+        </div>
+      </div>
 
-        {/* Search bar */}
-        <Box mt={2}>
-          <TextField
-            size="small"
-            fullWidth
-            className="members-search-field"
-            placeholder={i18next.t('members.search', 'Search by name or email...')}
-            value={memberSearch}
-            onChange={(e) => setMemberSearch(e.target.value)}
-            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon fontSize="small" color="action" />
-                </InputAdornment>
-              ),
-              endAdornment: memberSearch ? (
-                <InputAdornment position="end">
-                  <IconButton size="small" onClick={() => setMemberSearch('')}><ClearIcon fontSize="small" /></IconButton>
-                </InputAdornment>
-              ) : null,
-            }}
-          />
-        </Box>
+      <div className="members-toolbar">
+        <input
+          className="members-search"
+          placeholder={i18next.t('members.search', 'Search members…')}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
 
-        <Box mt={2}>
-          <ItemList<ITeamUser, ITeamMemberFilterOption>
-            title={i18next.t('members.title', 'Team Members')}
-            columns={[
-              i18next.t('profile.name', 'Name'),
-              i18next.t('admin.user.email', 'Email'),
-              i18next.t('members.role', 'Role'),
-              i18next.t('members.status', 'Status'),
-              i18next.t('members.joinedAt', 'Joined'),
-            ]}
-            initialFilter={initialFilter}
-            rowsPerPage={10}
-            fetch={fetchAdapter}
-            initialFetchPaused={!allowFetch}
-            renderFilterFields={(f, setF) => [
-              <Grid key="role">
-                <TextField select fullWidth label={i18next.t('members.role', 'Role')} value={f.role ?? ''} onChange={(e) => setF({ ...f, role: e.target.value })}>
-                  <MenuItem value="">{i18next.t('admin.teams.filter.any', 'Any')}</MenuItem>
-                  <MenuItem value="admin">admin</MenuItem>
-                  <MenuItem value="trainer">trainer</MenuItem>
-                  <MenuItem value="member">member</MenuItem>
-                </TextField>
-              </Grid>,
-              <Grid key="status">
-                <TextField select fullWidth label={i18next.t('members.status', 'Status')} value={f.status ?? ''} onChange={(e) => setF({ ...f, status: e.target.value })}>
-                  <MenuItem value="">{i18next.t('admin.teams.filter.any', 'Any')}</MenuItem>
-                  <MenuItem value="active">active</MenuItem>
-                  <MenuItem value="removed">removed</MenuItem>
-                </TextField>
-              </Grid>,
-            ]}
-            renderRow={(item) => renderRow(item)}
-            renderActions={(item) => renderActions(item as ITeamUser)}
-            sortableFields={[]}
-            items={filteredMembers}
-            count={filteredMembers.length}
-          />
-        </Box>
-      </Box>
+      <div className="vg-chip-row">
+        {roleChips.map(c => (
+          <button
+            key={c.value}
+            type="button"
+            className={`vg-chip${roleFilter === c.value ? ' vg-chip--active' : ''}`}
+            onClick={() => setRoleFilter(c.value)}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
 
-      {/* Edit Dialog */}
-      <Dialog open={editOpen} onClose={() => setEditOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>{i18next.t('members.editMember', 'Edit Member')}</DialogTitle>
+      <div className="members-list">
+        {filteredMembers.map(m => {
+          const name = m.name || m.preferredUsername || m.email;
+          const isYou = m.id === currentUser?.id;
+          const isInvited = m.status === TeamMemberStatus.Invited;
+          const reportCount = getReportCount(m);
+          const activityPct = Math.round((reportCount / maxReports) * 100);
+          return (
+            <div
+              key={m.id}
+              className="vg-row-item"
+              style={{ opacity: isInvited ? 0.6 : 1 }}
+              onClick={() => { if (canWrite) openEdit(m); }}
+            >
+              <div className="vg-avatar" style={{ background: avatarBg(name), marginRight: 14 }}>
+                {initials(name)}
+              </div>
+              <div className="members-row-info">
+                <div className="members-row-name">
+                  {name}
+                  {isYou && (
+                    <span className="members-row-name-you">
+                      ({i18next.t('members.you', 'you')})
+                    </span>
+                  )}
+                </div>
+                <div className="members-row-email">{m.email}</div>
+              </div>
+              <div className="members-row-right">
+                <div className="vg-activity-bar">
+                  <div className="vg-activity-track">
+                    <div className="vg-activity-fill" style={{ width: `${activityPct}%` }} />
+                  </div>
+                  <div className="vg-activity-label">
+                    {reportCount} {i18next.t('members.reports', 'rep.')}
+                  </div>
+                </div>
+                {m.role === RoleType.Trainer
+                  ? <span className="vg-badge vg-badge--trainer">{i18next.t(`members.role.${m.role}`, m.role)}</span>
+                  : <span className="vg-badge vg-badge--muted">{i18next.t(`members.role.${m.role}`, m.role)}</span>
+                }
+                {isInvited && (
+                  <span className="vg-badge vg-badge--open">
+                    {i18next.t('members.status.invited', 'Invited')}
+                  </span>
+                )}
+                {canWrite && <span className="vg-chevron">›</span>}
+              </div>
+            </div>
+          );
+        })}
+        {filteredMembers.length === 0 && (
+          <Typography sx={{ fontSize: 12, color: 'var(--vg-text-muted)', py: 4, textAlign: 'center' }}>
+            {i18next.t('members.empty', 'No members match the filter.')}
+          </Typography>
+        )}
+      </div>
+
+      <Dialog
+        open={editOpen}
+        onClose={() => setEditOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{ className: 'vg-dialog-paper' }}
+      >
+        <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
+          {i18next.t('members.editTitle', 'Edit Member')}
+        </DialogTitle>
         <DialogContent>
-          <form id="member-edit-form" onSubmit={handleSubmit(onEdit)}>
-            <Box className="members-dialog-form">
-              <Controller name="role" control={control} render={({ field }) => (
-                <TextField select fullWidth label={i18next.t('members.role', 'Role')} {...field}>
-                  {userRole === 'admin' && <MenuItem value="admin">admin</MenuItem>}
-                  <MenuItem value="trainer">trainer</MenuItem>
-                  <MenuItem value="member">member</MenuItem>
-                </TextField>
-              )} />
-              <Controller name="status" control={control} render={({ field }) => (
-                <TextField select fullWidth label={i18next.t('members.status', 'Status')} {...field}>
-                  <MenuItem value="active">active</MenuItem>
-                  <MenuItem value="removed">removed</MenuItem>
-                </TextField>
-              )} />
-            </Box>
-          </form>
+          <div className="members-dialog-form">
+            <Controller name="role" control={control} render={({ field }) => (
+              <TextField select fullWidth size="small" label={i18next.t('members.role.label', 'Role')} {...field}>
+                <MenuItem value={RoleType.Trainer}>{i18next.t('members.role.trainer', 'Trainer')}</MenuItem>
+                <MenuItem value={RoleType.Member}>{i18next.t('members.role.member', 'Member')}</MenuItem>
+              </TextField>
+            )} />
+            <Controller name="status" control={control} render={({ field }) => (
+              <TextField select fullWidth size="small" label={i18next.t('members.status.label', 'Status')} {...field}>
+                <MenuItem value={TeamMemberStatus.Active}>{i18next.t('members.status.active', 'Active')}</MenuItem>
+                <MenuItem value={TeamMemberStatus.Invited}>{i18next.t('members.status.invited', 'Invited')}</MenuItem>
+              </TextField>
+            )} />
+          </div>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</Button>
-          <Button type="submit" form="member-edit-form" variant="contained" disabled={actionLoading}>{i18next.t('common.save', 'Save')}</Button>
+        <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
+          <button className="vg-chip" type="button" onClick={() => setEditOpen(false)}>
+            {i18next.t('common.cancel', 'Cancel')}
+          </button>
+          <button
+            className="vg-chip vg-chip--active"
+            type="button"
+            onClick={handleSubmit(onEdit)}
+            disabled={actionLoading}
+            style={{ height: 30, borderRadius: 7, padding: '0 14px' }}
+          >
+            {i18next.t('common.save', 'Save')}
+          </button>
         </DialogActions>
       </Dialog>
-
-      {/* Remove Confirm Dialog */}
-      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
-        <DialogTitle>{i18next.t('members.remove', 'Remove')}</DialogTitle>
-        <DialogContent>
-          <Typography>{i18next.t('members.removeConfirm', 'Remove this member from the team?')}</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteOpen(false)}>{i18next.t('common.cancel', 'Cancel')}</Button>
-          <Button variant="contained" color="error" onClick={onRemove} disabled={actionLoading}>{i18next.t('members.remove', 'Remove')}</Button>
-        </DialogActions>
-      </Dialog>
-    </Paper>
+    </Box>
   );
 }
