@@ -45,6 +45,7 @@ export function Invites() {
   const [currentInvite, setCurrentInvite] = useState<IInvite | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const [revokeError, setRevokeError] = useState<string | null>(null);
 
   const { control, handleSubmit, reset } = useForm<InviteForm>({
     defaultValues: { email: '', role: RoleType.Member, message: '' },
@@ -74,10 +75,13 @@ export function Invites() {
   const onRevoke = async () => {
     if (!currentInvite || !teamId) return;
     setActionLoading(true);
+    setRevokeError(null);
     try {
       await revokeInvite(currentInvite.id, teamId);
       setRevokeOpen(false);
       await fetchTeamInvites(teamId, {});
+    } catch {
+      setRevokeError(i18next.t('invites.revokeError', 'Failed to revoke invite. Please try again.'));
     } finally {
       setActionLoading(false);
     }
@@ -147,7 +151,7 @@ export function Invites() {
                       type="button"
                       className="vg-chip"
                       style={{ height: 26, fontSize: 10 }}
-                      onClick={() => resendInvite(inv.id)}
+                      onClick={() => { resendInvite(inv.id).catch(() => {}); /* fire-and-forget: resend is low-stakes */ }}
                     >
                       {i18next.t('invites.resend', 'Resend')}
                     </button>
@@ -240,7 +244,7 @@ export function Invites() {
       </Dialog>
 
       {/* Revoke Confirm Dialog */}
-      <Dialog open={revokeOpen} onClose={() => setRevokeOpen(false)} maxWidth="xs"
+      <Dialog open={revokeOpen} onClose={() => { setRevokeOpen(false); setRevokeError(null); }} maxWidth="xs"
         PaperProps={{ className: 'vg-dialog-paper' }}>
         <DialogTitle sx={{ fontSize: 15, fontWeight: 800, borderBottom: '1px solid var(--vg-border)', pb: 1.5 }}>
           {i18next.t('invites.revokeTitle', 'Revoke Invite')}
@@ -250,8 +254,13 @@ export function Invites() {
             {i18next.t('invites.revokeConfirm', 'Revoke invite for')} <strong>{currentInvite?.email}</strong>?
           </Typography>
         </DialogContent>
+        {revokeError && (
+          <Typography sx={{ fontSize: 12, color: 'var(--palette-error-main)', px: 2.5, pb: 1 }}>
+            {revokeError}
+          </Typography>
+        )}
         <DialogActions sx={{ borderTop: '1px solid var(--vg-border)', px: 2.5, py: 1.5 }}>
-          <button type="button" className="vg-chip" onClick={() => setRevokeOpen(false)}>
+          <button type="button" className="vg-chip" onClick={() => { setRevokeOpen(false); setRevokeError(null); }}>
             {i18next.t('common.cancel', 'Cancel')}
           </button>
           <button
@@ -259,7 +268,7 @@ export function Invites() {
             className="vg-chip"
             onClick={onRevoke}
             disabled={actionLoading}
-            style={{ background: 'var(--palette-error-main)', color: '#fff', borderColor: 'var(--palette-error-main)', height: 30, borderRadius: 7, padding: '0 14px' }}
+            style={{ background: 'var(--palette-error-main)', color: 'var(--palette-common-white, #fff)', borderColor: 'var(--palette-error-main)', height: 30, borderRadius: 7, padding: '0 14px' }}
           >
             {i18next.t('invites.revoke', 'Revoke')}
           </button>
