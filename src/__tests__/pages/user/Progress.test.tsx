@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '../../test-utils';
+import userEvent from '@testing-library/user-event';
 import { Progress } from '../../../pages/user/Progress';
 import { setupMockStore, mockCognitoUserState, mockProgressReportState, mockSeasonState, mockGoalState, mockTeamState } from '../../mocks/stores';
 import { buildSeason, buildProgressReport } from '../../mocks/factories';
@@ -67,10 +68,10 @@ describe('Progress', () => {
     expect(screen.getByText('New Report')).toBeInTheDocument();
   });
 
-  it('navigates to create page on New Report button click', () => {
+  it('navigates to create page on New Report button click', async () => {
     setup();
     render(<Progress />);
-    screen.getByText('New Report').click();
+    await userEvent.click(screen.getByText('New Report'));
     expect(mockNavigate).toHaveBeenCalledWith('/progress/create');
   });
 

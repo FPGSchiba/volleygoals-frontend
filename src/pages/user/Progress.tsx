@@ -29,7 +29,7 @@ export function Progress() {
 
   React.useEffect(() => {
     if (teamId) fetchSeasons(teamId, { teamId });
-  }, [teamId]);
+  }, [teamId, fetchSeasons]);
 
   React.useEffect(() => {
     if (!seasons || seasons.length === 0) { setSelectedSeasonId(null); return; }
@@ -42,12 +42,13 @@ export function Progress() {
   }, [seasons]);
 
   React.useEffect(() => {
-    if (canOversee && teamId) fetchTeamMembers(teamId, { limit: 100 } as any).catch(() => {});
+    // fetchTeamMembers failure is non-critical — member list stays empty and ContextSwitcher still renders
+    if (canOversee && teamId) fetchTeamMembers(teamId, { limit: 100 }).catch(() => {});
   }, [canOversee, teamId]);
 
   React.useEffect(() => {
     if (!canParticipate && canOversee && viewMode === 'personal') setViewMode('team');
-  }, [canParticipate, canOversee]);
+  }, [canParticipate, canOversee, viewMode]);
 
   const members = teamMembers.map(m => ({
     id: m.id,

@@ -87,4 +87,19 @@ describe('ContextSwitcher', () => {
     expect(myProgress.tagName).toBe('BUTTON');
     expect(myProgress.className).toContain('vg-chip');
   });
+
+  it('calls onChange with member id when member chip is clicked', async () => {
+    const onChange = jest.fn();
+    render(
+      <ContextSwitcher
+        canParticipate={true}
+        canOversee={true}
+        value="member"
+        onChange={onChange}
+        members={mockMembers}
+      />,
+    );
+    await userEvent.click(screen.getByText('Anna Müller'));
+    expect(onChange).toHaveBeenCalledWith(mockMembers[0].id);
+  });
 });
